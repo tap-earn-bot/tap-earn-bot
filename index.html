@@ -165,25 +165,84 @@
             let msg = `💰 *New Withdrawal Request*\n\n👤 User: ${userName}\n🆔 ID: ${userId}\n💵 Amount: ₹${amount.toFixed(2)}\n🏦 UPI: \`${upi}\``;
             
             try {
+    <script>
+        let tg = window.Telegram.WebApp;
+        let userId = tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : "123";
+        let userName = tg.initDataUnsafe.user ? tg.initDataUnsafe.user.first_name : "User";
+        const DB_BASE_URL = "https://tap-earn-bot-default-rtdb.asia-southeast1.firebasedatabase.app/users/";
+        const BOT_TOKEN = "8307773463:AAEI0GefnG3PrdqwVXr42SFwj3PIaNWDPxY"; 
+        const ADMIN_ID = "6232537384"; 
+
+        let balance = 0, energy = 0, totalRefs = 0;
+
+        async function loadData() {
+            try {
+                let res = await fetch(`${DB_BASE_URL}${userId}.json`);
+                let data = await res.json();
+                if (data) {
+                    balance = data.balance || 0;
+                    energy = data.energy || 0;
+                    totalRefs = data.totalRefs || 0;
+                    
+                    // --- DAILY CLAIM CHECK ON LOAD ---
+                    let today = new Date().toISOString().slice(0, 10);
+                    if (data.lastClaim === today) {
+                        document.getElementById('dailyBtn').innerText = "Claimed Today";
+                        document.getElementById('dailyBtn').disabled = true;
+                        document.getElementById('dailyBtn').style.opacity = "0.5";
+                    }
+                    
+                    updateUI();
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        async function saveData() {
+            try {
+                await fetch(`${DB_BASE_URL}${userId}.json`, {
+                    method: 'PATCH',
+                    body: JSON.stringify({ balance, energy, totalRefs })
+                });
+            } catch (e) { console.error(e); }
+        }
+
+        function updateUI() {
+            document.getElementById('balance').innerText = balance.toFixed(2);
+            document.getElementById('w-balance').innerText = balance.toFixed(2);
+            document.getElementById('energy').innerText = energy;
+            document.getElementById('ref-count').innerText = totalRefs;
+        }
+
+        function handleTap(e) {
+            if (energy <= 0) return tg.showAlert("Energy 0!");
+            balance += 0.05; energy -= 1;
+            updateUI(); saveData();
+            const plus = document.createElement('div');
+            plus.className = 'plus-one'; plus.innerText = '+0.05';
+            plus.style.left = e.clientX + 'px'; plus.style.top = e.clientY + 'px';
+            document.body.appendChild(plus);
+            setTimeout(() => plus.remove(), 800);
+        }
+
+        async function withdraw() {
+            let upi = document.getElementById('upiId').value;
+            if (balance < 500) return tg.showAlert("Minimum ₹500 required!");
+            if (upi.length < 5 || !upi.includes('@')) return tg.showAlert("Please enter a valid UPI ID!");
+
+            let amount = balance;
+            let msg = `💰 *New Withdrawal Request*\n\n👤 User: ${userName}\n🆔 ID: ${userId}\n💵 Amount: ₹${amount.toFixed(2)}\n🏦 UPI: \`${upi}\``;
+            
+            try {
                 await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${ADMIN_ID}&text=${encodeURIComponent(msg)}&parse_mode=Markdown`);
-                
-                // Animation aur Popup dikhana
                 document.getElementById('popAmt').innerText = amount.toFixed(2);
                 document.getElementById('overlay').style.display = "block";
                 document.getElementById('successPopup').style.display = "block";
-                
-                // Lottie Success Animation
                 lottie.loadAnimation({
                     container: document.getElementById('lottieAnim'),
-                    renderer: 'svg',
-                    loop: false,
-                    autoplay: true,
+                    renderer: 'svg', loop: false, autoplay: true,
                     path: 'https://assets10.lottiefiles.com/packages/lf20_pqnfmone.json' 
                 });
-
-                balance = 0; // Balance reset after withdrawal
-                updateUI();
-                saveData();
+                balance = 0; updateUI(); saveData();
             } catch (e) { tg.showAlert("Error sending request!"); }
         }
 
@@ -192,11 +251,35 @@
             document.getElementById('successPopup').style.display = "none";
         }
 
-        function claimDaily() {
-            balance += 5; updateUI(); saveData();
-            document.getElementById('dailyBtn').innerText = "Claimed";
-            document.getElementById('dailyBtn').disabled = true;
-            tg.showAlert("₹5.00 Bonus Added!");
+        // --- FIXED DAILY CLAIM LOGIC ---
+        async function claimDaily() {
+            let today = new Date().toISOString().slice(0, 10);
+            try {
+                let res = await fetch(`${DB_BASE_URL}${userId}.json`);
+                let data = await res.json();
+                
+                if (data && data.lastClaim === today) {
+                    tg.showAlert("Aapne aaj ka reward le liya hai!");
+                    return;
+                }
+
+                balance += 5;
+                updateUI();
+                
+                // Save both Balance and Today's Date in Firebase
+                await fetch(`${DB_BASE_URL}${userId}.json`, {
+                    method: 'PATCH',
+                    body: JSON.stringify({ 
+                        balance: balance, 
+                        lastClaim: today 
+                    })
+                });
+
+                document.getElementById('dailyBtn').innerText = "Claimed Today";
+                document.getElementById('dailyBtn').disabled = true;
+                document.getElementById('dailyBtn').style.opacity = "0.5";
+                tg.showAlert("₹5.00 Bonus Added!");
+            } catch (e) { tg.showAlert("Error claiming reward!"); }
         }
 
         function invite() {
@@ -213,5 +296,6 @@
 
         window.onload = loadData;
     </script>
+
 </body>
 </html>
