@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Elite Tap & Earn</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { --gold: #ffcc00; --neon: #00f2ff; --bg: #05070a; --card: #161a1e; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
+        body { background: var(--bg); color: white; font-family: 'Inter', sans-serif; margin: 0; height: 100vh; overflow: hidden; }
+
+        /* Header */
+        .header { display: flex; justify-content: space-between; padding: 20px; background: rgba(255,255,255,0.03); border-bottom: 1px solid #1f2229; }
+        .badge { background: var(--card); padding: 8px 15px; border-radius: 12px; font-size: 13px; border: 1px solid #2d323a; color: var(--neon); font-weight: 700; box-shadow: 0 0 15px rgba(0,242,255,0.1); }
+
+        /* Pages */
+        .page { display: none; height: calc(100vh - 160px); overflow-y: auto; padding: 20px; animation: slideUp 0.4s ease; }
+        .page.active { display: block; }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+        /* Home UI */
+        .balance-container { margin: 25px 0; }
+        .balance-amount { font-size: 55px; font-weight: 900; color: var(--gold); text-shadow: 0 0 30px rgba(255,204,0,0.4); }
+        
+        /* Main Button Design */
+        .tap-area { position: relative; width: 260px; height: 260px; margin: 20px auto; }
+        .tap-circle { width: 100%; height: 100%; background: radial-gradient(circle, #1e293b 0%, #080a0f 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 6px solid #1e293b; box-shadow: 0 0 50px rgba(0,0,0,0.8); cursor: pointer; transition: transform 0.05s; z-index: 2; position: relative; }
+        .tap-circle:active { transform: scale(0.94); }
+        .tap-circle img { width: 140px; filter: drop-shadow(0 0 15px var(--gold)); pointer-events: none; }
+        
+        /* Rotating Ring */
+        .ring { position: absolute; top: -10px; left: -10px; width: 280px; height: 280px; border-radius: 50%; border: 2px dashed rgba(0,242,255,0.3); animation: rotate 15s linear infinite; }
+        @keyframes rotate { from { transform: rotate(0); } to { transform: rotate(360deg); } }
+
+        /* Cards & Buttons */
+        .glass-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; padding: 18px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
+        .btn-action { background: var(--gold); color: black; border: none; padding: 12px 20px; border-radius: 12px; font-weight: 800; cursor: pointer; box-shadow: 0 4px 15px rgba(255,204,0,0.2); }
+        .btn-action:disabled { background: #333; color: #777; box-shadow: none; }
+
+        /* Navbar */
+        .navbar { position: fixed; bottom: 0; width: 100%; height: 85px; background: #0c0e12; display: flex; justify-content: space-around; border-top: 1px solid #1f2229; padding-top: 10px; }
+        .nav-item { color: #52525b; text-decoration: none; font-size: 11px; display: flex; flex-direction: column; align-items: center; gap: 6px; flex: 1; }
+        .nav-item.active { color: var(--gold); }
+        .nav-item i { font-size: 24px; }
+
+        /* Floating + Text */
+        .plus-one { position: absolute; color: white; font-weight: 900; font-size: 32px; pointer-events: none; animation: fly 0.8s ease-out forwards; text-shadow: 0 0 10px rgba(0,0,0,1); }
+        @keyframes fly { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-160px) scale(1.2); } }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="badge">⚡ <span id="energy">1000</span> / 1000</div>
+        <div class="badge" id="rank" style="color:var(--gold)">🏆 Bronze</div>
+    </div>
+
+    <div id="home" class="page active">
+        <div class="balance-container">
+            <div class="balance-amount">₹<span id="balance">0.00</span></div>
+            <p style="color:#71717a; font-size:14px; letter-spacing: 1px;">TOTAL COINS</p>
+        </div>
+        
+        <div class="tap-area">
+            <div class="ring"></div>
+            <div class="tap-circle" onclick="handleTap(event)">
+                <img src="https://cdn-icons-png.flaticon.com/512/217/217853.png">
+            </div>
+        </div>
+
+        <div style="margin-top: 20px;">
+            <p style="color:var(--neon); font-size:14px; font-weight:bold; margin:0;">Unlimited Potential</p>
+            <p style="color:#71717a; font-size:11px;">Energy Refills only via Referrals</p>
+        </div>
+    </div>
+
+    <div id="tasks" class="page">
+        <h2 style="text-align:left; color:var(--gold);">Earning Quests</h2>
+        <div class="glass-card">
+            <div><div style="font-weight:bold;">Daily Bonus</div><div style="font-size:12px; color:#777;">+ ₹5.00 Instant</div></div>
+            <button class="btn-action" onclick="claimDaily(this)">Claim</button>
+        </div>
+        <div class="glass-card">
+            <div><div style="font-weight:bold;">Official Channel</div><div style="font-size:12px; color:#777;">+ ₹20.00 Reward</div></div>
+            <button class="btn-action" onclick="window.open('https://t.me/yourchannel')">Join</button>
+        </div>
+    </div>
+
+    <div id="wallet" class="page">
+        <h2 style="text-align:left; color:var(--gold);">My Bank</h2>
+        <div style="background:linear-gradient(135deg, #1e293b, #080a0f); padding:30px; border-radius:25px; text-align:left; border:1px solid #334155; position:relative; overflow:hidden;">
+            <p style="color:#94a3b8; margin:0; font-size:14px;">Available for Payout</p>
+            <h1 style="color:var(--gold); font-size:45px; margin:10px 0;">₹<span id="w-balance">0.00</span></h1>
+            <button class="btn-action" style="width:100%; height:55px; font-size:16px;" onclick="withdraw()">WITHDRAW NOW</button>
+        </div>
+        <p style="margin-top:15px; font-size:12px; color:#52525b;">Minimum withdrawal threshold: ₹100.00</p>
+    </div>
+
+    <div id="frens" class="page">
+        <h2 style="text-align:left; color:var(--gold);">Referral Center</h2>
+        <div class="glass-card" style="flex-direction:column; padding:40px 20px; text-align:center;">
+            <div style="background:rgba(0,242,255,0.1); width:80px; height:80px; border-radius:50%; display:flex; align-items:center; justify-content:center; margin-bottom:20px;">
+                <i class="fas fa-user-plus" style="font-size:30px; color:var(--neon);"></i>
+            </div>
+            <h3 style="margin:0;">Invite & Refill</h3>
+            <p style="color:#71717a; font-size:14px; margin:15px 0;">Har friend ke join karne par aapki <b>Energy +250 ⚡</b> badhegi!</p>
+            <p style="color:var(--gold); font-size:12px; margin-bottom:20px;">(Max Limit: 1000 Energy)</p>
+            <button class="btn-action" style="width:100%; height:55px;" onclick="invite()">SEND INVITE LINK</button>
+        </div>
+    </div>
+
+    <div class="navbar">
+        <div class="nav-item active" onclick="nav('home', this)"><i class="fas fa-home"></i>Home</div>
+        <div class="nav-item" onclick="nav('tasks', this)"><i class="fas fa-bolt"></i>Tasks</div>
+        <div class="nav-item" onclick="nav('wallet', this)"><i class="fas fa-wallet"></i>Wallet</div>
+        <div class="nav-item" onclick="nav('frens', this)"><i class="fas fa-users"></i>Frens</div>
+    </div>
+
+    <script>
+        let balance = 0;
+        let energy = 1000;
+        let tg = window.Telegram.WebApp;
+        tg.expand();
+
+        function nav(pageId, el) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+            el.classList.add('active');
+            document.getElementById('w-balance').innerText = balance.toFixed(2);
+        }
+
+        function handleTap(e) {
+            if (energy <= 0) {
+                alert("Energy Empty! Invite friends to refill.");
+                return;
+            }
+            balance += 0.05;
+            energy -= 1;
+            updateUI();
+            
+            // Pro Animation
+            const rect = e.target.getBoundingClientRect();
+            const plus = document.createElement('div');
+            plus.className = 'plus-one';
+            plus.innerText = '+0.05';
+            plus.style.left = e.clientX + 'px';
+            plus.style.top = e.clientY + 'px';
+            document.body.appendChild(plus);
+            setTimeout(() => plus.remove(), 800);
+        }
+
+        function updateUI() {
+            document.getElementById('balance').innerText = balance.toFixed(2);
+            document.getElementById('energy').innerText = energy;
+            if(balance > 500) document.getElementById('rank').innerText = "🥈 Silver";
+            if(balance > 2000) document.getElementById('rank').innerText = "🥇 Gold";
+        }
+
+        function invite() {
+            // Asli logic: Link share hone par backend 250 energy dega
+            // Demo ke liye hum yahan add kar rahe hain:
+            if (energy >= 1000) {
+                alert("Aapki energy pehle se full hai! Pehle tap karke kam karo.");
+            } else {
+                let add = 250;
+                if (energy + add > 1000) energy = 1000;
+                else energy += add;
+                alert("Mubarak! Referral se +250 Energy refill hui.");
+                updateUI();
+            }
+            
+            let userId = tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : "123";
+            tg.openTelegramLink(`https://t.me/share/url?url=https://t.me/YourBot?start=${userId}&text=Join and Earn!`);
+        }
+
+        function claimDaily(btn) {
+            balance += 5;
+            btn.innerText = "Claimed";
+            btn.disabled = true;
+            updateUI();
+        }
+
+        function withdraw() {
+            if(balance < 100) alert("Need ₹100 to withdraw!");
+            else alert("Payout request received!");
+        }
+    </script>
+</body>
+</html>
