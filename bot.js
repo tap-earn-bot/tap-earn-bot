@@ -2,7 +2,7 @@ const { Telegraf, Markup } = require('telegraf');
 const axios = require('axios');
 
 const bot = new Telegraf('8307773463:AAEI0GefnG3PrdqwVXr42SFwj3PIaNWDPxY');
-const DB_URL = "AAPKA_FIREBASE_URL_YAHAN_DALO/.json"; // Firebase URL yahan dalein
+const DB_URL = "https://tap-earn-bot-default-rtdb.asia-southeast1.firebasedatabase.app/.json"; // Firebase URL yahan dalein
 
 bot.start(async (ctx) => {
     const userId = ctx.from.id;
