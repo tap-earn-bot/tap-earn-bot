@@ -42,12 +42,27 @@ bot.start(async (ctx) => {
             }
         }
 
-        ctx.reply(`🎰 Welcome back, ${ctx.from.first_name}!\nTap Fortune mein aapka swagat hai.`, Markup.inlineKeyboard([
-            [Markup.button.webApp('🚀 Play Now', 'https://tap-earn-bot.github.io/tap-earn-bot/')]
-        ]));
-    } catch (err) { 
-        console.log(err);
-        ctx.reply("❌ Error: Database se connect nahi ho paya. Dobara try karein.");
+// GitHub se "Copy Raw Link" karke yahan paste karein
+const photoUrl = 'https://raw.githubusercontent.com/tap-earn-bot/tap-earn-bot/main/1771951780779.png'; 
+
+bot.start(async (ctx) => {
+    try {
+        const firstName = ctx.from.first_name || "User";
+        
+        // Aapka professional English message
+        const welcomeMessage = `**Hi ${firstName}, Welcome to the Tap Fortune community!** ✨\n\nReady to unlock unlimited potential? The more you tap, the more you earn. Don't let your coins wait!\n\n🔥 **Get started and boost your balance!**`;
+
+        await ctx.replyWithPhoto(photoUrl, {
+            caption: welcomeMessage,
+            parse_mode: 'Markdown',
+            ...Markup.inlineKeyboard([
+                [Markup.button.webApp('🚀 Play Now', 'https://tap-earn-bot.github.io/tap-earn-bot/')]
+            ])
+        });
+
+    } catch (err) {
+        console.log("Error Details:", err);
+        ctx.reply("❌ Error: Something went wrong while connecting to the server.");
     }
 });
 
