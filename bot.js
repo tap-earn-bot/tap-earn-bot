@@ -14,8 +14,6 @@ bot.start(async (ctx) => {
     const userId = ctx.from.id;
     const refId = ctx.startPayload;
 
-    // Turant response taaki user wait na kare
-    await ctx.reply("⏳ Loading your profile...");
 
     try {
         let res = await axios.get(`${DB_BASE}/${userId}.json`);
