@@ -9,13 +9,15 @@ app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
 const bot = new Telegraf('8652596915:AAGgK4nWqRM-YB3864rCII_T0uHxQbz_RKU');
 const DB_BASE = "https://tap-earn-bot-default-rtdb.asia-southeast1.firebasedatabase.app/users";
+const photoUrl = 'https://raw.githubusercontent.com/tap-earn-bot/tap-earn-bot/main/1771951780779.png'; 
 
 bot.start(async (ctx) => {
     const userId = ctx.from.id;
     const refId = ctx.startPayload;
-
+    const firstName = ctx.from.first_name || "User";
 
     try {
+        // --- Firebase Database Logic (No Changes) ---
         let res = await axios.get(`${DB_BASE}/${userId}.json`);
         let userData = res.data;
 
@@ -25,7 +27,7 @@ bot.start(async (ctx) => {
                 energy: 1000, 
                 totalRefs: 0, 
                 referredBy: refId || null,
-                lastClaim: 0 // New Field
+                lastClaim: 0 
             };
             await axios.put(`${DB_BASE}/${userId}.json`, userData);
 
@@ -42,15 +44,10 @@ bot.start(async (ctx) => {
             }
         }
 
-// GitHub se "Copy Raw Link" karke yahan paste karein
-const photoUrl = 'https://raw.githubusercontent.com/tap-earn-bot/tap-earn-bot/main/1771951780779.png'; 
-
-bot.start(async (ctx) => {
-    try {
-        const firstName = ctx.from.first_name || "User";
-        
-        // Aapka professional English message
-        const welcomeMessage = `**Hi ${firstName}, Welcome to the Tap Fortune community!** ✨\n\nReady to unlock unlimited potential? The more you tap, the more you earn. Don't let your coins wait!\n\n🔥 **Get started and boost your balance!**`;
+        // --- Photo and Welcome Message Logic ---
+        const welcomeMessage = `**Hi ${firstName}, Welcome to the Tap Fortune community!** ✨\n\n` +
+            `Ready to unlock unlimited potential? The more you tap, the more you earn. Don't let your coins wait!\n\n` +
+            `🔥 **Get started and boost your balance!**`;
 
         await ctx.replyWithPhoto(photoUrl, {
             caption: welcomeMessage,
@@ -60,10 +57,14 @@ bot.start(async (ctx) => {
             ])
         });
 
-    } catch (err) {
+    } catch (err) { 
         console.log("Error Details:", err);
         ctx.reply("❌ Error: Something went wrong while connecting to the server.");
     }
 });
 
 bot.launch().then(() => console.log("Bot started!"));
+
+// Graceful stop settings
+process.once('SIGINT', () => bot.stop('SIGINT'));
+process.once('SIGTERM', () => bot.stop('SIGTERM'));
