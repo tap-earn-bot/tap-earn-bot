@@ -131,8 +131,18 @@
             <h1 style="color:var(--gold); font-size:45px; margin:10px 0;">₹<span id="w-balance">0.00</span></h1>
             <input type="text" id="upiId" class="upi-input" placeholder="Enter UPI ID (e.g. name@apl)">
             <button class="btn-action" style="width:100%; height:55px;" onclick="withdraw()">WITHDRAW NOW</button>
+            
+<div id="txn-history" style="margin-top: 20px; border-top: 1px solid #334155; padding-top: 15px;">
+    <p style="color:#94a3b8; font-size: 12px; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px;">Recent History (Last 3)</p>
+    <div id="txn-list" style="display: flex; flex-direction: column; gap: 8px;">
+        <p id="no-txn" style="color: #4b5563; font-size: 13px; text-align: center;">No history found</p>
+    </div>
+</div>
+
+
         </div>
     </div>
+
 
     <div id="frens" class="page">
         <h2 style="color:var(--gold);">Referral Dashboard</h2>
@@ -156,7 +166,7 @@
         let userName = tg.initDataUnsafe.user ? tg.initDataUnsafe.user.first_name : "User";
         const DB_BASE_URL = "https://tap-earn-bot-default-rtdb.asia-southeast1.firebasedatabase.app/users/";
         const BOT_TOKEN = "8652596915:AAGgK4nWqRM-YB3864rCII_T0uHxQbz_RKU"; 
-        const ADMIN_ID = "6232537384";
+        const ADMIN_ID = "6252869088";
 
         let balance = 0, energy = 0, totalRefs = 0, lastClaim = 0;
 
@@ -223,29 +233,72 @@
             tg.showAlert("₹5.00 Bonus Added!");
         }
 
-        async function withdraw() {
-            let upi = document.getElementById('upiId').value;
-            if (balance < 500) return tg.showAlert("Minimum ₹500 required!");
-            if (upi.length < 5 || !upi.includes('@')) return tg.showAlert("Please enter a valid UPI ID!");
+// Updated Withdrawal Function
+async function withdraw() {
+    let upi = document.getElementById('upiId').value;
+    if (balance < 500) return tg.showAlert("Minimum ₹500 required!");
+    if (upi.length < 5 || !upi.includes('@')) return tg.showAlert("Please enter a valid UPI ID!");
 
-            let amount = balance;
-            let msg = `💰 *New Withdrawal Request*\n\n👤 User: ${userName}\n🆔 ID: ${userId}\n💵 Amount: ₹${amount.toFixed(2)}\n🏦 UPI: \`${upi}\``;
+    let amount = balance;
+    let msg = `💰 *New Withdrawal Request*\n\n👤 User: ${userName}\n🆔 ID: ${userId}\n💵 Amount: ₹${amount.toFixed(2)}\n🏦 UPI: \`${upi}\``;
+    
+    try {
+        await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${ADMIN_ID}&text=${encodeURIComponent(msg)}&parse_mode=Markdown`);
+        
+        // --- Status "Under Process" ke saath save karein ---
+        let entry = { 
+            amt: amount.toFixed(2), 
+            date: new Date().toLocaleDateString('en-IN', {day:'2-digit', month:'short'}),
+            status: "Under Process" // Default status
+        };
+        await fetch(`${DB_BASE_URL}${userId}/history.json`, { method: 'POST', body: JSON.stringify(entry) });
+        
+        updateHistoryUI(); 
+
+        document.getElementById('popAmt').innerText = amount.toFixed(2);
+        document.getElementById('overlay').style.display = "block";
+        document.getElementById('successPopup').style.display = "block";
+        
+        balance = 0; updateUI(); saveData();
+    } catch (e) { tg.showAlert("Error sending request!"); }
+}
+
+// Updated History UI with status logic
+async function updateHistoryUI() {
+    try {
+        let res = await fetch(`${DB_BASE_URL}${userId}/history.json`);
+        let data = await res.json();
+        if (data) {
+            let container = document.getElementById('txn-list');
+            if(!container) return;
+            document.getElementById('no-txn').style.display = 'none';
+            let lastThree = Object.values(data).reverse().slice(0, 3);
             
-            try {
-                await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${ADMIN_ID}&text=${encodeURIComponent(msg)}&parse_mode=Markdown`);
-                document.getElementById('popAmt').innerText = amount.toFixed(2);
-                document.getElementById('overlay').style.display = "block";
-                document.getElementById('successPopup').style.display = "block";
+            container.innerHTML = lastThree.map(t => {
+                // Status ke hisaab se color badalne ke liye
+                let isSuccess = t.status === "Success";
+                let statusColor = isSuccess ? "#22c55e" : "#fbbf24"; // Success = Green, Process = Yellow
                 
-                lottie.loadAnimation({
-                    container: document.getElementById('lottieAnim'),
-                    renderer: 'svg', loop: false, autoplay: true,
-                    path: 'https://assets10.lottiefiles.com/packages/lf20_pqnfmone.json' 
-                });
-
-                balance = 0; updateUI(); saveData();
-            } catch (e) { tg.showAlert("Error sending request!"); }
+                return `
+                <div style="background: rgba(255,255,255,0.03); padding: 10px; border-radius: 12px; border: 1px solid #1e293b; display: flex; justify-content: space-between; align-items: center; margin-bottom:5px;">
+                    <div>
+                        <span style="font-size: 11px; color: #cbd5e1;">${t.date}</span>
+                    </div>
+                    <div style="text-align: right;">
+                        <span style="font-size: 13px; color: var(--gold); font-weight: bold;">₹${t.amt}</span><br>
+                        <span style="font-size: 10px; color: ${statusColor}; font-weight: bold; text-transform: uppercase;">
+                            ${t.status}
+                        </span>
+                    </div>
+                </div>`;
+            }).join('');
         }
+    } catch (e) { console.log(e); }
+}
+
+setTimeout(updateHistoryUI, 1000);
+
+
 
         function closePopup() {
             document.getElementById('overlay').style.display = "none";
