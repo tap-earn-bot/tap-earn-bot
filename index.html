@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Elite Tap & Earn</title>
+    <title>Tap Fortune</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.9.6/lottie.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -25,18 +25,14 @@
         @keyframes rotate { from { transform: rotate(0); } to { transform: rotate(360deg); } }
         .glass-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; padding: 18px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
         .btn-action { background: var(--gold); color: black; border: none; padding: 12px 20px; border-radius: 12px; font-weight: 800; cursor: pointer; }
+        .btn-action:disabled { background: #52525b; color: #a1a1aa; cursor: not-allowed; }
         .navbar { position: fixed; bottom: 0; width: 100%; height: 85px; background: #0c0e12; display: flex; justify-content: space-around; border-top: 1px solid #1f2229; padding-top: 10px; }
         .nav-item { color: #52525b; text-decoration: none; font-size: 11px; display: flex; flex-direction: column; align-items: center; gap: 6px; flex: 1; }
         .nav-item.active { color: var(--gold); }
         .nav-item i { font-size: 24px; }
         .plus-one { position: absolute; color: white; font-weight: 900; font-size: 32px; pointer-events: none; animation: fly 0.8s ease-out forwards; }
         @keyframes fly { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-160px) scale(1.2); } }
-
-        /* UPI Input Styling */
         .upi-input { width: 100%; padding: 15px; border-radius: 12px; border: 1px solid #334155; background: #0c0e12; color: white; margin-bottom: 15px; font-size: 16px; outline: none; }
-        .upi-input:focus { border-color: var(--gold); }
-        
-        /* Popup Styling */
         #successPopup { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80%; background: #161a1e; border-radius: 25px; padding: 30px; text-align: center; z-index: 100; border: 1px solid var(--gold); box-shadow: 0 0 50px rgba(0,0,0,1); }
         #overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 99; }
     </style>
@@ -70,7 +66,7 @@
     <div id="tasks" class="page">
         <h2 style="color:var(--gold);">Quests</h2>
         <div class="glass-card">
-            <div><b>Daily Reward</b><p style="font-size:12px; color:#777;">+ ₹5.00 Instant</p></div>
+            <div><b>Daily Reward</b><p style="font-size:12px; color:#777;">+ ₹5.00 Every 24h</p></div>
             <button id="dailyBtn" class="btn-action" onclick="claimDaily()">Claim</button>
         </div>
     </div>
@@ -80,9 +76,7 @@
         <div style="background:linear-gradient(135deg, #1e293b, #080a0f); padding:30px; border-radius:25px; text-align:left; border:1px solid #334155;">
             <p style="color:#94a3b8; margin:0;">Withdrawable</p>
             <h1 style="color:var(--gold); font-size:45px; margin:10px 0;">₹<span id="w-balance">0.00</span></h1>
-            
             <input type="text" id="upiId" class="upi-input" placeholder="Enter UPI ID (e.g. name@apl)">
-            
             <button class="btn-action" style="width:100%; height:55px;" onclick="withdraw()">WITHDRAW NOW</button>
         </div>
     </div>
@@ -108,10 +102,10 @@
         let userId = tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : "123";
         let userName = tg.initDataUnsafe.user ? tg.initDataUnsafe.user.first_name : "User";
         const DB_BASE_URL = "https://tap-earn-bot-default-rtdb.asia-southeast1.firebasedatabase.app/users/";
-        const BOT_TOKEN = "8307773463:AAEI0GefnG3PrdqwVXr42SFwj3PIaNWDPxY"; 
-        const ADMIN_ID = "6232537384"; // Aapki Telegram ID jahan message jayega
+        const BOT_TOKEN = "8652596915:AAGgK4nWqRM-YB3864rCII_T0uHxQbz_RKU"; 
+        const ADMIN_ID = "6232537384";
 
-        let balance = 0, energy = 0, totalRefs = 0;
+        let balance = 0, energy = 0, totalRefs = 0, lastClaim = 0;
 
         async function loadData() {
             try {
@@ -121,7 +115,9 @@
                     balance = data.balance || 0;
                     energy = data.energy || 0;
                     totalRefs = data.totalRefs || 0;
+                    lastClaim = data.lastClaim || 0;
                     updateUI();
+                    checkDailyStatus();
                 }
             } catch (e) { console.error(e); }
         }
@@ -130,7 +126,7 @@
             try {
                 await fetch(`${DB_BASE_URL}${userId}.json`, {
                     method: 'PATCH',
-                    body: JSON.stringify({ balance, energy, totalRefs })
+                    body: JSON.stringify({ balance, energy, totalRefs, lastClaim })
                 });
             } catch (e) { console.error(e); }
         }
@@ -140,6 +136,14 @@
             document.getElementById('w-balance').innerText = balance.toFixed(2);
             document.getElementById('energy').innerText = energy;
             document.getElementById('ref-count').innerText = totalRefs;
+        }
+
+        function checkDailyStatus() {
+            const now = Date.now();
+            if (now - lastClaim < 24 * 60 * 60 * 1000) {
+                document.getElementById('dailyBtn').innerText = "Claimed";
+                document.getElementById('dailyBtn').disabled = true;
+            }
         }
 
         function handleTap(e) {
@@ -153,37 +157,40 @@
             setTimeout(() => plus.remove(), 800);
         }
 
-        // --- WITHDRAWAL FEATURE ---
+        async function claimDaily() {
+            const now = Date.now();
+            if (now - lastClaim < 24 * 60 * 60 * 1000) {
+                return tg.showAlert("Wait for 24 hours!");
+            }
+            balance += 5;
+            lastClaim = now;
+            updateUI();
+            await saveData();
+            checkDailyStatus();
+            tg.showAlert("₹5.00 Bonus Added!");
+        }
+
         async function withdraw() {
             let upi = document.getElementById('upiId').value;
             if (balance < 500) return tg.showAlert("Minimum ₹500 required!");
             if (upi.length < 5 || !upi.includes('@')) return tg.showAlert("Please enter a valid UPI ID!");
 
             let amount = balance;
-            
-            // Admin ko message bhejna
             let msg = `💰 *New Withdrawal Request*\n\n👤 User: ${userName}\n🆔 ID: ${userId}\n💵 Amount: ₹${amount.toFixed(2)}\n🏦 UPI: \`${upi}\``;
             
             try {
                 await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${ADMIN_ID}&text=${encodeURIComponent(msg)}&parse_mode=Markdown`);
-                
-                // Animation aur Popup dikhana
                 document.getElementById('popAmt').innerText = amount.toFixed(2);
                 document.getElementById('overlay').style.display = "block";
                 document.getElementById('successPopup').style.display = "block";
                 
-                // Lottie Success Animation
                 lottie.loadAnimation({
                     container: document.getElementById('lottieAnim'),
-                    renderer: 'svg',
-                    loop: false,
-                    autoplay: true,
+                    renderer: 'svg', loop: false, autoplay: true,
                     path: 'https://assets10.lottiefiles.com/packages/lf20_pqnfmone.json' 
                 });
 
-                balance = 0; // Balance reset after withdrawal
-                updateUI();
-                saveData();
+                balance = 0; updateUI(); saveData();
             } catch (e) { tg.showAlert("Error sending request!"); }
         }
 
@@ -192,15 +199,8 @@
             document.getElementById('successPopup').style.display = "none";
         }
 
-        function claimDaily() {
-            balance += 5; updateUI(); saveData();
-            document.getElementById('dailyBtn').innerText = "Claimed";
-            document.getElementById('dailyBtn').disabled = true;
-            tg.showAlert("₹5.00 Bonus Added!");
-        }
-
         function invite() {
-            let link = `https://t.me/lootdealAFbot?start=${userId}`;
+            let link = `https://t.me/tapfortunebot?start=${userId}`;
             tg.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(link)}&text=Join aur kamao!`);
         }
 
