@@ -7,7 +7,7 @@ const PORT = process.env.PORT || 3000;
 app.get('/', (req, res) => res.send('Bot is Live!'));
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
-const bot = new Telegraf('8307773463:AAEI0GefnG3PrdqwVXr42SFwj3PIaNWDPxY');
+const bot = new Telegraf('8652596915:AAGgK4nWqRM-YB3864rCII_T0uHxQbz_RKU');
 const DB_BASE = "https://tap-earn-bot-default-rtdb.asia-southeast1.firebasedatabase.app/users";
 
 bot.start(async (ctx) => {
@@ -44,7 +44,7 @@ bot.start(async (ctx) => {
             }
         }
 
-        ctx.reply(`🎰 Welcome back, ${ctx.from.first_name}!\nElite Tap & Earn mein aapka swagat hai.`, Markup.inlineKeyboard([
+        ctx.reply(`🎰 Welcome back, ${ctx.from.first_name}!\nTap Fortune mein aapka swagat hai.`, Markup.inlineKeyboard([
             [Markup.button.webApp('🚀 Play Now', 'https://tap-earn-bot.github.io/tap-earn-bot/')]
         ]));
     } catch (err) { 
