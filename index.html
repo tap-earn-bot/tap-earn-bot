@@ -7,6 +7,7 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.9.6/lottie.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 <style>
     :root { --gold: #ffcc00; --bg: #05070a; --card: #161a1e; --neon: #00f2ff; }
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
@@ -233,41 +234,63 @@
             tg.showAlert("₹5.00 Bonus Added!");
         }
 
-// Updated Withdrawal Function
 async function withdraw() {
     let upi = document.getElementById('upiId').value;
+    let btn = document.querySelector('.btn-action[onclick="withdraw()"]');
+
     if (balance < 500) return tg.showAlert("Minimum ₹500 required!");
     if (upi.length < 5 || !upi.includes('@')) return tg.showAlert("Please enter a valid UPI ID!");
+
+    // --- 1. Loading State Start ---
+    const originalBtnText = btn.innerHTML;
+    btn.disabled = true;
+    btn.style.opacity = "0.7";
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...'; 
 
     let amount = balance;
     let msg = `💰 *New Withdrawal Request*\n\n👤 User: ${userName}\n🆔 ID: ${userId}\n💵 Amount: ₹${amount.toFixed(2)}\n🏦 UPI: \`${upi}\``;
     
-    try {
-        await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${ADMIN_ID}&text=${encodeURIComponent(msg)}&parse_mode=Markdown`);
-        
-        // --- Status "Under Process" ke saath save karein ---
-        let entry = { 
-            amt: amount.toFixed(2), 
-            date: new Date().toLocaleDateString('en-IN', {day:'2-digit', month:'short'}),
-            status: "Under Process" // Default status
-        };
-        await fetch(`${DB_BASE_URL}${userId}/history.json`, { method: 'POST', body: JSON.stringify(entry) });
-        
-        updateHistoryUI(); 
+    // --- 2. 3 Second ka Artificial Delay ---
+    setTimeout(async () => {
+        try {
+            await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${ADMIN_ID}&text=${encodeURIComponent(msg)}&parse_mode=Markdown`);
+            
+            let entry = { 
+                amt: amount.toFixed(2), 
+                date: new Date().toLocaleDateString('en-IN', {day:'2-digit', month:'short'}),
+                status: "Under Process" 
+            };
+            await fetch(`${DB_BASE_URL}${userId}/history.json`, { method: 'POST', body: JSON.stringify(entry) });
+            
+            updateHistoryUI(); 
 
-        document.getElementById('popAmt').innerText = amount.toFixed(2);
-        document.getElementById('overlay').style.display = "block";
-        document.getElementById('successPopup').style.display = "block";
+            // --- 3. Success Popup Show ---
+            document.getElementById('popAmt').innerText = amount.toFixed(2);
+            document.getElementById('overlay').style.display = "block";
+            document.getElementById('successPopup').style.display = "block";
 
-                lottie.loadAnimation({
-                    container: document.getElementById('lottieAnim'),
-                    renderer: 'svg', loop: false, autoplay: true,
-                    path: 'https://assets10.lottiefiles.com/packages/lf20_pqnfmone.json' 
-                });
+            // Lottie Animation Trigger
+            document.getElementById('lottieAnim').innerHTML = ''; // Purana clear karne ke liye
+            lottie.loadAnimation({
+                container: document.getElementById('lottieAnim'),
+                renderer: 'svg', loop: false, autoplay: true,
+                path: 'https://assets10.lottiefiles.com/packages/lf20_pqnfmone.json' 
+            });
 
-        balance = 0; updateUI(); saveData();
-    } catch (e) { tg.showAlert("Error sending request!"); }
-}
+            balance = 0; 
+            updateUI(); 
+            saveData();
+
+        } catch (e) { 
+            tg.showAlert("Error sending request!"); 
+        } finally {
+            // Button wapas normal karna
+            btn.disabled = false;
+            btn.style.opacity = "1";
+            btn.innerHTML = originalBtnText;
+        }
+    }, 3000); // 3000ms = 3 Seconds
+}}
 
 // Updated History UI with status logic
 async function updateHistoryUI() {
