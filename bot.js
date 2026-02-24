@@ -1,33 +1,40 @@
 const { Telegraf, Markup } = require('telegraf');
 const axios = require('axios');
-const express = require('express'); // Port detect karne ke liye
+const express = require('express');
 
-// 1. Express Setup (Isse Render wala error solve hoga)
 const app = express();
 const PORT = process.env.PORT || 3000;
 app.get('/', (req, res) => res.send('Bot is Live!'));
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
-// 2. Bot Setup
 const bot = new Telegraf('8307773463:AAEI0GefnG3PrdqwVXr42SFwj3PIaNWDPxY');
-const DB_URL = "https://tap-earn-bot-default-rtdb.asia-southeast1.firebasedatabase.app/.json";
+const DB_BASE = "https://tap-earn-bot-default-rtdb.asia-southeast1.firebasedatabase.app/users";
 
 bot.start(async (ctx) => {
     const userId = ctx.from.id;
     const refId = ctx.startPayload;
 
+    // Turant response taaki user wait na kare
+    await ctx.reply("⏳ Loading your profile...");
+
     try {
-        let res = await axios.get(`https://tap-earn-bot-default-rtdb.asia-southeast1.firebasedatabase.app/users/${userId}.json`);
+        let res = await axios.get(`${DB_BASE}/${userId}.json`);
         let userData = res.data;
 
         if (!userData) {
-            userData = { balance: 0, energy: 1000, totalRefs: 0, referredBy: refId || null };
-            await axios.put(`https://tap-earn-bot-default-rtdb.asia-southeast1.firebasedatabase.app/users/${userId}.json`, userData);
+            userData = { 
+                balance: 0, 
+                energy: 1000, 
+                totalRefs: 0, 
+                referredBy: refId || null,
+                lastClaim: 0 // New Field
+            };
+            await axios.put(`${DB_BASE}/${userId}.json`, userData);
 
             if (refId && refId != userId) {
-                let refRes = await axios.get(`https://tap-earn-bot-default-rtdb.asia-southeast1.firebasedatabase.app/users/${refId}.json`);
+                let refRes = await axios.get(`${DB_BASE}/${refId}.json`);
                 if (refRes.data) {
-                    await axios.patch(`https://tap-earn-bot-default-rtdb.asia-southeast1.firebasedatabase.app/users/${refId}.json`, {
+                    await axios.patch(`${DB_BASE}/${refId}.json`, {
                         energy: Math.min(1000, (refRes.data.energy || 0) + 250),
                         balance: (refRes.data.balance || 0) + 10,
                         totalRefs: (refRes.data.totalRefs || 0) + 1
@@ -37,10 +44,13 @@ bot.start(async (ctx) => {
             }
         }
 
-        ctx.reply(`🎰 Welcome to Elite Tap & Earn!`, Markup.inlineKeyboard([
+        ctx.reply(`🎰 Welcome back, ${ctx.from.first_name}!\nElite Tap & Earn mein aapka swagat hai.`, Markup.inlineKeyboard([
             [Markup.button.webApp('🚀 Play Now', 'https://tap-earn-bot.github.io/tap-earn-bot/')]
         ]));
-    } catch (err) { console.log(err); }
+    } catch (err) { 
+        console.log(err);
+        ctx.reply("❌ Error: Database se connect nahi ho paya. Dobara try karein.");
+    }
 });
 
-bot.launch();
+bot.launch().then(() => console.log("Bot started!"));
