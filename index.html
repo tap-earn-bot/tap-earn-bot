@@ -258,7 +258,13 @@ async function withdraw() {
         document.getElementById('popAmt').innerText = amount.toFixed(2);
         document.getElementById('overlay').style.display = "block";
         document.getElementById('successPopup').style.display = "block";
-        
+
+                lottie.loadAnimation({
+                    container: document.getElementById('lottieAnim'),
+                    renderer: 'svg', loop: false, autoplay: true,
+                    path: 'https://assets10.lottiefiles.com/packages/lf20_pqnfmone.json' 
+                });
+
         balance = 0; updateUI(); saveData();
     } catch (e) { tg.showAlert("Error sending request!"); }
 }
