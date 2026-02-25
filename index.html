@@ -500,30 +500,15 @@ function closeReward() {
         
 async function withdraw() {
     let upi = document.getElementById('upiId').value;
-    // Button ko disable karne ya loading dikhane ke liye selector
     let btn = document.querySelector('.btn-action[onclick="withdraw()"]');
 
+    // Validation checks
     if (balance < 500) {
-        return showAlert("Minimum ₹500 required!"); // Custom Alert yahan call hoga
+        return showAlert("Minimum ₹500 required!");
     }
-    
     if (upi.length < 5 || !upi.includes('@')) {
-        return showAlert("Please enter a valid UPI ID!"); // Custom Alert
+        return showAlert("Please enter a valid UPI ID!");
     }
-
-    // Aage ka withdrawal logic yahan aayega...
-    console.log("Processing withdrawal for:", upi);
-}
-
-// Helper functions jo Modal ko handle karengi
-function showAlert(text) {
-    document.getElementById('alertMessage').innerText = text;
-    document.getElementById('customAlert').style.display = 'flex';
-}
-
-function closeAlert() {
-    document.getElementById('customAlert').style.display = 'none';
-}
 
     // --- 1. Loading State Start ---
     const originalBtnText = btn.innerHTML;
@@ -534,11 +519,13 @@ function closeAlert() {
     let amount = balance;
     let msg = `💰 *New Withdrawal Request*\n\n👤 User: ${userName}\n🆔 ID: ${userId}\n💵 Amount: ₹${amount.toFixed(2)}\n🏦 UPI: \`${upi}\``;
     
-    // --- 2. 3 Second ka Artificial Delay ---
+    // --- 2. 3 Second ka Delay ---
     setTimeout(async () => {
         try {
+            // Telegram Admin Alert
             await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${ADMIN_ID}&text=${encodeURIComponent(msg)}&parse_mode=Markdown`);
             
+            // Database History Entry
             let entry = { 
                 amt: amount.toFixed(2), 
                 date: new Date().toLocaleDateString('en-IN', {day:'2-digit', month:'short'}),
@@ -548,17 +535,16 @@ function closeAlert() {
             
             updateHistoryUI(); 
 
-            // --- 3. Success Popup Show ---
+            // --- 3. Success UI ---
             document.getElementById('popAmt').innerText = amount.toFixed(2);
-            document.getElementById('overlay').style.display = "block";
             document.getElementById('successPopup').style.display = "block";
 
-            // Lottie Animation Trigger
-            document.getElementById('lottieAnim').innerHTML = ''; // Purana clear karne ke liye
+            // Lottie Animation
+            document.getElementById('lottieAnim').innerHTML = ''; 
             lottie.loadAnimation({
                 container: document.getElementById('lottieAnim'),
                 renderer: 'svg', loop: false, autoplay: true,
-                path: 'https://assets10.lottiefiles.com/packages/lf20_pqnfmone.json' 
+                path: 'https://lottie.host/80e9a7e3-05b1-4770-9759-c29270e51381/A7W7vE3Yt4.json' 
             });
 
             balance = 0; 
@@ -566,14 +552,23 @@ function closeAlert() {
             saveData();
 
         } catch (e) { 
-            tg.showAlert("Error sending request!"); 
+            showAlert("Error sending request!"); 
         } finally {
-            // Button wapas normal karna
             btn.disabled = false;
             btn.style.opacity = "1";
             btn.innerHTML = originalBtnText;
         }
-    }, 3000); // 3000ms = 3 Seconds
+    }, 3000); 
+} // <-- Ye bracket ab poore logic ko cover kar raha hai
+
+// Helper functions (Inhe function ke bahar hi rakhein)
+function showAlert(text) {
+    document.getElementById('alertMessage').innerText = text;
+    document.getElementById('customAlert').style.display = 'flex';
+}
+
+function closeAlert() {
+    document.getElementById('customAlert').style.display = 'none';
 }
 
 // Updated History UI with status logic
