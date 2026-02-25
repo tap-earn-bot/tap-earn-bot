@@ -322,7 +322,19 @@
     transform: translate(-50%, -50%); /* Screen ke center mein rakhne ke liye */
     z-index: 1001;
 }
-
+#overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.4); /* Thoda transparent black */
+    backdrop-filter: blur(8px);    /* Yeh line piche ka sab blur kar degi */
+    -webkit-backdrop-filter: blur(8px); /* Safari browser ke liye */
+    z-index: 1000;
+}
+    
 #successPopup h2 {
     margin: 10px 0;
     font-size: 22px;
