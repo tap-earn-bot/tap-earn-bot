@@ -304,57 +304,69 @@
     align-items: center;
 }
 #successPopup {
-    display: none;
-    flex-direction: column; /* Sab kuch ek ke niche ek lane ke liye */
-    align-items: center;    /* Horizontal centering */
-    justify-content: center;
-    text-align: center;
-    padding: 20px;
-    background: #1a1a1a;    /* Aapka dark background */
-    backdrop-filter: blur(8px);
-    border: 2px solid var(--gold);
-    border-radius: 15px;
-    width: 80%;             /* Mobile screen ke hisab se width */
-    max-width: 350px;       /* Desktop par zyada bada na dikhe */
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%); /* Screen ke center mein rakhne ke liye */
-    z-index: 1001;
-}
 #overlay {
     display: none;
     position: fixed;
     top: 0;
     left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.4); /* Thoda transparent black */
-    backdrop-filter: blur(8px);    /* Yeh line piche ka sab blur kar degi */
-    -webkit-backdrop-filter: blur(8px); /* Safari browser ke liye */
+    width: 100vw;
+    height: 100vh;
+    /* Transparent black taaki piche ka dikhe aur blur ho sake */
+    background: rgba(0, 0, 0, 0.45); 
+    /* Main Blur properties */
+    backdrop-filter: blur(10px) saturate(150%);
+    -webkit-backdrop-filter: blur(10px) saturate(150%);
     z-index: 1000;
 }
-    
+
+#successPopup {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 25px;
+    background: #1a1a1a; 
+    border: 1px solid rgba(255, 215, 0, 0.3); /* Gold border thodi light */
+    border-radius: 20px;
+    width: 85%;
+    max-width: 320px;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1001;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+}
+
 #successPopup h2 {
     margin: 10px 0;
-    font-size: 22px;
+    font-size: 20px;
+    font-weight: 700;
 }
 
 #successPopup p {
-    color: #fff;
-    margin-bottom: 20px;
-    font-size: 16px;
+    color: #aeaeae;
+    font-size: 15px;
 }
 
 #successPopup .btn-action {
-    width: 100%;            /* Button ko full width dene ke liye */
+    width: 100%;
     padding: 12px;
-    background-color: var(--gold);
+    background: var(--gold);
+    color: #000;
     border: none;
-    border-radius: 8px;
+    border-radius: 12px;
     font-weight: bold;
+    font-size: 16px;
     cursor: pointer;
+    transition: transform 0.2s;
 }
+
+#successPopup .btn-action:active {
+    transform: scale(0.95);
+}
+
 
 </style>
     
@@ -387,13 +399,16 @@
 
     
 <div id="overlay"></div>
+
 <div id="successPopup">
-    <div id="lottieAnim" style="width: 120px; height: 120px; margin-bottom: 10px;"></div>
+    <div id="lottieAnim" style="width: 100px; height: 100px; margin-bottom: 5px;">
+        <img src="https://i.getlyrical.com/i/success_check.gif" alt="Success" style="width: 100%; height: 100%; object-fit: contain;">
+    </div>
     
-    <h2 style="color:var(--gold); margin: 5px 0;">Withdrawal Requested!</h2>
-    <p style="margin: 10px 0;">Your ₹<span id="popAmt">0</span> request is being processed</p>
+    <h2 style="color:var(--gold);">Withdrawal Requested!</h2>
+    <p>Your ₹<span id="popAmt" style="color:#fff; font-weight:bold;">0</span> request is being processed</p>
     
-    <button class="btn-action" onclick="closePopup()" style="margin-top: 15px;">GOT IT</button>
+    <button class="btn-action" onclick="closePopup()">GOT IT</button>
 </div>
 
     <div class="header">
