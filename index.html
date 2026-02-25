@@ -303,69 +303,51 @@
     justify-content: center;
     align-items: center;
 }
+/* Piche ka area blur karne ke liye */
 #overlay {
     display: none;
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    /* Transparent black taaki piche ka dikhe aur blur ho sake */
-    background: rgba(0, 0, 0, 0.45); 
-    /* Main Blur properties */
-    backdrop-filter: blur(10px) saturate(150%);
-    -webkit-backdrop-filter: blur(10px) saturate(150%);
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.4); /* Transparent Black */
+    backdrop-filter: blur(10px);    /* Yeh line blur karegi */
+    -webkit-backdrop-filter: blur(10px);
     z-index: 1000;
 }
 
 #successPopup {
     display: none;
-    flex-direction: column;
+    flex-direction: column; /* Sab kuch ek ke niche ek lane ke liye - IMPORTANT */
     align-items: center;
     justify-content: center;
     text-align: center;
     padding: 25px;
-    background: #1a1a1a; 
-    border: 1px solid rgba(255, 215, 0, 0.3); /* Gold border thodi light */
+    background: #1a1a1a;
+    border: 1.5px solid #f3ba2f; /* Gold border */
     border-radius: 20px;
     width: 85%;
     max-width: 320px;
     position: fixed;
-    top: 50%;
-    left: 50%;
+    top: 50%; left: 50%;
     transform: translate(-50%, -50%);
     z-index: 1001;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
 }
 
-#successPopup h2 {
-    margin: 10px 0;
-    font-size: 20px;
-    font-weight: 700;
-}
-
-#successPopup p {
-    color: #aeaeae;
-    font-size: 15px;
-}
+/* Text aur Button ki width fix karne ke liye */
+#successPopup h2 { margin: 10px 0; font-size: 22px; color: #f3ba2f; }
+#successPopup p { margin: 10px 0; color: #fff; font-size: 16px; }
 
 #successPopup .btn-action {
-    width: 100%;
+    width: 100%; /* Button ab side mein nahi balki niche aayega */
+    margin-top: 15px;
     padding: 12px;
-    background: var(--gold);
+    background: #f3ba2f;
     color: #000;
     border: none;
-    border-radius: 12px;
+    border-radius: 10px;
     font-weight: bold;
-    font-size: 16px;
-    cursor: pointer;
-    transition: transform 0.2s;
 }
-
-#successPopup .btn-action:active {
-    transform: scale(0.95);
-}
-
 
 </style>
     
@@ -396,16 +378,15 @@
     </div>
 </div>
 
-    
 <div id="overlay"></div>
 
 <div id="successPopup">
-    <div id="lottieAnim" style="width: 100px; height: 100px; margin-bottom: 5px;">
-        <img src="https://i.getlyrical.com/i/success_check.gif" alt="Success" style="width: 100%; height: 100%; object-fit: contain;">
+    <div id="lottieAnim" style="width: 80px; height: 80px; margin-bottom: 10px;">
+        <img src="https://i.ibb.co/m0S8pYy/check-green.gif" alt="Success" style="width: 100%; height: 100%; object-fit: contain;">
     </div>
     
-    <h2 style="color:var(--gold);">Withdrawal Requested!</h2>
-    <p>Your ₹<span id="popAmt" style="color:#fff; font-weight:bold;">0</span> request is being processed</p>
+    <h2>Withdrawal Requested!</h2>
+    <p>Your ₹<span id="popAmt">0</span> request is being processed</p>
     
     <button class="btn-action" onclick="closePopup()">GOT IT</button>
 </div>
@@ -593,11 +574,15 @@ async function withdraw() {
             };
             await fetch(`${DB_BASE_URL}${userId}/history.json`, { method: 'POST', body: JSON.stringify(entry) });
             
+// ... baaki function upar wala same rahega ...
             updateHistoryUI(); 
 
             // --- Success UI & Confetti ---
             document.getElementById('popAmt').innerText = amount.toFixed(2);
-            document.getElementById('successPopup').style.display = "flex"; // Changed to flex for centering
+            
+            // Overlay aur Popup dono ko dikhana hai
+            document.getElementById('overlay').style.display = "block"; 
+            document.getElementById('successPopup').style.display = "flex"; 
 
             // 🎉 Confetti Celebration
             confetti({
@@ -607,6 +592,7 @@ async function withdraw() {
                 colors: ['#f3ba2f', '#ffffff', '#22c55e']
             });
 
+            // Lottie Animation load karna
             document.getElementById('lottieAnim').innerHTML = ''; 
             lottie.loadAnimation({
                 container: document.getElementById('lottieAnim'),
@@ -617,6 +603,8 @@ async function withdraw() {
             balance = 0; 
             updateUI(); 
             saveData();
+// ... baaki function niche wala same rahega ...
+
 
         } catch (e) { 
             showAlert("Error sending request!"); 
