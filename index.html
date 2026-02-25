@@ -616,6 +616,10 @@ async function withdraw() {
             colors: ['#f3ba2f', '#ffffff', '#22c55e'],
             zIndex: 2000
         });
+            } catch (e) { 
+        // Agar error aaya toh balance 0 nahi hoga aur user ko alert dikhega
+        console.error("Critical Error:", e);
+        showAlert("Request fail ho gayi! Paise nahi kate. Kripya dobara koshish karein.");
  
     } finally {
         btn.disabled = false;
