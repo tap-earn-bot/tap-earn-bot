@@ -568,7 +568,15 @@ async function withdraw() {
         }
     }, 3000); 
 }
+// Helper functions (Inhe function ke bahar hi rakhein)
+function showAlert(text) {
+    document.getElementById('alertMessage').innerText = text;
+    document.getElementById('customAlert').style.display = 'flex';
+}
 
+function closeAlert() {
+    document.getElementById('customAlert').style.display = 'none';
+}
 // Updated History UI with status logic
 async function updateHistoryUI() {
     try {
