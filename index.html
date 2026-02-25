@@ -98,6 +98,33 @@
 #dailyBtn {
   cursor: pointer;
 }
+/* popup entry animation */
+@keyframes popIn {
+  from { transform: scale(0.85); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
+}
+
+/* success glow */
+@keyframes glow {
+  0% { box-shadow: 0 0 5px #00ff99; }
+  50% { box-shadow: 0 0 20px #00ff99; }
+  100% { box-shadow: 0 0 5px #00ff99; }
+}
+
+/* loader pulse */
+@keyframes pulse {
+  0% { transform: scale(1); opacity: .6; }
+  50% { transform: scale(1.15); opacity: 1; }
+  100% { transform: scale(1); opacity: .6; }
+}
+
+#claimBox {
+  animation: popIn 0.35s ease-out;
+}
+
+#loader {
+  animation: spin 1s linear infinite, pulse 1.4s ease-in-out infinite;
+}
 </style>
     
 </head>
@@ -411,15 +438,34 @@ function showClaimLoading(text) {
   const o = document.getElementById("claimOverlay");
   o.style.pointerEvents = "auto";
   o.style.display = "flex";
+
+  const box = document.getElementById("claimBox");
+  box.style.animation = "popIn 0.35s ease-out";
+
   document.getElementById("claimText").innerText = text;
   document.getElementById("loader").style.display = "block";
 }
 
 function showClaimSuccess() {
-  document.getElementById("loader").style.display = "none";
-  document.getElementById("claimText").innerHTML =
-    "💸 <b>₹5 Bonus Added</b><br><small>Come back after 24 hours</small>";
+  const loader = document.getElementById("loader");
+  const text = document.getElementById("claimText");
+  const box = document.getElementById("claimBox");
+
+  loader.style.display = "none";
+
+  text.innerHTML = `
+    <div style="font-size:22px">💸 ₹5 Added</div>
+    <small style="opacity:.8">Come back after 24 hours</small>
+  `;
+
+  box.style.animation = "glow 1.2s ease-in-out";
 }
+        setTimeout(() => {
+  const o = document.getElementById("claimOverlay");
+  o.style.display = "none";
+  o.style.pointerEvents = "none"; // ✅ ADD THIS
+}, 1800);
+        
     </script>
 </body>
 </html>
