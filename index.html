@@ -616,18 +616,7 @@ async function withdraw() {
             colors: ['#f3ba2f', '#ffffff', '#22c55e'],
             zIndex: 2000
         });
-
-        document.getElementById('lottieAnim').innerHTML = ''; 
-        lottie.loadAnimation({
-            container: document.getElementById('lottieAnim'),
-            renderer: 'svg', loop: false, autoplay: true,
-            path: 'https://lottie.host/80e9a7e3-05b1-4770-9759-c29270e51381/A7W7vE3Yt4.json' 
-        });
-
-    } catch (e) { 
-        // Agar error aaya toh balance 0 nahi hoga aur user ko alert dikhega
-        console.error("Critical Error:", e);
-        showAlert("Request fail ho gayi! Paise nahi kate. Kripya dobara koshish karein."); 
+ 
     } finally {
         btn.disabled = false;
         btn.style.opacity = "1";
