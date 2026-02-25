@@ -427,20 +427,31 @@
         </div>
     </div>
 
-    <div id="wallet" class="page">
-        <h2 style="color:var(--gold);">My Bank</h2>
-        <div style="background:linear-gradient(135deg, #1e293b, #080a0f); padding:30px; border-radius:25px; text-align:left; border:1px solid #334155;">
-            <p style="color:#94a3b8; margin:0;">Withdrawable</p>
-            <h1 style="color:var(--gold); font-size:45px; margin:10px 0;">₹<span id="w-balance">0.00</span></h1>
-            <input type="text" id="upiId" class="upi-input" placeholder="Enter UPI ID (e.g. name@apl)">
-            <button class="btn-action" style="width:100%; height:55px;" onclick="withdraw()">WITHDRAW NOW</button>
+<<div id="wallet" class="page">
+    <h2 style="color: #f3ba2f; text-align: center; margin-bottom: 20px; font-weight: 800; letter-spacing: 1px;">My Bank</h2>
+    
+    <div style="background: linear-gradient(145deg, #161b22, #0d1117); padding: 30px; border-radius: 28px; text-align: left; border: 1px solid #30363d; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
+        
+        <p style="color: #8b949e; margin: 0; font-size: 14px; font-weight: 500;">Withdrawable</p>
+        
+        <h1 style="color: #f3ba2f; font-size: 48px; margin: 10px 0; font-weight: 800;">₹<span id="w-balance">0.00</span></h1>
+        
+        <input type="text" id="upiId" class="upi-input" placeholder="Enter UPI ID (e.g. name@apl)" 
+               style="width: 100%; background: #0d1117; border: 1px solid #30363d; color: #fff; padding: 15px; border-radius: 12px; margin-bottom: 20px; outline: none;">
+        
+        <button class="btn-action" style="width: 100%; height: 55px; background: #f3ba2f; color: #000; border: none; border-radius: 15px; font-weight: 700; font-size: 16px; cursor: pointer; box-shadow: 0 4px 15px rgba(243, 186, 47, 0.3);" onclick="withdraw()">
+            WITHDRAW NOW
+        </button>
             
-<div id="txn-history" style="margin-top: 20px; border-top: 1px solid #334155; padding-top: 15px;">
-    <p style="color:#94a3b8; font-size: 12px; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px;">Recent History (Last 3)</p>
-    <div id="txn-list" style="display: flex; flex-direction: column; gap: 8px;">
-        <p id="no-txn" style="color: #4b5563; font-size: 13px; text-align: center;">No history found</p>
+        <div id="txn-history" style="margin-top: 25px; border-top: 1px solid #30363d; padding-top: 20px;">
+            <p style="color: #8b949e; font-size: 11px; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 600;">Recent History (Last 3)</p>
+            <div id="txn-list" style="display: flex; flex-direction: column; gap: 10px;">
+                <p id="no-txn" style="color: #484f58; font-size: 13px; text-align: center;">No history found</p>
+            </div>
+        </div>
     </div>
-</div>
+<</div>
+
 
 
         </div>
