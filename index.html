@@ -260,11 +260,60 @@
     0%, 100% { opacity: 0.5; }
     50% { opacity: 1; }
     }
+    .modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(8px); /* Blur effect */
+    z-index: 10000;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background: #121212;
+    border: 2px solid #f3ba2f; /* Gold Border */
+    border-radius: 24px;
+    padding: 30px;
+    width: 85%;
+    max-width: 350px;
+    text-align: center;
+    color: white;
+    box-shadow: 0 0 20px rgba(243, 186, 47, 0.2);
+    animation: shake 0.4s ease-in-out;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+.modal-content button {
+    background: linear-gradient(90deg, #f3ba2f, #ffdb4d);
+    color: black;
+    border: none;
+    padding: 12px;
+    width: 100%;
+    border-radius: 12px;
+    font-weight: 800;
+    margin-top: 15px;
+    text-transform: uppercase;
+}
     
 </style>
     
 </head>
 <body>
+<div id="customAlert" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-icon">💰</div> <p id="alertMessage"></p>
+        <button onclick="closeAlert()">Close</button>
+    </div>
+</div>
+    
 <div id="loadingOverlay">
     <div class="premium-loader"></div>
     <div class="loading-text">Processing Reward...</div>
@@ -451,10 +500,30 @@ function closeReward() {
         
 async function withdraw() {
     let upi = document.getElementById('upiId').value;
+    // Button ko disable karne ya loading dikhane ke liye selector
     let btn = document.querySelector('.btn-action[onclick="withdraw()"]');
 
-    if (balance < 500) return tg.showAlert("Minimum ₹500 required!");
-    if (upi.length < 5 || !upi.includes('@')) return tg.showAlert("Please enter a valid UPI ID!");
+    if (balance < 500) {
+        return showAlert("Minimum ₹500 required!"); // Custom Alert yahan call hoga
+    }
+    
+    if (upi.length < 5 || !upi.includes('@')) {
+        return showAlert("Please enter a valid UPI ID!"); // Custom Alert
+    }
+
+    // Aage ka withdrawal logic yahan aayega...
+    console.log("Processing withdrawal for:", upi);
+}
+
+// Helper functions jo Modal ko handle karengi
+function showAlert(text) {
+    document.getElementById('alertMessage').innerText = text;
+    document.getElementById('customAlert').style.display = 'flex';
+}
+
+function closeAlert() {
+    document.getElementById('customAlert').style.display = 'none';
+}
 
     // --- 1. Loading State Start ---
     const originalBtnText = btn.innerHTML;
