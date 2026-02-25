@@ -427,7 +427,7 @@
         </div>
     </div>
 
-<<div id="wallet" class="page">
+<div id="wallet" class="page">
     <h2 style="color: #f3ba2f; text-align: center; margin-bottom: 20px; font-weight: 800; letter-spacing: 1px;">My Bank</h2>
     
     <div style="background: linear-gradient(145deg, #161b22, #0d1117); padding: 30px; border-radius: 28px; text-align: left; border: 1px solid #30363d; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
@@ -450,7 +450,7 @@
             </div>
         </div>
     </div>
-<</div>
+</div>
 
 
 
@@ -656,7 +656,7 @@ async function updateHistoryUI() {
             let container = document.getElementById('txn-list');
             if(!container) return;
             document.getElementById('no-txn').style.display = 'none';
-            let lastThree = Object.values(data).reverse().slice(0, 3);
+            let lastThree = Object.values(data).reverse().slice(0, 1);
             
             container.innerHTML = lastThree.map(t => {
                 // Status ke hisaab se color badalne ke liye
