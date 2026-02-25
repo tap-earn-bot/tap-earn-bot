@@ -213,11 +213,57 @@
     margin-top: 20px;
     text-transform: uppercase;
 }
+/* Premium Loader Style */
+#loadingOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(8px);
+    display: none; /* JS se show hoga */
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 10001;
+}
 
+.premium-loader {
+    width: 60px;
+    height: 60px;
+    border: 4px solid rgba(255, 204, 0, 0.1);
+    border-left-color: var(--gold);
+    border-radius: 50%;
+    animation: spinLoader 1s linear infinite;
+    box-shadow: 0 0 15px rgba(255, 204, 0, 0.3);
+}
+
+.loading-text {
+    margin-top: 15px;
+    color: var(--gold);
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-size: 12px;
+    animation: pulseText 1.5s ease-in-out infinite;
+}
+
+@keyframes spinLoader {
+    to { transform: rotate(360deg); }
+}
+
+@keyframes pulseText {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
+    }
+    
 </style>
     
 </head>
 <body>
+<div id="loadingOverlay">
+    <div class="premium-loader"></div>
+    <div class="loading-text">Processing Reward...</div>
+</div>
+    
 <div id="claimOverlay">
     <div class="reward-card">
         <div class="sunburst"></div>
@@ -362,22 +408,35 @@
 
 async function claimDaily() {
     const now = Date.now();
+    
+    // 24 ghante ka check
     if (now - lastClaim < 24 * 60 * 60 * 1000) {
         return tg.showAlert("Wait for 24 hours!");
     }
 
-    // Amount set karein (Maan lo ₹5 mil rahe hain)
-    document.getElementById('pop-amount').innerText = "5.00";
-    
-    // Popup show karein
-    document.getElementById("claimOverlay").style.display = "flex";
+    // 1. Loading dikhao
+    const loader = document.getElementById("loadingOverlay");
+    loader.style.display = "flex";
 
-    // Data save karein
-    balance += 5;
-    lastClaim = now;
-    updateUI();
-    await saveData();
-    checkDailyStatus();
+    // 2. 2 Second ka delay (Professional feel ke liye)
+    setTimeout(async () => {
+        // Loader chhupao
+        loader.style.display = "none";
+
+        // Reward calculation
+        balance += 5;
+        lastClaim = now;
+        
+        // 3. Pop-up dikhao (Jo humne pehle banaya tha)
+        document.getElementById('pop-amount').innerText = "5.00";
+        document.getElementById("claimOverlay").style.display = "flex";
+
+        // Data save karein
+        updateUI();
+        await saveData();
+        checkDailyStatus();
+        
+    }, 2000); // 2000ms = 2 seconds
 }
 
 function closeReward() {
