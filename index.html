@@ -613,11 +613,63 @@ async function withdraw() {
             particleCount: 150,
             spread: 70,
             origin: { y: 0.6 },
+async function withdraw() {
+    let upi = document.getElementById('upiId').value;
+    let btn = document.querySelector('.btn-action[onclick="withdraw()"]');
+
+    if (balance < 500) return showAlert("Minimum ₹500 required!");
+    if (upi.length < 5 || !upi.includes('@')) return showAlert("Please enter a valid UPI ID!");
+
+    const originalBtnText = btn.innerHTML;
+    btn.disabled = true;
+    btn.style.opacity = "0.7";
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...'; 
+
+    let amount = balance;
+
+    try {
+        // --- STEP 1: Database mein entry (Pehal kaam) ---
+        let entry = { 
+            amt: amount.toFixed(2), 
+            date: new Date().toLocaleDateString('en-IN', {day:'2-digit', month:'short'}),
+            status: "Under Process" 
+        };
+        
+        // Database update ka wait karein
+        const dbResponse = await fetch(`${DB_BASE_URL}${userId}/history.json`, { 
+            method: 'POST', 
+            body: JSON.stringify(entry) 
+        });
+
+        if (!dbResponse.ok) throw new Error("Database error");
+
+        // --- STEP 2: Telegram Message (Doosra kaam) ---
+        let msg = `💰 *New Withdrawal Request*\n\n👤 User: ${userName}\n🆔 ID: ${userId}\n💵 Amount: ₹${amount.toFixed(2)}\n🏦 UPI: \`${upi}\``;
+        
+        const tgResponse = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${ADMIN_ID}&text=${encodeURIComponent(msg)}&parse_mode=Markdown`);
+
+        if (!tgResponse.ok) throw new Error("Telegram error");
+
+        // --- STEP 3: Sab success hone ke baad hi paise kaate (Final Step) ---
+        // Agar yahan tak code pahucha hai, matlab request admin tak chali gayi hai
+        balance = 0; 
+        updateUI(); 
+        updateHistoryUI();
+        saveData(); // Ab local storage update hoga
+
+        // --- Success UI & Confetti ---
+        document.getElementById('popAmt').innerText = amount.toFixed(2);
+        document.getElementById('overlay').style.display = "block"; 
+        document.getElementById('successPopup').style.display = "flex"; 
+
+        confetti({
+            particleCount: 150,
+            spread: 70,
+            origin: { y: 0.6 },
             colors: ['#f3ba2f', '#ffffff', '#22c55e'],
             zIndex: 2000
         });
 
-        // Lottie Animation
         document.getElementById('lottieAnim').innerHTML = ''; 
         lottie.loadAnimation({
             container: document.getElementById('lottieAnim'),
@@ -626,14 +678,16 @@ async function withdraw() {
         });
 
     } catch (e) { 
-        console.error("Withdraw Error:", e);
-        showAlert("Error: Request process nahi ho saki. Internet check karein!"); 
+        // Agar error aaya toh balance 0 nahi hoga aur user ko alert dikhega
+        console.error("Critical Error:", e);
+        showAlert("Request fail ho gayi! Paise nahi kate. Kripya dobara koshish karein."); 
     } finally {
         btn.disabled = false;
         btn.style.opacity = "1";
         btn.innerHTML = originalBtnText;
     }
-            }
+}
+
 // Helper functions (Inhe function ke bahar hi rakhein)
 function showAlert(text) {
     document.getElementById('alertMessage').innerText = text;
