@@ -407,7 +407,6 @@
         }
 
 async function claimDaily() {
-async function claimDaily() {
     const now = Date.now();
     if (now - lastClaim < 24 * 60 * 60 * 1000) {
         return tg.showAlert("Wait for 24 hours!");
