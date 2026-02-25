@@ -125,53 +125,7 @@
 #loader {
   animation: spin 1s linear infinite, pulse 1.4s ease-in-out infinite;
 }
-    #claimOverlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,.75);
-  display: none;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
-}
 
-#rewardPopup {
-  position: relative;
-  width: 280px;
-  background: radial-gradient(#111, #000);
-  border-radius: 20px;
-  padding: 24px;
-  text-align: center;
-  color: #fff;
-  animation: popupIn .4s ease-out;
-  overflow: hidden;
-}
-
-@keyframes popupIn {
-  from { transform: scale(.8); opacity: 0 }
-  to { transform: scale(1); opacity: 1 }
-}
-
-/* golden rays */
-.rays {
-  position: absolute;
-  inset: -40%;
-  background: repeating-conic-gradient(
-    from 0deg,
-    rgba(255,215,0,.35) 0deg 10deg,
-    transparent 10deg 20deg
-  );
-  animation: spin 12s linear infinite;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-.rewardCoin {
-  width: 110px;
-  margin: 12px auto;
-  position: relative;
 /* --- New Popup Styles (Exactly like image) --- */
 #claimOverlay {
     position: fixed;
