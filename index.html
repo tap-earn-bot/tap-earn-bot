@@ -220,18 +220,35 @@
             setTimeout(() => plus.remove(), 800);
         }
 
-        async function claimDaily() {
-            const now = Date.now();
-            if (now - lastClaim < 24 * 60 * 60 * 1000) {
-                return tg.showAlert("Wait for 24 hours!");
-            }
-            balance += 5;
-            lastClaim = now;
-            updateUI();
-            await saveData();
-            checkDailyStatus();
-            tg.showAlert("₹5.00 Bonus Added!");
-        }
+async function claimDaily() {
+    const btn = document.getElementById('dailyBtn');
+    const now = Date.now();
+
+    if (now - lastClaim < 24 * 60 * 60 * 1000) {
+        return tg.showAlert("Wait for 24 hours!");
+    }
+
+    // 🔄 loading start
+    btn.disabled = true;
+    btn.innerText = "Processing... ⏳";
+
+    // ⏱️ 2.5 second fake loading (animation feel)
+    setTimeout(async () => {
+        balance += 5;
+        lastClaim = now;
+        updateUI();
+        await saveData();
+        checkDailyStatus();
+
+        // 🎉 success popup
+        tg.showPopup({
+          title: "🎉 Bonus Added",
+          message: "₹5.00 successfully added to your balance",
+          buttons: [{ id: "ok", type: "ok", text: "Great!" }]
+        });
+
+    }, 2500); // 2.5 seconds
+}
 
 async function withdraw() {
     let upi = document.getElementById('upiId').value;
