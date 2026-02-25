@@ -303,35 +303,33 @@
     justify-content: center;
     align-items: center;
 }
-/* Piche ka area blur karne ke liye */
 #overlay {
     display: none;
     position: fixed;
     top: 0; left: 0;
     width: 100%; height: 100%;
-    background: rgba(0, 0, 0, 0.4); /* Transparent Black */
-    backdrop-filter: blur(10px);    /* Yeh line blur karegi */
+    background: rgba(0, 0, 0, 0.4); 
+    backdrop-filter: blur(10px);    
     -webkit-backdrop-filter: blur(10px);
-    z-index: 1000;
+    z-index: 1000; /* Confetti isse zyada hona chahiye (2000) */
 }
 
 #successPopup {
     display: none;
-    flex-direction: column; /* Sab kuch ek ke niche ek lane ke liye - IMPORTANT */
+    flex-direction: column; 
     align-items: center;
     justify-content: center;
     text-align: center;
     padding: 25px;
     background: #1a1a1a;
-    border: 1.5px solid #f3ba2f; /* Gold border */
+    border: 1.5px solid #f3ba2f;
     border-radius: 20px;
     width: 85%;
-    max-width: 320px;
+    max-width: 300px;
     position: fixed;
     top: 50%; left: 50%;
     transform: translate(-50%, -50%);
-    z-index: 1001;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    z-index: 1001; /* Popup overlay ke upar */
 }
 
 /* Text aur Button ki width fix karne ke liye */
@@ -577,29 +575,29 @@ async function withdraw() {
 // ... baaki function upar wala same rahega ...
             updateHistoryUI(); 
 
-            // --- Success UI & Confetti ---
-            document.getElementById('popAmt').innerText = amount.toFixed(2);
-            
-            // Overlay aur Popup dono ko dikhana hai
-            document.getElementById('overlay').style.display = "block"; 
-            document.getElementById('successPopup').style.display = "flex"; 
+// --- Success UI & Confetti ---
+document.getElementById('popAmt').innerText = amount.toFixed(2);
 
-            // 🎉 Confetti Celebration
-            confetti({
-                particleCount: 150,
-                spread: 70,
-                origin: { y: 0.6 },
-                colors: ['#f3ba2f', '#ffffff', '#22c55e']
-            });
+// Overlay aur Popup show karein
+document.getElementById('overlay').style.display = "block"; 
+document.getElementById('successPopup').style.display = "flex"; 
 
-            // Lottie Animation load karna
-            document.getElementById('lottieAnim').innerHTML = ''; 
-            lottie.loadAnimation({
-                container: document.getElementById('lottieAnim'),
-                renderer: 'svg', loop: false, autoplay: true,
-                path: 'https://lottie.host/80e9a7e3-05b1-4770-9759-c29270e51381/A7W7vE3Yt4.json' 
-            });
+// 🎉 Confetti Celebration (Updated with zIndex)
+confetti({
+    particleCount: 150,
+    spread: 70,
+    origin: { y: 0.6 },
+    colors: ['#f3ba2f', '#ffffff', '#22c55e'],
+    zIndex: 2000 // Yeh line confetti ko blur ke upar le aayegi
+});
 
+// Lottie logic waisa hi rahega...
+document.getElementById('lottieAnim').innerHTML = ''; 
+lottie.loadAnimation({
+    container: document.getElementById('lottieAnim'),
+    renderer: 'svg', loop: false, autoplay: true,
+    path: 'https://lottie.host/80e9a7e3-05b1-4770-9759-c29270e51381/A7W7vE3Yt4.json' 
+});
             balance = 0; 
             updateUI(); 
             saveData();
