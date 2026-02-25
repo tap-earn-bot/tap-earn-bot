@@ -92,6 +92,7 @@
 <style>
 <div id="claimOverlay" style="
 display:none;
+pointer-events:none;
 position:fixed;
 inset:0;
 background:rgba(0,0,0,0.7);
@@ -119,7 +120,10 @@ border-radius:50%;
 margin:0 auto 12px;
 animation:spin 1s linear infinite;
 "></div>
-
+    
+#dailyBtn {
+  cursor: pointer;
+}
     <div id="claimText">Processing reward...</div>
   </div>
 </div>
@@ -403,10 +407,12 @@ setTimeout(updateHistoryUI, 1000);
 
         window.onload = loadData;
 
-        function showClaimLoading(text) {
+function showClaimLoading(text) {
+  const o = document.getElementById("claimOverlay");
+  o.style.pointerEvents = "auto";
+  o.style.display = "flex";
   document.getElementById("claimText").innerText = text;
   document.getElementById("loader").style.display = "block";
-  document.getElementById("claimOverlay").style.display = "flex";
 }
 
 function showClaimSuccess() {
