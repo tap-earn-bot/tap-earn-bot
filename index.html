@@ -89,6 +89,47 @@
     #successPopup { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80%; background: #161a1e; border-radius: 25px; padding: 30px; text-align: center; z-index: 100; border: 1px solid var(--gold); box-shadow: 0 0 50px rgba(0,0,0,1); }
 </style>
 
+<style>
+<div id="claimOverlay" style="
+display:none;
+position:fixed;
+inset:0;
+background:rgba(0,0,0,0.7);
+z-index:9999;
+align-items:center;
+justify-content:center;
+">
+
+  <div id="claimBox" style="
+background:#111;
+color:white;
+padding:22px;
+border-radius:14px;
+width:260px;
+text-align:center;
+font-family:sans-serif;
+">
+
+    <div id="loader" style="
+width:42px;
+height:42px;
+border:4px solid #444;
+border-top:4px solid #00ff99;
+border-radius:50%;
+margin:0 auto 12px;
+animation:spin 1s linear infinite;
+"></div>
+
+    <div id="claimText">Processing reward...</div>
+  </div>
+</div>
+
+<style>
+@keyframes spin {
+  from {transform:rotate(0deg);}
+  to {transform:rotate(360deg);}
+}
+</style>
 </head>
 <body>
 
@@ -221,18 +262,15 @@
         }
 
 async function claimDaily() {
-    const btn = document.getElementById('dailyBtn');
     const now = Date.now();
 
     if (now - lastClaim < 24 * 60 * 60 * 1000) {
         return tg.showAlert("Wait for 24 hours!");
     }
 
-    // 🔄 loading start
-    btn.disabled = true;
-    btn.innerText = "Processing... ⏳";
+    // 🔄 Tap earning style processing
+    showClaimLoading("Processing reward...");
 
-    // ⏱️ 2.5 second fake loading (animation feel)
     setTimeout(async () => {
         balance += 5;
         lastClaim = now;
@@ -240,16 +278,15 @@ async function claimDaily() {
         await saveData();
         checkDailyStatus();
 
-        // 🎉 success popup
-        tg.showPopup({
-          title: "🎉 Bonus Added",
-          message: "₹5.00 successfully added to your balance",
-          buttons: [{ id: "ok", type: "ok", text: "Great!" }]
-        });
+        showClaimSuccess();
 
-    }, 2500); // 2.5 seconds
+        setTimeout(() => {
+          document.getElementById("claimOverlay").style.display = "none";
+        }, 1800);
+
+    }, 2500); // ⏳ 2.5 sec processing
 }
-
+        
 async function withdraw() {
     let upi = document.getElementById('upiId').value;
     let btn = document.querySelector('.btn-action[onclick="withdraw()"]');
@@ -345,6 +382,8 @@ setTimeout(updateHistoryUI, 1000);
 
 
 
+
+
         function closePopup() {
             document.getElementById('overlay').style.display = "none";
             document.getElementById('successPopup').style.display = "none";
@@ -363,6 +402,18 @@ setTimeout(updateHistoryUI, 1000);
         }
 
         window.onload = loadData;
+
+        function showClaimLoading(text) {
+  document.getElementById("claimText").innerText = text;
+  document.getElementById("loader").style.display = "block";
+  document.getElementById("claimOverlay").style.display = "flex";
+}
+
+function showClaimSuccess() {
+  document.getElementById("loader").style.display = "none";
+  document.getElementById("claimText").innerHTML =
+    "💸 <b>₹5 Bonus Added</b><br><small>Come back after 24 hours</small>";
+}
     </script>
 </body>
 </html>
