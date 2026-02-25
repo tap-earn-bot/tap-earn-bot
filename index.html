@@ -150,13 +150,14 @@
     to { transform: scale(1); opacity: 1; }
 }
 
-/* Background Rays Effect */
+/* Background Rays Effect - Fixed for Full Screen */
 .sunburst {
     position: absolute;
     top: 50%;
     left: 50%;
-    width: 600px;
-    height: 600px;
+    /* 600px ki jagah 200% ya 150vw use karein taaki har screen cover ho */
+    width: 150vmax; 
+    height: 150vmax; 
     transform: translate(-50%, -50%);
     background: repeating-conic-gradient(
         from 0deg,
@@ -165,6 +166,8 @@
     );
     animation: rotateRays 15s linear infinite;
     z-index: -1;
+    /* Isse animation screen ke bahar scroll bar nahi banayega */
+    pointer-events: none; 
 }
 
 @keyframes rotateRays {
