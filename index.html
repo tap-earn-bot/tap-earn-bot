@@ -373,13 +373,15 @@
 </div>
 
     
-    <div id="overlay"></div>
-    <div id="successPopup">
-        <div id="lottieAnim" style="width: 150px; height: 150px; margin: 0 auto;"></div>
-        <h2 style="color:var(--gold);">Withdrawal Requested!</h2>
-        <p>Your ₹<span id="popAmt">0</span> request is being processed</p>
-        <button class="btn-action" onclick="closePopup()">GOT IT</button>
-    </div>
+<div id="overlay"></div>
+<div id="successPopup">
+    <div id="lottieAnim" style="width: 120px; height: 120px; margin-bottom: 10px;"></div>
+    
+    <h2 style="color:var(--gold); margin: 5px 0;">Withdrawal Requested!</h2>
+    <p style="margin: 10px 0;">Your ₹<span id="popAmt">0</span> request is being processed</p>
+    
+    <button class="btn-action" onclick="closePopup()" style="margin-top: 15px;">GOT IT</button>
+</div>
 
     <div class="header">
         <div class="badge">⚡ <span id="energy">...</span> / 1000</div>
