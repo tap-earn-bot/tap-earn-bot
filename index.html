@@ -172,68 +172,111 @@
   width: 110px;
   margin: 12px auto;
   position: relative;
-  z-index: 2;
-  animation: float 2s ease-in-out infinite;
+/* --- New Popup Styles (Exactly like image) --- */
+#claimOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.9);
+    display: none; /* JS se control hoga */
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
 }
 
-@keyframes float {
-  0%,100% { transform: translateY(0) }
-  50% { transform: translateY(-8px) }
+.reward-card {
+    position: relative;
+    width: 100%;
+    max-width: 350px;
+    text-align: center;
+    animation: popupPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-.rewardText {
-  position: relative;
-  z-index: 2;
+@keyframes popupPop {
+    from { transform: scale(0.7); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
 }
 
-.title {
-  font-size: 14px;
-  opacity: .9;
+/* Background Rays Effect */
+.sunburst {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 600px;
+    height: 600px;
+    transform: translate(-50%, -50%);
+    background: repeating-conic-gradient(
+        from 0deg,
+        rgba(255, 255, 255, 0.08) 0deg 10deg,
+        transparent 10deg 20deg
+    );
+    animation: rotateRays 15s linear infinite;
+    z-index: -1;
 }
 
-.amount {
-  font-size: 42px;
-  color: gold;
-  font-weight: bold;
+@keyframes rotateRays {
+    from { transform: translate(-50%, -50%) rotate(0deg); }
+    to { transform: translate(-50%, -50%) rotate(360deg); }
 }
 
-.subtitle {
-  font-size: 13px;
-  opacity: .7;
+.congrats-text {
+    font-size: 18px;
+    font-weight: 600;
+    color: #ffffff;
+    margin-bottom: 5px;
 }
 
-#acceptBtn {
-  margin-top: 16px;
-  width: 100%;
-  padding: 12px;
-  border: none;
-  border-radius: 10px;
-  background: #4e7cff;
-  color: white;
-  font-weight: bold;
-  cursor: pointer;
+.reward-amount {
+    font-size: 55px;
+    font-weight: 900;
+    color: #ffcc00;
+    line-height: 1;
 }
+
+.reward-unit {
+    font-size: 22px;
+    color: #ffcc00;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+.coin-stack {
+    width: 180px;
+    margin: 15px auto;
+    filter: drop-shadow(0 0 20px rgba(255, 204, 0, 0.3));
+    display: block;
+}
+
+.accept-btn {
+    background: #4e7cff;
+    color: white;
+    border: none;
+    width: 85%;
+    padding: 16px;
+    border-radius: 12px;
+    font-size: 18px;
+    font-weight: 800;
+    cursor: pointer;
+    margin-top: 20px;
+    text-transform: uppercase;
+}
+
 </style>
     
 </head>
 <body>
 <div id="claimOverlay">
-  <div id="rewardPopup">
-
-    <div class="rays"></div>
-
-    <img src="https://raw.githubusercontent.com/tap-earn-bot/tap-earn-bot/main/1000410752-removebg-preview.png" class="rewardCoin">
-
-    <div class="rewardText">
-      <div class="title">Congratulations on getting</div>
-      <div class="amount">₹5</div>
-      <div class="subtitle">Daily Bonus</div>
+    <div class="reward-card">
+        <div class="sunburst"></div>
+        <div class="congrats-text">Congratulations on getting</div>
+        <div class="reward-amount" id="pop-amount">10,000</div>
+        <div class="reward-unit">TapCoins</div>
+        
+        <img src="https://raw.githubusercontent.com/tap-earn-bot/tap-earn-bot/main/1000410752-removebg-preview.png" class="coin-stack">
+        
+        <button class="accept-btn" onclick="closeReward()">ACCEPT</button>
     </div>
-
-    <button id="acceptBtn" onclick="closeReward()">ACCEPT</button>
-
-  </div>
 </div>
+
     
     <div id="overlay"></div>
     <div id="successPopup">
@@ -364,29 +407,28 @@
         }
 
 async function claimDaily() {
+async function claimDaily() {
     const now = Date.now();
-
     if (now - lastClaim < 24 * 60 * 60 * 1000) {
         return tg.showAlert("Wait for 24 hours!");
     }
 
-    // 🔄 Tap earning style processing
-    showClaimLoading("Processing reward...");
+    // Amount set karein (Maan lo ₹5 mil rahe hain)
+    document.getElementById('pop-amount').innerText = "5.00";
+    
+    // Popup show karein
+    document.getElementById("claimOverlay").style.display = "flex";
 
-    setTimeout(async () => {
-        balance += 5;
-        lastClaim = now;
-        updateUI();
-        await saveData();
-        checkDailyStatus();
+    // Data save karein
+    balance += 5;
+    lastClaim = now;
+    updateUI();
+    await saveData();
+    checkDailyStatus();
+}
 
-        showClaimSuccess();
-
-        setTimeout(() => {
-          document.getElementById("claimOverlay").style.display = "none";
-        }, 1800);
-
-    }, 2500); // ⏳ 2.5 sec processing
+function closeReward() {
+    document.getElementById("claimOverlay").style.display = "none";
 }
         
 async function withdraw() {
@@ -505,26 +547,6 @@ setTimeout(updateHistoryUI, 1000);
 
         window.onload = loadData;
 
-function showClaimLoading(text) {
-  const o = document.getElementById("claimOverlay");
-  o.style.pointerEvents = "auto";
-  o.style.display = "flex";
-
-  const box = document.getElementById("claimBox");
-  box.style.animation = "popIn 0.35s ease-out";
-
-  document.getElementById("claimText").innerText = text;
-  document.getElementById("loader").style.display = "block";
-}
-
-function showReward(amount) {
-  document.querySelector(".amount").innerText = "₹" + amount;
-  document.getElementById("claimOverlay").style.display = "flex";
-}
-
-function closeReward() {
-  document.getElementById("claimOverlay").style.display = "none";
-}
         setTimeout(() => {
   const o = document.getElementById("claimOverlay");
   o.style.display = "none";
