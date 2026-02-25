@@ -125,10 +125,116 @@
 #loader {
   animation: spin 1s linear infinite, pulse 1.4s ease-in-out infinite;
 }
+    #claimOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.75);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+#rewardPopup {
+  position: relative;
+  width: 280px;
+  background: radial-gradient(#111, #000);
+  border-radius: 20px;
+  padding: 24px;
+  text-align: center;
+  color: #fff;
+  animation: popupIn .4s ease-out;
+  overflow: hidden;
+}
+
+@keyframes popupIn {
+  from { transform: scale(.8); opacity: 0 }
+  to { transform: scale(1); opacity: 1 }
+}
+
+/* golden rays */
+.rays {
+  position: absolute;
+  inset: -40%;
+  background: repeating-conic-gradient(
+    from 0deg,
+    rgba(255,215,0,.35) 0deg 10deg,
+    transparent 10deg 20deg
+  );
+  animation: spin 12s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.rewardCoin {
+  width: 110px;
+  margin: 12px auto;
+  position: relative;
+  z-index: 2;
+  animation: float 2s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%,100% { transform: translateY(0) }
+  50% { transform: translateY(-8px) }
+}
+
+.rewardText {
+  position: relative;
+  z-index: 2;
+}
+
+.title {
+  font-size: 14px;
+  opacity: .9;
+}
+
+.amount {
+  font-size: 42px;
+  color: gold;
+  font-weight: bold;
+}
+
+.subtitle {
+  font-size: 13px;
+  opacity: .7;
+}
+
+#acceptBtn {
+  margin-top: 16px;
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 10px;
+  background: #4e7cff;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+}
 </style>
     
 </head>
 <body>
+<div id="claimOverlay">
+  <div id="rewardPopup">
+
+    <div class="rays"></div>
+
+    <img src="assets/coin.png" class="rewardCoin">
+
+    <div class="rewardText">
+      <div class="title">Congratulations on getting</div>
+      <div class="amount">₹5</div>
+      <div class="subtitle">Daily Bonus</div>
+    </div>
+
+    <button id="acceptBtn" onclick="closeReward()">ACCEPT</button>
+
+  </div>
+</div>
+    
 <div id="claimOverlay" style="
 display:none;
 pointer-events:none;
@@ -446,19 +552,13 @@ function showClaimLoading(text) {
   document.getElementById("loader").style.display = "block";
 }
 
-function showClaimSuccess() {
-  const loader = document.getElementById("loader");
-  const text = document.getElementById("claimText");
-  const box = document.getElementById("claimBox");
+function showReward(amount) {
+  document.querySelector(".amount").innerText = "₹" + amount;
+  document.getElementById("claimOverlay").style.display = "flex";
+}
 
-  loader.style.display = "none";
-
-  text.innerHTML = `
-    <div style="font-size:22px">💸 ₹5 Added</div>
-    <small style="opacity:.8">Come back after 24 hours</small>
-  `;
-
-  box.style.animation = "glow 1.2s ease-in-out";
+function closeReward() {
+  document.getElementById("claimOverlay").style.display = "none";
 }
         setTimeout(() => {
   const o = document.getElementById("claimOverlay");
