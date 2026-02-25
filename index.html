@@ -151,22 +151,25 @@
 }
 
 /* Background Rays Effect - Fixed for Full Screen */
+/* Background Rays Effect - Small Circle behind coins */
 .sunburst {
     position: absolute;
-    top: 50%;
+    top: 50%;         /* Coins ke center ke hisaab se adjust karein */
     left: 50%;
-    /* 600px ki jagah 200% ya 150vw use karein taaki har screen cover ho */
-    width: 150vmax; 
-    height: 150vmax; 
+    width: 350px;     /* Size chhota kar diya (Photo ke liye perfect) */
+    height: 350px;    /* Width aur Height barabar rakhein */
     transform: translate(-50%, -50%);
     background: repeating-conic-gradient(
         from 0deg,
-        rgba(255, 255, 255, 0.08) 0deg 10deg,
-        transparent 10deg 20deg
+        rgba(255, 255, 255, 0.12) 0deg 15deg, /* Thoda zyada visible kiya */
+        transparent 15deg 30deg
     );
+    /* Soft edges ke liye mask ya radial gradient */
+    -webkit-mask-image: radial-gradient(circle, black 30%, transparent 70%);
+    mask-image: radial-gradient(circle, black 30%, transparent 70%);
+    
     animation: rotateRays 15s linear infinite;
-    z-index: -1;
-    /* Isse animation screen ke bahar scroll bar nahi banayega */
+    z-index: -1; 
     pointer-events: none; 
 }
 
