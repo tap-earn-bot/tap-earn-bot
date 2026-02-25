@@ -304,13 +304,14 @@
     align-items: center;
 }
 #successPopup {
-    display: flex;
+    display: none;
     flex-direction: column; /* Sab kuch ek ke niche ek lane ke liye */
     align-items: center;    /* Horizontal centering */
     justify-content: center;
     text-align: center;
     padding: 20px;
     background: #1a1a1a;    /* Aapka dark background */
+    backdrop-filter: blur(8px);
     border: 2px solid var(--gold);
     border-radius: 15px;
     width: 80%;             /* Mobile screen ke hisab se width */
