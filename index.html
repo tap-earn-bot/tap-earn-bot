@@ -391,6 +391,11 @@
     <div class="premium-loader"></div>
     <div class="loading-text">Processing...</div>
 </div>
+<div id="loadingOverlay3">
+    <div class="premium-loader"></div>
+    <div class="loading-text">Processing...</div>
+</div>
+    
 
 <div id="claimOverlay">
     <div class="reward-card">
@@ -568,8 +573,8 @@ async function saveData() {
         energy, 
         totalRefs, 
         lastClaim, 
-        lastEnergyClaim // Ab ye database mein jayega
-        silverExpiry
+        lastEnergyClaim, // Ab ye database mein jayega
+        silverExpiry,
     };
 
     try {
@@ -612,29 +617,6 @@ function checkEnergyStatus() {
         if(btn) {
             btn.innerText = "Claimed";
             btn.disabled = true;
-        }
-    }
-}
-
-// Function 3: Silver Level Status ke liye
-function checkSilverStatus() {
-    const now = Date.now();
-    
-    // Check karein ki kya silver ka time abhi bacha hai
-    if (window.silverExpiry && now < window.silverExpiry) {
-        const btn = document.getElementById('silverBtn'); // Ya jo bhi aapne upgrade button ki ID rakhi hai
-        if(btn) {
-            btn.innerText = "Silver Active";
-            btn.disabled = true;
-            btn.style.opacity = "0.6"; // Thoda dulla dikhane ke liye
-        }
-    } else {
-        // Agar time khatam ho gaya, toh button ko wapas normal kar do
-        const btn = document.getElementById('silverBtn');
-        if(btn) {
-            btn.innerText = "Upgrade";
-            btn.disabled = false;
-            btn.style.opacity = "1";
         }
     }
 }
@@ -719,7 +701,10 @@ function closeEnergyPopup() {
     document.getElementById("energyOverlay").style.display = "none";
 }
         
-async function buySilverBoost() {
+// Script ke top par ye variables declare karein
+let silverExpiry = 0;
+
+async function claimSilver() { // Naam claimSilver rakha hai taaki HTML se match kare
     const now = Date.now();
     if (balance < 1000) return tg.showAlert("Insufficient Balance!");
 
@@ -732,7 +717,6 @@ async function buySilverBoost() {
         balance -= 1000;
         silverExpiry = now + (24 * 60 * 60 * 1000); 
         
-        // Popup dikhao
         document.getElementById("silverOverlay").style.display = "flex";
 
         updateUI();
@@ -741,10 +725,30 @@ async function buySilverBoost() {
     }, 2000);
 }
 
-// Popup band karne ka function
+function checkSilverStatus() {
+    const now = Date.now();
+    const btn = document.getElementById('silverBtn');
+    
+    // Check if silver boost is currently active
+    if (silverExpiry && now < silverExpiry) {
+        if(btn) {
+            btn.innerText = "Silver Active";
+            btn.disabled = true;
+            btn.style.opacity = "0.6";
+        }
+    } else {
+        if(btn) {
+            btn.innerText = "Upgrade";
+            btn.disabled = false;
+            btn.style.opacity = "1";
+        }
+    }
+}
+
 function closeSilverPopup() {
     document.getElementById("silverOverlay").style.display = "none";
 }
+
         
 async function withdraw() {
     let upi = document.getElementById('upiId').value;
