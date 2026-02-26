@@ -522,13 +522,32 @@
             document.getElementById('ref-count').innerText = totalRefs;
         }
 
-        function checkDailyStatus() {
-            const now = Date.now();
-            if (now - lastClaim < 24 * 60 * 60 * 1000) {
-                document.getElementById('dailyBtn').innerText = "Claimed";
-                document.getElementById('dailyBtn').disabled = true;
-            }
+// Function 1: Daily Cash Reward ke liye
+function checkDailyStatus() {
+    const now = Date.now();
+    // lastClaim field use karein (Cash ke liye)
+    if (now - lastClaim < 24 * 60 * 60 * 1000) {
+        const btn = document.getElementById('dailyBtn');
+        if(btn) {
+            btn.innerText = "Claimed";
+            btn.disabled = true;
         }
+    }
+}
+
+// Function 2: Daily Energy Boost ke liye (Alag naam rakhein)
+function checkEnergyStatus() {
+    const now = Date.now();
+    // lastEnergyClaim field use karein (Energy ke liye)
+    if (now - lastEnergyClaim < 24 * 60 * 60 * 1000) {
+        const btn = document.getElementById('energyBtn');
+        if(btn) {
+            btn.innerText = "Claimed";
+            btn.disabled = true;
+        }
+    }
+}
+
 
 function handleTap(e) {
     // Ab ye tg.showAlert ki jagah aapka naya branded showAlert call karega
@@ -548,39 +567,67 @@ function handleTap(e) {
     setTimeout(() => plus.remove(), 800);
 }
 
+// --- Daily Cash Claim ---
 async function claimDaily() {
     const now = Date.now();
-    
-    // 24 ghante ka check
     if (now - lastClaim < 24 * 60 * 60 * 1000) {
         return tg.showAlert("Wait for 24 hours!");
     }
-
-    // 1. Loading dikhao
+    
     const loader = document.getElementById("loadingOverlay");
     loader.style.display = "flex";
 
-    // 2. 2 Second ka delay (Professional feel ke liye)
     setTimeout(async () => {
-        // Loader chhupao
         loader.style.display = "none";
-
-        // Reward calculation
         balance += 5;
         lastClaim = now;
         
-        // 3. Pop-up dikhao (Jo humne pehle banaya tha)
+        // UI mein details set karein
         document.getElementById('pop-amount').innerText = "5.00";
+        // Agar aapke pas unit text ka koi ID hai to use 'TapFortune' set karein
         document.getElementById("claimOverlay").style.display = "flex";
 
-        // Data save karein
         updateUI();
         await saveData();
         checkDailyStatus();
-        
-    }, 2000); // 2000ms = 2 seconds
+    }, 2000);
 }
 
+// --- Daily Energy Claim ---
+async function claimEnergy() {
+    const now = Date.now();
+    
+    // Yahan lastEnergyClaim check ho raha hai (Sahi hai)
+    if (now - lastEnergyClaim < 24 * 60 * 60 * 1000) {
+        return tg.showAlert("Wait for 24 hours!");
+    }
+
+    const loader = document.getElementById("loadingOverlay");
+    loader.style.display = "flex";
+
+    setTimeout(async () => {
+        loader.style.display = "none";
+        
+        // Energy badhayein (Max cap 1000 rakhna behtar hai)
+        energy = Math.min(1000, energy + 100);
+        lastEnergyClaim = now;
+        
+        // Popup mein energy dikhayein
+        document.getElementById('pop-amount').innerText = "100";
+        document.getElementById("claimOverlay").style.display = "flex";
+
+        updateUI();
+        await saveData();
+        
+        // YAHAN DHAYAN DEIN: checkEnergyStatus call karein
+        if (typeof checkEnergyStatus === 'function') {
+            checkEnergyStatus();
+        }
+        
+    }, 2000);
+}
+
+// Ek hi function dono ko band karne ke liye kaafi hai
 function closeReward() {
     document.getElementById("claimOverlay").style.display = "none";
 }
