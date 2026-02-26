@@ -632,7 +632,29 @@ function checkEnergyStatus() {
     }
 }
 
+function checkSilverStatus() {
+    const now = Date.now();
+    const btn = document.getElementById('silverBtn');
+    
+    // Check if silver boost is currently active
+    if (silverExpiry && now < silverExpiry) {
+        if(btn) {
+            btn.innerText = "Silver Active";
+            btn.disabled = true;
+            btn.style.opacity = "0.6";
+        }
+    } else {
+        if(btn) {
+            btn.innerText = "Upgrade";
+            btn.disabled = false;
+            btn.style.opacity = "1";
+        }
+    }
+}
 
+function closeSilverPopup() {
+    document.getElementById("silverOverlay").style.display = "none";
+}
 function handleTap(e) {
     // Ab ye tg.showAlert ki jagah aapka naya branded showAlert call karega
     if (energy <= 0) return showAlert("Energy 0! Please invite friend."); 
@@ -734,30 +756,6 @@ async function claimSilver() { // Naam claimSilver rakha hai taaki HTML se match
         await saveData();
         checkSilverStatus();
     }, 2000);
-}
-
-function checkSilverStatus() {
-    const now = Date.now();
-    const btn = document.getElementById('silverBtn');
-    
-    // Check if silver boost is currently active
-    if (silverExpiry && now < silverExpiry) {
-        if(btn) {
-            btn.innerText = "Silver Active";
-            btn.disabled = true;
-            btn.style.opacity = "0.6";
-        }
-    } else {
-        if(btn) {
-            btn.innerText = "Upgrade";
-            btn.disabled = false;
-            btn.style.opacity = "1";
-        }
-    }
-}
-
-function closeSilverPopup() {
-    document.getElementById("silverOverlay").style.display = "none";
 }
 
         
