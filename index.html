@@ -232,6 +232,17 @@
     justify-content: center;
     z-index: 10001;
 }
+    #loadingOverlay2 {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(8px);
+    display: none; /* JS se show hoga */
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 10001;
+}
 
 .premium-loader {
     width: 60px;
@@ -375,6 +386,10 @@
 <div id="loadingOverlay">
     <div class="premium-loader"></div>
     <div class="loading-text">Processing Reward...</div>
+</div>
+<div id="loadingOverlay2">
+    <div class="premium-loader"></div>
+    <div class="loading-text">Processing Energy...</div>
 </div>
 
 <div id="claimOverlay">
@@ -614,7 +629,7 @@ async function claimEnergy() {
         return tg.showAlert("Wait for 24 hours!");
     }
 
-    const loader = document.getElementById("loadingOverlay");
+    const loader = document.getElementById("loadingOverlay2");
     loader.style.display = "flex";
 
     setTimeout(async () => {
@@ -626,7 +641,7 @@ async function claimEnergy() {
         
         // Popup mein energy dikhayein
         document.getElementById('pop-amount').innerText = "100";
-        document.getElementById("claimOverlay").style.display = "flex";
+        document.getElementById("energyOverlay").style.display = "flex";
 
         updateUI();
         await saveData();
@@ -640,8 +655,8 @@ async function claimEnergy() {
 }
 
 // Ek hi function dono ko band karne ke liye kaafi hai
-function closeReward() {
-    document.getElementById("claimOverlay").style.display = "none";
+function closeEnergyPopup() {
+    document.getElementById("energyOverlay").style.display = "none";
 }
         
 async function withdraw() {
