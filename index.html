@@ -376,17 +376,28 @@
     <div class="premium-loader"></div>
     <div class="loading-text">Processing Reward...</div>
 </div>
-    
+
 <div id="claimOverlay">
     <div class="reward-card">
         <div class="sunburst"></div>
         <div class="congrats-text">Congratulations on getting</div>
-        <div class="reward-amount" id="pop-amount">10,000</div>
+        <div class="reward-amount" id="pop-amount">5</div>
         <div class="reward-unit">TapFortune</div>
         
         <img src="https://raw.githubusercontent.com/tap-earn-bot/tap-earn-bot/main/1000410752-removebg-preview.png" class="coin-stack">
         
         <button class="accept-btn" onclick="closeReward()">ACCEPT</button>
+    </div>
+</div>
+
+<div id="energyOverlay" style="display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.9); align-items: center; justify-content: center; z-index: 10000;">
+    <div class="reward-card">
+        <div class="sunburst"></div>
+        <div class="congrats-text">Congratulations on getting</div>
+        <div class="reward-amount" id="energy-pop-amount">100</div>
+        <div class="reward-unit">Energy ⚡</div> <img src="https://raw.githubusercontent.com/tap-earn-bot/tap-earn-bot/main/1000410752-removebg-preview.png" class="coin-stack" style="filter: hue-rotate(180deg);">
+        
+        <button class="accept-btn" onclick="closeEnergyPopup()">ACCEPT</button>
     </div>
 </div>
 
