@@ -491,8 +491,6 @@
                 if (data) {
                     balance = data.balance || 0;
                     energy = data.energy || 0;
-                    // loadData ke andar
-                    window.lastEnergyClaim = data.lastEnergyClaim || 0; 
                     totalRefs = data.totalRefs || 0;
                     lastClaim = data.lastClaim || 0;
                     updateUI();
@@ -775,7 +773,6 @@ function showAlert(text) {
         document.body.appendChild(wrapper);
     }, 200); 
 }
-    <script src="daily-energy.js"></script>
     
 </script>
     </body>
