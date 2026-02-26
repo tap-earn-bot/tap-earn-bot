@@ -712,36 +712,62 @@ setTimeout(updateHistoryUI, 1000);
 
         window.onload = loadData;
 
-        function showAlert(text) {
-    // Purana koi alert screen par hai toh hatao
-    const existing = document.getElementById('brandedAlertBox');
-    if(existing) existing.remove();
+function showAlert(text) {
+    // 1. Button click ka ehsas dilane ke liye 200ms ka delay
+    setTimeout(() => {
+        const existing = document.getElementById('brandedAlertWrapper');
+        if(existing) existing.remove();
 
-    // Naya Branded Dabba banao (Unique ID hum yahan de rahe hain)
-    const box = document.createElement('div');
-    box.id = 'brandedAlertBox'; 
-    
-    // Screenshot branding (Black & Gold)
-    box.style = `
-        position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-        width: 85%; max-width: 320px; 
-        background: linear-gradient(145deg, #161b22, #0d1117); 
-        border: 1.5px solid #f3ba2f; border-radius: 25px;
-        padding: 30px; z-index: 10000; text-align: center;
-        box-shadow: 0 10px 40px rgba(0,0,0,0.9);
-    `;
+        // CSS Animations Inject karein (Shake aur Fade-in ke liye)
+        if (!document.getElementById('brandedAlertStyles')) {
+            const style = document.createElement('style');
+            style.id = 'brandedAlertStyles';
+            style.innerHTML = `
+                @keyframes brandedShake {
+                    0% { transform: translate(-50%, -50%) scale(0.9); }
+                    50% { transform: translate(-50%, -50%) scale(1.05); }
+                    100% { transform: translate(-50%, -50%) scale(1); }
+                }
+                .shake-anim { animation: brandedShake 0.3s ease-out; }
+            `;
+            document.head.appendChild(style);
+        }
 
-    box.innerHTML = `
-        <div style="color: #f3ba2f; font-size: 40px; margin-bottom: 15px;">⚠️</div>
-        <h3 style="color: #f3ba2f; margin: 0 0 10px 0; font-weight: 800;">TAP FORTUNE</h3>
-        <p style="color: #fff; margin-bottom: 25px; opacity: 0.9;">${text}</p>
-        <button onclick="document.getElementById('brandedAlertBox').remove()" 
-                style="background: #f3ba2f; color: #000; border: none; padding: 14px; border-radius: 15px; font-weight: 800; width: 100%; cursor: pointer;">
-            UNDERSTOOD
-        </button>
-    `;
+        // 2. Background Blur Overlay
+        const wrapper = document.createElement('div');
+        wrapper.id = 'brandedAlertWrapper';
+        wrapper.style = `
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px); z-index: 9999;
+        `;
 
-    document.body.appendChild(box);
+        // 3. Branded Alert Box
+        const box = document.createElement('div');
+        box.id = 'brandedAlertBox'; 
+        box.className = 'shake-anim'; // Shake effect yahan se aayega
+        box.style = `
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 85%; max-width: 320px; 
+            background: linear-gradient(145deg, #161b22, #0d1117); 
+            border: 1.5px solid #f3ba2f; border-radius: 25px;
+            padding: 30px; text-align: center;
+            box-shadow: 0 20px 50px rgba(0,0,0,1);
+        `;
+
+        box.innerHTML = `
+            <div style="color: #f3ba2f; font-size: 40px; margin-bottom: 15px;">⚠️</div>
+            <h3 style="color: #f3ba2f; margin: 0 0 10px 0; font-weight: 800; letter-spacing: 1px;">TAP FORTUNE</h3>
+            <p style="color: #fff; margin-bottom: 25px; opacity: 0.9; line-height: 1.5;">${text}</p>
+            <button onclick="document.getElementById('brandedAlertWrapper').remove()" 
+                    style="background: #f3ba2f; color: #000; border: none; padding: 14px; border-radius: 15px; font-weight: 800; width: 100%; cursor: pointer; transition: transform 0.1s active { transform: scale(0.95); }">
+                UNDERSTOOD
+            </button>
+        `;
+
+        wrapper.appendChild(box);
+        document.body.appendChild(wrapper);
+    }, 200); // 200ms ka delay button click feel ke liye
 }
 
     </script>
