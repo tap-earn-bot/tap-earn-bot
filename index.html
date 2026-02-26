@@ -708,7 +708,7 @@ async function claimSilver() { // Naam claimSilver rakha hai taaki HTML se match
     const now = Date.now();
     if (balance < 1000) return tg.showAlert("Insufficient Balance!");
 
-    const loader = document.getElementById("loadingOverlay");
+    const loader = document.getElementById("loadingOverlay3");
     if(loader) loader.style.display = "flex";
 
     setTimeout(async () => {
