@@ -410,7 +410,7 @@
         <div class="sunburst"></div>
         <div class="congrats-text">Congratulations on getting</div>
         <div class="reward-amount" id="energy-pop-amount">100</div>
-        <div class="reward-unit">Energy⚡</div> <img src="https://raw.githubusercontent.com/tap-earn-bot/tap-earn-bot/main/1000412177-removebg-preview.png" class="coin-stack" style="filter: hue-rotate(180deg);">
+        <div class="reward-unit">⚡</div> <img src="https://raw.githubusercontent.com/tap-earn-bot/tap-earn-bot/main/1000412177-removebg-preview.png" class="coin-stack" style="filter: hue-rotate(180deg);">
         
         <button class="accept-btn" onclick="closeEnergyPopup()">ACCEPT</button>
     </div>
@@ -638,8 +638,7 @@ async function claimEnergy() {
 
     setTimeout(async () => {
         loader.style.display = "none";
-        // Energy badhayein (Max cap 1000 rakhna behtar hai)
-        energy = Math.min(1000, energy + 100);
+        energy += 100;
         lastEnergyClaim = now;
         // Popup mein energy dikhayein
         document.getElementById('pop-amount').innerText = "100";
@@ -647,13 +646,9 @@ async function claimEnergy() {
 
         updateUI();
         await saveData();
-        
-        // YAHAN DHAYAN DEIN: checkEnergyStatus call karein
-        if (typeof checkEnergyStatus === 'function') {
-            checkEnergyStatus();
-        }
-        
+        checkEnergyStatus();
     }, 2000);
+
 }
 
 // Ek hi function dono ko band karne ke liye kaafi hai
