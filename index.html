@@ -412,7 +412,7 @@
         <div class="reward-amount" id="energy-pop-amount">100</div>
         <div class="reward-unit">Energy ⚡</div> <img src="https://raw.githubusercontent.com/tap-earn-bot/tap-earn-bot/main/1000410752-removebg-preview.png" class="coin-stack" style="filter: hue-rotate(180deg);">
         
-        <button class="accept-btn" onclick="closeEnergyPopup()">ACCEPT</button>
+        <button class="accept-btn2" onclick="closeEnergyPopup()">ACCEPT</button>
     </div>
 </div>
 
@@ -526,6 +526,7 @@
                     energy = data.energy || 0;
                     totalRefs = data.totalRefs || 0;
                     lastClaim = data.lastClaim || 0;
+                    lastEnergyClaim = data.lastEnergyClaim || 0;
                     updateUI();
                     checkDailyStatus();
                     checkEnergyStatus();
@@ -621,7 +622,7 @@ async function claimDaily() {
 }
 // Ek hi function dono ko band karne ke liye kaafi hai
 function closeReward(){
-    document.getElementById("closeReward").style.display = "none";
+    document.getElementById("claimOverlay").style.display = "none";
 }
 // --- Daily Energy Claim ---
 async function claimEnergy() {
@@ -637,11 +638,9 @@ async function claimEnergy() {
 
     setTimeout(async () => {
         loader.style.display = "none";
-        
         // Energy badhayein (Max cap 1000 rakhna behtar hai)
         energy = Math.min(1000, energy + 100);
         lastEnergyClaim = now;
-        
         // Popup mein energy dikhayein
         document.getElementById('pop-amount').innerText = "100";
         document.getElementById("energyOverlay").style.display = "flex";
@@ -659,7 +658,7 @@ async function claimEnergy() {
 
 // Ek hi function dono ko band karne ke liye kaafi hai
 function closeEnergyPopup() {
-    document.getElementById("closeEnergyPopup").style.display = "none";
+    document.getElementById("energyOverlay").style.display = "none";
 }
         
 async function withdraw() {
