@@ -419,11 +419,13 @@
 <div id="silverOverlay" style="display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.9); align-items: center; justify-content: center; z-index: 10000;">
     <div class="reward-card">
         <div class="sunburst"></div>
-        <div class="congrats-text">Congratulations on getting</div>
-        <div class="reward-amount" id="energy-pop-amount">100</div>
-        <div class="reward-unit">⚡</div> <img src="https://raw.githubusercontent.com/tap-earn-bot/tap-earn-bot/main/1000412177-removebg-preview.png" class="coin-stack" style="filter: hue-rotate(180deg);">
+        <div class="congrats-text">Silver Level is Now</div>
+        <div class="reward-amount" id="silver-pop-status" style="color: #c0c0c0; font-size: 28px;">ACTIVATED</div>
+        <div class="reward-unit">For 24 Hours ⏳</div> 
         
-        <button class="accept-btn" onclick="closeEnergyPopup()">ACCEPT</button>
+        <img src="https://raw.githubusercontent.com/tap-earn-bot/tap-earn-bot/main/1000412177-removebg-preview.png" class="coin-stack">
+        
+        <button class="accept-btn" onclick="closeSilverPopup()">LET'S GO!</button>
     </div>
 </div>
     
@@ -534,22 +536,30 @@
 
         let balance = 0, energy = 0, totalRefs = 0, lastClaim = 0;
 
-        async function loadData() {
-            try {
-                let res = await fetch(`${DB_BASE_URL}${userId}.json`);
-                let data = await res.json();
-                if (data) {
-                    balance = data.balance || 0;
-                    energy = data.energy || 0;
-                    totalRefs = data.totalRefs || 0;
-                    lastClaim = data.lastClaim || 0;
-                    lastEnergyClaim = data.lastEnergyClaim || 0;
-                    updateUI();
-                    checkDailyStatus();
-                    checkEnergyStatus();
-                }
-            } catch (e) { console.error(e); }
+async function loadData() {
+    try {
+        let res = await fetch(`${DB_BASE_URL}${userId}.json`);
+        let data = await res.json();
+        if (data) {
+            balance = data.balance || 0;
+            energy = data.energy || 1000;
+            totalRefs = data.totalRefs || 0;
+            lastClaim = data.lastClaim || 0;
+            lastEnergyClaim = data.lastEnergyClaim || 0;
+
+            // 1. Silver expiry ka data database se uthayein
+            silverExpiry = data.silverExpiry || 0;
+
+            updateUI();
+            checkDailyStatus();
+            checkEnergyStatus();
+            
+            // 2. Refresh ke baad check karein ki silver active hai ya nahi
+            checkSilverStatus(); 
         }
+    } catch (e) { console.error(e); }
+}
+
 
 async function saveData() {
     // Sabhi variables ko ek hi object mein rakhein
@@ -559,6 +569,7 @@ async function saveData() {
         totalRefs, 
         lastClaim, 
         lastEnergyClaim // Ab ye database mein jayega
+        silverExpiry
     };
 
     try {
@@ -601,6 +612,29 @@ function checkEnergyStatus() {
         if(btn) {
             btn.innerText = "Claimed";
             btn.disabled = true;
+        }
+    }
+}
+
+// Function 3: Silver Level Status ke liye
+function checkSilverStatus() {
+    const now = Date.now();
+    
+    // Check karein ki kya silver ka time abhi bacha hai
+    if (window.silverExpiry && now < window.silverExpiry) {
+        const btn = document.getElementById('silverBtn'); // Ya jo bhi aapne upgrade button ki ID rakhi hai
+        if(btn) {
+            btn.innerText = "Silver Active";
+            btn.disabled = true;
+            btn.style.opacity = "0.6"; // Thoda dulla dikhane ke liye
+        }
+    } else {
+        // Agar time khatam ho gaya, toh button ko wapas normal kar do
+        const btn = document.getElementById('silverBtn');
+        if(btn) {
+            btn.innerText = "Upgrade";
+            btn.disabled = false;
+            btn.style.opacity = "1";
         }
     }
 }
@@ -683,6 +717,33 @@ async function claimEnergy() {
 // Ek hi function dono ko band karne ke liye kaafi hai
 function closeEnergyPopup() {
     document.getElementById("energyOverlay").style.display = "none";
+}
+        
+async function buySilverBoost() {
+    const now = Date.now();
+    if (balance < 1000) return tg.showAlert("Insufficient Balance!");
+
+    const loader = document.getElementById("loadingOverlay");
+    if(loader) loader.style.display = "flex";
+
+    setTimeout(async () => {
+        if(loader) loader.style.display = "none";
+
+        balance -= 1000;
+        silverExpiry = now + (24 * 60 * 60 * 1000); 
+        
+        // Popup dikhao
+        document.getElementById("silverOverlay").style.display = "flex";
+
+        updateUI();
+        await saveData();
+        checkSilverStatus();
+    }, 2000);
+}
+
+// Popup band karne ka function
+function closeSilverPopup() {
+    document.getElementById("silverOverlay").style.display = "none";
 }
         
 async function withdraw() {
