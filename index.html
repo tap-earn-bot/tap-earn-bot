@@ -534,17 +534,26 @@
             } catch (e) { console.error(e); }
         }
 
-        async function saveData() {
-            const data = {
-                lastEnergyClaim: lastEnergyClaim // YE LINE HONI ZAROORI HAI
-        };
-            try {
-                await fetch(`${DB_BASE_URL}${userId}.json`, {
-                    method: 'PATCH',
-                    body: JSON.stringify({ balance, energy, totalRefs, lastClaim })
-                });
-            } catch (e) { console.error(e); }
-        }
+async function saveData() {
+    // Sabhi variables ko ek hi object mein rakhein
+    const dataToSave = { 
+        balance, 
+        energy, 
+        totalRefs, 
+        lastClaim, 
+        lastEnergyClaim // Ab ye database mein jayega
+    };
+
+    try {
+        await fetch(`${DB_BASE_URL}${userId}.json`, {
+            method: 'PATCH',
+            body: JSON.stringify(dataToSave) // Poora object ek saath bhejein
+        });
+    } catch (e) { 
+        console.error("Save Error:", e); 
+    }
+}
+
 
         function updateUI() {
             document.getElementById('balance').innerText = balance.toFixed(2);
