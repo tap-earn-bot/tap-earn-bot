@@ -5,6 +5,9 @@ const express = require('express');
 const app = express();
 const PORT = process.env.PORT || 3000;
 app.get('/', (req, res) => res.send('Bot is Live!'));
+app.get('/ping', (req, res) => {
+  res.status(200).send('OK');
+});
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
 const bot = new Telegraf('8652596915:AAGgK4nWqRM-YB3864rCII_T0uHxQbz_RKU');
