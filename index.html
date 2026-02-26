@@ -535,6 +535,9 @@
         }
 
         async function saveData() {
+            const data = {
+                lastEnergyClaim: lastEnergyClaim // YE LINE HONI ZAROORI HAI
+        };
             try {
                 await fetch(`${DB_BASE_URL}${userId}.json`, {
                     method: 'PATCH',
