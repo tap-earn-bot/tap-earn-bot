@@ -382,7 +382,7 @@
         <div class="sunburst"></div>
         <div class="congrats-text">Congratulations on getting</div>
         <div class="reward-amount" id="pop-amount">10,000</div>
-        <div class="reward-unit">TapCoins</div>
+        <div class="reward-unit">TapFortune</div>
         
         <img src="https://raw.githubusercontent.com/tap-earn-bot/tap-earn-bot/main/1000410752-removebg-preview.png" class="coin-stack">
         
@@ -398,7 +398,7 @@
     </div>
     
     <h2>Withdrawal Requested!</h2>
-    <p>Your ₹<span id="popAmt">0</span> request is being processed</p>
+    <p>Your <span id="popAmt">0</span> request is being processed</p>
     
     <button class="btn-action" onclick="closePopup()">GOT IT</button>
 </div>
@@ -422,7 +422,7 @@
     <div id="tasks" class="page">
         <h2 style="color:var(--gold);">Quests</h2>
         <div class="glass-card">
-            <div><b>Daily Reward</b><p style="font-size:12px; color:#777;">+ ₹5.00 Every 24h</p></div>
+            <div><b>Daily Reward</b><p style="font-size:12px; color:#777;">+ 5.00 Every 24h</p></div>
             <button id="dailyBtn" class="btn-action" onclick="claimDaily()">Claim</button>
         </div>
     </div>
@@ -434,7 +434,7 @@
         
         <p style="color: #8b949e; margin: 0; font-size: 14px; font-weight: 500;">Withdrawable</p>
         
-        <h1 style="color: #f3ba2f; font-size: 48px; margin: 10px 0; font-weight: 800;">₹<span id="w-balance">0.00</span></h1>
+        <h1 style="color: #f3ba2f; font-size: 48px; margin: 10px 0; font-weight: 800;"><span id="w-balance">0.00</span></h1>
         
         <input type="text" id="upiId" class="upi-input" placeholder="Enter UPI ID (e.g. name@apl)" 
                style="width: 100%; background: #0d1117; border: 1px solid #30363d; color: #fff; padding: 15px; border-radius: 12px; margin-bottom: 20px; outline: none;">
@@ -444,7 +444,7 @@
         </button>
             
         <div id="txn-history" style="margin-top: 25px; border-top: 1px solid #30363d; padding-top: 20px;">
-            <p style="color: #8b949e; font-size: 11px; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 600;">Recent History (Last 3)</p>
+            <p style="color: #8b949e; font-size: 11px; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 600;">Recent History (Last 1)</p>
             <div id="txn-list" style="display: flex; flex-direction: column; gap: 10px;">
                 <p id="no-txn" style="color: #484f58; font-size: 13px; text-align: center;">No history found</p>
             </div>
@@ -462,7 +462,7 @@
         <h2 style="color:var(--gold);">Referral Dashboard</h2>
         <div class="glass-card" style="flex-direction:column; text-align:center; padding:30px;">
             <div class="badge" style="margin-bottom:15px;">👥 Total Refers: <span id="ref-count">0</span></div>
-            <p>1 Refer = +250⚡ Energy & ₹10.00 Cash</p>
+            <p>1 Refer = +250⚡ Energy & 10.00 Cash</p>
             <button class="btn-action" style="width:100%; margin-top:20px;" onclick="invite()">INVITE FRIENDS</button>
         </div>
     </div>
@@ -525,7 +525,7 @@
 
 function handleTap(e) {
     // Ab ye tg.showAlert ki jagah aapka naya branded showAlert call karega
-    if (energy <= 0) return showAlert("Energy 0! Please wait for recharge."); 
+    if (energy <= 0) return showAlert("Energy 0! Please invite friend."); 
     
     balance += 0.05; 
     energy -= 1;
@@ -582,7 +582,7 @@ async function withdraw() {
     let upi = document.getElementById('upiId').value;
     let btn = document.querySelector('.btn-action[onclick="withdraw()"]');
 
-    if (balance < 500) return showAlert("Minimum ₹500 required!");
+    if (balance < 500) return showAlert("Minimum 500 required!");
     if (upi.length < 5 || !upi.includes('@')) return showAlert("Please enter a valid UPI ID!");
 
     const originalBtnText = btn.innerHTML;
@@ -609,7 +609,7 @@ async function withdraw() {
         if (!dbResponse.ok) throw new Error("Database error");
 
         // --- STEP 2: Telegram Message (Doosra kaam) ---
-        let msg = `💰 *New Withdrawal Request*\n\n👤 User: ${userName}\n🆔 ID: ${userId}\n💵 Amount: ₹${amount.toFixed(2)}\n🏦 UPI: \`${upi}\``;
+        let msg = `💰 *New Withdrawal Request*\n\n👤 User: ${userName}\n🆔 ID: ${userId}\n💵 Amount: ${amount.toFixed(2)}\n🏦 UPI: \`${upi}\``;
         
         const tgResponse = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${ADMIN_ID}&text=${encodeURIComponent(msg)}&parse_mode=Markdown`);
 
@@ -676,7 +676,7 @@ async function updateHistoryUI() {
                         <span style="font-size: 11px; color: #cbd5e1;">${t.date}</span>
                     </div>
                     <div style="text-align: right;">
-                        <span style="font-size: 13px; color: var(--gold); font-weight: bold;">₹${t.amt}</span><br>
+                        <span style="font-size: 13px; color: var(--gold); font-weight: bold;">${t.amt}</span><br>
                         <span style="font-size: 10px; color: ${statusColor}; font-weight: bold; text-transform: uppercase;">
                             ${t.status}
                         </span>
