@@ -619,7 +619,10 @@ async function claimDaily() {
         checkDailyStatus();
     }, 2000);
 }
-
+// Ek hi function dono ko band karne ke liye kaafi hai
+function closeReward(){
+    document.getElementById("claimOverlay").style.display = "none";
+}
 // --- Daily Energy Claim ---
 async function claimEnergy() {
     const now = Date.now();
