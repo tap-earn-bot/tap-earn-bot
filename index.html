@@ -383,10 +383,60 @@
     object-fit: cover;      /* Photo stretch nahi hogi */
 }
 
+/* Sirf Badge wale cards ke liye special container */
+.badge-container {
+    position: relative;
+    overflow: hidden;
+    /* Baaki glass-card ki property index.html se apne aap utha lega */
+}
+
+.premium-badge {
+    position: absolute;
+    top: 12px;
+    right: -32px;
+    background: linear-gradient(135deg, #f3ba2f 0%, #ffd700 50%, #f3ba2f 100%);
+    color: #000;
+    font-size: 10px;
+    font-weight: 900;
+    padding: 5px 35px;
+    transform: rotate(45deg);
+    box-shadow: 0 4px 15px rgba(243, 186, 47, 0.4);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    z-index: 10;
+    border: 1px solid rgba(255,255,255,0.3);
+}
+
+/* Shine Animation */
+.premium-badge::after {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.8), transparent);
+    animation: shine-badge 3s infinite;
+}
+
+@keyframes shine-badge {
+    0% { left: -100%; }
+    20% { left: 100%; }
+    100% { left: 100%; }
+}
+
 </style>
     
 </head>
 <body>
+<div class="glass-card badge-container" style="margin-top: 15px;">
+    <div class="premium-badge">LIMITED</div>
+
+    <div>
+        <b>Silver Boost</b>
+        <p style="font-size:12px; color:#777;">- 1000 validity 24h only</p>
+    </div>
+    <button id="silverBtn" class="btn-action" onclick="claimSilver()">Claim</button>
+</div>
+    
 <div id="customAlert" class="modal-overlay">
     <div class="modal-content">
         <div class="modal-icon">💰</div> <p id="alertMessage"></p>
