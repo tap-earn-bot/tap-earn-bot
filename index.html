@@ -781,7 +781,10 @@ async function claimEnergy() {
     }, 2000);
 
 }
-
+// Ek hi function dono ko band karne ke liye kaafi hai
+function closeEnergyPopup(){
+    document.getElementById("energyOverlay").style.display = "none";
+}
 // Script ke top par ye variables zaroor rakhein
 let silverExpiry = 0;
 
@@ -1004,6 +1007,27 @@ function showAlert(text) {
         document.body.appendChild(wrapper);
     }, 200); 
 }
+
+// --- LIVE UI REFRESH LOOP ---
+setInterval(() => {
+    const now = Date.now();
+    
+    // Sirf tab chalega jab Silver Active ho
+    if (silverExpiry && now < silverExpiry) {
+        
+        // 1. Live Balance: 5 coins/hour ke hisab se har second thoda sa badhega
+        balance += (5 / 3600); 
+
+        // 2. Live Energy: 1 energy har 10 sec mein badhegi
+        if (energy < 1000) {
+            energy += 0.1; 
+        }
+
+        // Screen par numbers ko update karne ke liye
+        updateUI();
+    }
+}, 1000); 
+
     
 </script>
     </body>
