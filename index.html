@@ -1012,25 +1012,41 @@ function showAlert(text) {
     }, 200); 
 }
 
-// --- LIVE UI REFRESH LOOP ---
-setInterval(() => {
+// --- FINAL LIVE & AUTO-SYNC LOOP ---
+setInterval(async () => {
     const now = Date.now();
     
-    // Sirf tab chalega jab Silver Active ho
+    // 1. SILVER PASSIVE INCOME (Har 1 second mein UI update)
     if (silverExpiry && now < silverExpiry) {
-        
-        // 1. Live Balance: 5 coins/hour ke hisab se har second thoda sa badhega
+        // Har second balance aur energy thoda badhao (visual update)
         balance += (5 / 3600); 
-
-        // 2. Live Energy: 1 energy har 10 sec mein badhegi
         if (energy < 1000) {
             energy += 0.1; 
         }
-
-        // Screen par numbers ko update karne ke liye
         updateUI();
     }
+
+    // 2. AUTO-SYNC (Har 10 second mein Database se Refer/Balance fetch karna)
+    // Hum "now % 10000 < 1000" isliye use kar rahe hain taaki har 10 sec mein ek baar fetch ho
+    if (Math.floor(now / 1000) % 10 === 0) {
+        try {
+            let res = await fetch(`${DB_BASE_URL}${userId}.json`);
+            let data = await res.json();
+            if (data) {
+                // Database se naye numbers uthao (Referral, Balance, etc.)
+                totalRefs = data.totalRefs || 0;
+                // Offline earning ya referral reward judne par balance update hoga
+                if (data.balance > balance) {
+                    balance = data.balance;
+                }
+                updateUI();
+            }
+        } catch (e) {
+            console.error("Sync Error:", e);
+        }
+    }
 }, 1000); 
+
 
     
 </script>
