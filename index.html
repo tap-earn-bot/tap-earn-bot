@@ -493,44 +493,46 @@
     </div>
 </div> 
      
-    <div id="wallet" class="page"> <h2 style="color: #f3ba2f; text-align: center; margin-bottom: 20px; font-weight: 800;">My Bank</h2>    
-    <div style="background: linear-gradient(145deg, #161b22, #0d1117); padding: 30px; border-radius: 28px; border: 1px solid #30363d;">
-        <p style="color: #8b949e; margin: 0; font-size: 14px;">Withdrawable</p>
-        <h1 style="color: #f3ba2f; font-size: 48px; margin: 10px 0;"><span id="w-balance">0.00</span></h1>
+<div id="wallet" class="page">
+    <h2 style="color: #f3ba2f; text-align: center; margin-bottom: 20px; font-weight: 800; letter-spacing: 1px;">My Bank</h2>
+    
+    <div style="background: linear-gradient(145deg, #161b22, #0d1117); padding: 30px; border-radius: 28px; text-align: left; border: 1px solid #30363d; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
         
-        <input type="text" id="upiId" class="upi-input" placeholder="Enter UPI ID" 
-               style="width: 100%; background: #0d1117; border: 1px solid #30363d; color: #fff; padding: 15px; border-radius: 12px; margin-bottom: 20px;">
+        <p style="color: #8b949e; margin: 0; font-size: 14px; font-weight: 500;">Withdrawable</p>
+        <h1 style="color: #f3ba2f; font-size: 48px; margin: 10px 0; font-weight: 800;">
+            <span id="w-balance">0.00</span>
+        </h1>
         
-        <button class="btn-action" style="width: 100%; height: 55px; background: #f3ba2f; color: #000; border-radius: 15px;" onclick="withdraw()">
+        <input type="text" id="upiId" class="upi-input" placeholder="Enter UPI ID (e.g. name@apl)" 
+               style="width: 100%; background: #0d1117; border: 1px solid #30363d; color: #fff; padding: 15px; border-radius: 12px; margin-bottom: 20px; outline: none;">
+        
+        <button class="btn-action" style="width: 100%; height: 55px; background: #f3ba2f; color: #000; border: none; border-radius: 15px; font-weight: 700; font-size: 16px; cursor: pointer;" onclick="withdraw()">
             WITHDRAW NOW
         </button>
-    </div>
-</div>
-            
+
         <div id="txn-history" style="margin-top: 25px; border-top: 1px solid #30363d; padding-top: 20px;">
             <p style="color: #8b949e; font-size: 11px; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 600;">Recent History (Last 1)</p>
             <div id="txn-list" style="display: flex; flex-direction: column; gap: 10px;">
-            <p id="no-txn" style="color: #484f58; font-size: 13px; text-align: center;">No history found</p>
+                <p id="no-txn" style="color: #484f58; font-size: 13px; text-align: center;">No history found</p>
             </div>
         </div>
-    </div>
-</div>
-
-    <div id="frens" class="page">
-        <h2 style="color:var(--gold);">Referral Dashboard</h2>
-        <div class="glass-card" style="flex-direction:column; text-align:center; padding:30px;">
-            <div class="badge" style="margin-bottom:15px;">👥 Total Refers: <span id="ref-count">0</span></div>
-            <p>1 Refer = +250⚡ Energy & 10.00 Cash</p>
-            <button class="btn-action" style="width:100%; margin-top:20px;" onclick="invite()">INVITE FRIENDS</button>
+    </div> </div> <div id="frens" class="page">
+    <h2 style="color:var(--gold); text-align: center;">Referral Dashboard</h2>
+    <div class="glass-card" style="display: flex; flex-direction:column; text-align:center; padding:30px; margin-top: 10px;">
+        <div class="badge" style="margin-bottom:15px; display: inline-block;">
+            👥 Total Refers: <span id="ref-count">0</span>
         </div>
+        <p style="color: #cbd5e1;">1 Refer = +250⚡ Energy & 10.00 Cash</p>
+        <button class="btn-action" style="width:100%; margin-top:20px;" onclick="invite()">
+            INVITE FRIENDS
+        </button>
     </div>
-
-    <div class="navbar">
-        <div class="nav-item active" onclick="nav('home', this)"><i class="fas fa-home"></i>Home</div>
-        <div class="nav-item" onclick="nav('tasks', this)"><i class="fas fa-bolt"></i>Tasks</div>
-        <div class="nav-item" onclick="nav('wallet', this)"><i class="fas fa-wallet"></i>Wallet</div>
-        <div class="nav-item" onclick="nav('frens', this)"><i class="fas fa-users"></i>Frens</div>
-    </div>
+</div> <div class="navbar">
+    <div class="nav-item active" onclick="nav('home', this)"><i class="fas fa-home"></i>Home</div>
+    <div class="nav-item" onclick="nav('tasks', this)"><i class="fas fa-bolt"></i>Tasks</div>
+    <div class="nav-item" onclick="nav('wallet', this)"><i class="fas fa-wallet"></i>Wallet</div>
+    <div class="nav-item" onclick="nav('frens', this)"><i class="fas fa-users"></i>Frens</div>
+</div>
 
     <script>
         let tg = window.Telegram.WebApp;
