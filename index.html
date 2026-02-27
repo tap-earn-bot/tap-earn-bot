@@ -255,21 +255,17 @@
     justify-content: center;
     z-index: 10001;
 }
-#loadingOverlay4 {
-    display: none; /* By default hidden */
+    #loadingOverlay4 {
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,0.8);
-    z-index: 20000;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(8px);
+    display: none; /* JS se show hoga */
     flex-direction: column;
     align-items: center;
     justify-content: center;
-}
-
-#InterstitialOverlay {
-    display: none; /* JavaScript handle karega */
-}
-
+    z-index: 10001;
+    }
 .premium-loader {
     width: 60px;
     height: 60px;
@@ -460,7 +456,7 @@
     
  <div id="bot-loader">
     <div class="loader-content">
-        <img src="https://raw.githubusercontent.com/tap-earn-bot/tap-earn-bot/main/1000413486-removebg-preview.png" class="loader-logo">
+        <img src="https://raw.githubusercontent.com/tap-earn-bot/tap-earn-bot/main/1000410752-removebg-preview.png" class="loader-logo">
         <div class="loader-bar-container">
             <div class="loader-bar"></div>
         </div>
@@ -510,7 +506,9 @@
         <div class="sunburst"></div>
         <div class="congrats-text">Congratulations on getting</div>
         <div class="reward-amount" id="energy-pop-amount">100</div>
-        <div class="reward-unit">⚡</div> <img src="https://raw.githubusercontent.com/tap-earn-bot/tap-earn-bot/main/1000412177-removebg-preview.png" class="coin-stack" style="filter: hue-rotate(180deg);">
+        <div class="reward-unit">TapFortune</div>
+        
+        <img src="https://raw.githubusercontent.com/tap-earn-bot/tap-earn-bot/main/1000412177-removebg-preview.png" class="coin-stack" style="filter: hue-rotate(180deg);">
         
         <button class="accept-btn" onclick="closeEnergyPopup()">ACCEPT</button>
     </div>
@@ -529,21 +527,16 @@
     </div>
 </div>
 
-<div id="InterstitialOverlay" style="display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.95); align-items: center; justify-content: center; z-index: 10000; backdrop-filter: blur(5px);">
-    <div class="reward-card" style="border: 1px solid var(--gold); background: linear-gradient(180deg, #1a1a1a, #000);">
+<div id="InterstitialOverlay" style="display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.9); align-items: center; justify-content: center; z-index: 10000;">
+    <div class="reward-card">
         <div class="sunburst"></div>
+        <div class="congrats-text">Congratulations on getting</div>
+        <div class="reward-amount" id="Interstitial-pop-amount">10</div>
+        <div class="reward-unit">⚡</div>
         
-        <div class="congrats-text" style="text-transform: uppercase; letter-spacing: 1px; font-weight: 800;">Fortune Reward Unlocked!</div>
-        
-        <div class="reward-amount" id="Interstitial-pop-amount" style="text-shadow: 0 0 20px rgba(243, 186, 47, 0.5);">10</div>
-        
-        <div class="reward-unit" style="color: #8b949e; font-size: 14px;">Fortune Coins added to your bank</div> 
+        <img src="https://raw.githubusercontent.com/tap-earn-bot/tap-earn-bot/main/1000410752-removebg-preview.png" class="coin-stack" style="filter: hue-rotate(180deg);">
 
-        <img src="https://raw.githubusercontent.com/tap-earn-bot/tap-earn-bot/main/1000410752-removebg-preview.png" class="coin-stack" style="width: 120px; margin: 20px 0;">
-        
-        <p style="color: #555; font-size: 11px; margin-bottom: 15px;">Next reward available in 2 hours</p>
-        
-        <button class="accept-btn" onclick="closeInterstitialPopup()" style="box-shadow: 0 4px 15px rgba(243, 186, 47, 0.3);">COLLECT NOW</button>
+        <button class="accept-btn" onclick="closeInterstitialPopup()">ACCEPT</button>
     </div>
 </div>
 
@@ -595,16 +588,10 @@
         <button id="silverBtn" class="btn-action" onclick="claimSilver()">Claim</button>
     </div>
 
-<div class="glass-card badge-container" style="margin-top: 15px; border-left: 4px solid var(--gold);">
-    <div class="premium-badge">HOT</div> <div style="flex: 1; text-align: left; padding-left: 10px;">
-        <b style="font-size: 15px; color: #fff;">Premium Video Quest</b>
-        <p style="font-size: 12px; color: #8b949e; margin-top: 4px;">Watch short clip to earn <span style="color: var(--gold); font-weight: bold;">+10.00 Cash</span></p>
+    <div class="glass-card" style="margin-top: 15px;">
+        <div><b>Premium Video Quest</b><p style="font-size:12px; color:#777;">watch short clip 2 earn +10 cash</p></div>
+        <button id="watchBtn" class="btn-action" onclick="claimInterstitial()">Claim</button>
     </div>
-    
-    <button id="watchBtn" class="btn-action" onclick="claimInterstitial()" style="min-width: 90px; height: 40px; font-size: 13px;">
-        START
-    </button>
-</div>
 </div>
      
 <div id="wallet" class="page">
