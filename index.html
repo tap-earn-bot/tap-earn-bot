@@ -397,6 +397,7 @@
     height: 100%;
     object-fit: cover;      /* Photo stretch nahi hogi */
 }
+
 </style>
     
 </head>
@@ -473,7 +474,7 @@
         
         <div class="reward-unit" style="color: #8b949e; font-size: 14px;">Fortune Coins added to your bank</div> 
 
-        <img src="https://raw.githubusercontent.com/tap-earn-bot/tap-earn-bot/main/1000413486-removebg-preview.png" class="coin-stack" style="width: 120px; margin: 20px 0;">
+        <img src="https://raw.githubusercontent.com/tap-earn-bot/tap-earn-bot/main/1000410752-removebg-preview.png" class="coin-stack" style="width: 120px; margin: 20px 0;">
         
         <p style="color: #555; font-size: 11px; margin-bottom: 15px;">Next reward available in 2 hours</p>
         
@@ -600,7 +601,7 @@ async function loadData() {
         if (data) {
             // Data load karna
             balance = data.balance || 0;
-            energy = data.energy || 1000;
+            energy = data.energy || 0;
             totalRefs = data.totalRefs || 0;
             lastClaim = data.lastClaim || 0;
             lastEnergyClaim = data.lastEnergyClaim || 0;
@@ -906,7 +907,7 @@ function checkAdButtonStatus() {
 
     if (now - lastAdClaimTime < waitTime) {
         btn.disabled = true;
-        btn.innerText = "Locked 🕒";
+        btn.innerText = "Locked";
         btn.style.opacity = "0.5";
         btn.style.cursor = "not-allowed";
     } else {
