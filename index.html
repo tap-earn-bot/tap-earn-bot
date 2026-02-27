@@ -598,12 +598,13 @@ async function saveData() {
 }
 
 
-        function updateUI() {
-            document.getElementById('balance').innerText = balance.toFixed(2);
-            document.getElementById('w-balance').innerText = balance.toFixed(2);
-            document.getElementById('energy').innerText = energy;
-            document.getElementById('ref-count').innerText = totalRefs;
-        }
+function updateUI() {
+    // Purana logic (Numbers update)
+    document.getElementById('balance').innerText = balance.toFixed(2);
+    document.getElementById('w-balance').innerText = balance.toFixed(2);
+    document.getElementById('energy').innerText = Math.floor(energy); // Decimal na dikhe isliye Math.floor
+    document.getElementById('ref-count').innerText = totalRefs;
+
 
 // Function 1: Daily Cash Reward ke liye
 function checkDailyStatus() {
@@ -635,7 +636,6 @@ function checkSilverStatus() {
     const now = Date.now();
     const btn = document.getElementById('silverBtn');
     
-    // Check if silver boost is currently active
     if (silverExpiry && now < silverExpiry) {
         if(btn) {
             btn.innerText = "Silver Active";
@@ -644,28 +644,43 @@ function checkSilverStatus() {
         }
     } else {
         if(btn) {
-            btn.innerText = "Upgrade";
+            btn.innerText = "Upgrade"; // Ya "Claim" jo aapne HTML mein rakha ho
             btn.disabled = false;
             btn.style.opacity = "1";
         }
     }
+    
+    // YEH LINE ZAROORI HAI: Taaki 24h baad Rank Bronze ho jaye bina refresh ke
+    updateUI(); 
 }
 
 function closeSilverPopup() {
     document.getElementById("silverOverlay").style.display = "none";
 }
+
+
+function closeSilverPopup() {
+    document.getElementById("silverOverlay").style.display = "none";
+}
 function handleTap(e) {
-    // Ab ye tg.showAlert ki jagah aapka naya branded showAlert call karega
+    // 1. Check karein ki Silver active hai ya nahi
+    let isSilver = (silverExpiry && Date.now() < silverExpiry);
+    
+    // 2. Power set karein: Silver hai toh 0.10, Bronze hai toh 0.05
+    let tapPower = isSilver ? 0.10 : 0.05;
+
     if (energy <= 0) return showAlert("Energy 0! Please invite friend."); 
     
-    balance += 0.05; 
+    // 3. Balance mein dynamic power jodein
+    balance += tapPower; 
     energy -= 1;
     updateUI(); 
     saveData();
 
+    // 4. Floating text update (+0.05 ya +0.10 dikhayega)
     const plus = document.createElement('div');
     plus.className = 'plus-one'; 
-    plus.innerText = '+0.05';
+    plus.innerText = `+${tapPower.toFixed(2)}`; // Dynamic text
     plus.style.left = e.clientX + 'px'; 
     plus.style.top = e.clientY + 'px';
     document.body.appendChild(plus);
@@ -728,16 +743,12 @@ async function claimEnergy() {
 
 }
 
-// Ek hi function dono ko band karne ke liye kaafi hai
-function closeEnergyPopup() {
-    document.getElementById("energyOverlay").style.display = "none";
-}
-        
-// Script ke top par ye variables declare karein
+// Script ke top par ye variables zaroor rakhein
 let silverExpiry = 0;
 
-async function claimSilver() { // Naam claimSilver rakha hai taaki HTML se match kare
+async function claimSilver() {
     const now = Date.now();
+    // 1000 balance check
     if (balance < 1000) return tg.showAlert("Insufficient Balance!");
 
     const loader = document.getElementById("loadingOverlay3");
@@ -747,6 +758,7 @@ async function claimSilver() { // Naam claimSilver rakha hai taaki HTML se match
         if(loader) loader.style.display = "none";
 
         balance -= 1000;
+        // 24 ghante ka validity set karna
         silverExpiry = now + (24 * 60 * 60 * 1000); 
         
         document.getElementById("silverOverlay").style.display = "flex";
@@ -755,6 +767,24 @@ async function claimSilver() { // Naam claimSilver rakha hai taaki HTML se match
         await saveData();
         checkSilverStatus();
     }, 2000);
+}
+
+function updateUI() {
+    // Balance ko 2 decimal tak dikhana (0.05 logic ke liye)
+    document.getElementById('balance').innerText = balance.toFixed(2);
+    document.getElementById('energy').innerText = Math.floor(energy);
+
+    const rankElement = document.getElementById('rank');
+    const now = Date.now();
+
+    // Rank Update Logic
+    if (silverExpiry && now < silverExpiry) {
+        rankElement.innerHTML = "🏆 Silver";
+        rankElement.style.color = "#c0c0c0"; 
+    } else {
+        rankElement.innerHTML = "🏆 Bronze";
+        rankElement.style.color = "var(--gold)"; 
+    }
 }
 
         
