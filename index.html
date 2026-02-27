@@ -555,7 +555,9 @@ async function loadData() {
     try {
         let res = await fetch(`${DB_BASE_URL}${userId}.json`);
         let data = await res.json();
+        
         if (data) {
+            // Data load karna
             balance = data.balance || 0;
             energy = data.energy || 1000;
             totalRefs = data.totalRefs || 0;
@@ -563,31 +565,27 @@ async function loadData() {
             lastEnergyClaim = data.lastEnergyClaim || 0;
             silverExpiry = data.silverExpiry || 0;
 
-            // --- Naya Logic: Offline Earning Calculation ---
+            // Offline Earning Logic (Jab bot band tha tab ki kamayi)
             const now = Date.now();
             if (silverExpiry && now < silverExpiry) {
-                // Dekho user pichli baar kab online tha
                 let lastTime = data.lastSaveTime || now;
                 let secondsPassed = Math.floor((now - lastTime) / 1000);
                 
-                // 1. Silver Passive Balance (5.00 coins per hour)
-                // Math: (5 / 3600) * seconds
-                let earned = (secondsPassed / 3600) * 5;
-                balance += earned;
-
-                // 2. Silver Energy Refill (1 point per 10 seconds)
+                // Har ghante 5 coins, har 10 sec mein 1 energy
+                balance += (secondsPassed / 3600) * 5;
                 energy = Math.min(1000, energy + Math.floor(secondsPassed / 10));
             }
-            // -----------------------------------------------
 
             updateUI();
             checkDailyStatus();
             checkEnergyStatus();
             checkSilverStatus(); 
         }
-    } catch (e) { console.error(e); }
+    } catch (e) { 
+        console.error("Firebase Error:", e);
+        updateUI(); // Error aaye tab bhi UI dikhao taaki app stuck na ho
+    }
 }
-
 
 async function saveData() {
     const dataToSave = { 
@@ -596,8 +594,8 @@ async function saveData() {
         totalRefs, 
         lastClaim, 
         lastEnergyClaim,
-        silverExpiry, // Ye aapne pehle hi sahi lagaya hai
-        lastSaveTime: Date.now() // <--- Yeh nayi line zaroori hai!
+        silverExpiry,
+        lastSaveTime: Date.now() // Yeh line sabse zaroori hai
     };
 
     try {
@@ -605,19 +603,36 @@ async function saveData() {
             method: 'PATCH',
             body: JSON.stringify(dataToSave)
         });
-    } catch (e) { 
-        console.error("Save Error:", e); 
-    }
+    } catch (e) { console.error("Save Error:", e); }
 }
 
 
-
 function updateUI() {
-    // Purana logic (Numbers update)
-    document.getElementById('balance').innerText = balance.toFixed(2);
-    document.getElementById('w-balance').innerText = balance.toFixed(2);
-    document.getElementById('energy').innerText = Math.floor(energy); // Decimal na dikhe isliye Math.floor
-    document.getElementById('ref-count').innerText = totalRefs;
+    // Numbers update karein
+    const balEl = document.getElementById('balance');
+    const wBalEl = document.getElementById('w-balance');
+    const enEl = document.getElementById('energy');
+    
+    if(balEl) balEl.innerText = balance.toFixed(2);
+    if(wBalEl) wBalEl.innerText = balance.toFixed(2);
+    if(enEl) enEl.innerText = Math.floor(energy);
+    
+    // Rank Update Logic
+    const rankElement = document.getElementById('rank');
+    const now = Date.now();
+
+    if (rankElement) {
+        if (silverExpiry && now < silverExpiry) {
+            rankElement.innerHTML = "🏆 Silver";
+            rankElement.style.color = "#c0c0c0"; 
+            rankElement.style.textShadow = "0 0 8px rgba(192, 192, 192, 0.6)";
+        } else {
+            rankElement.innerHTML = "🏆 Bronze";
+            rankElement.style.color = "var(--gold)"; 
+            rankElement.style.textShadow = "none";
+        }
+    }
+}
 
 
 // Function 1: Daily Cash Reward ke liye
@@ -646,7 +661,7 @@ function checkEnergyStatus() {
     }
 }
 
-function checkSilverStatus() {
+function checkSilverStatus() { // <--- Yeh line aur bracket hona zaroori hai!
     const now = Date.now();
     const btn = document.getElementById('silverBtn');
     
@@ -658,45 +673,58 @@ function checkSilverStatus() {
         }
     } else {
         if(btn) {
-            btn.innerText = "Upgrade"; // Ya "Claim" jo aapne HTML mein rakha ho
+            btn.innerText = "Upgrade"; 
             btn.disabled = false;
             btn.style.opacity = "1";
         }
     }
     
-    // YEH LINE ZAROORI HAI: Taaki 24h baad Rank Bronze ho jaye bina refresh ke
+    // Rank aur UI update karne ke liye
     updateUI(); 
 }
 
 function closeSilverPopup() {
-    document.getElementById("silverOverlay").style.display = "none";
+    const popup = document.getElementById("silverOverlay");
+    if(popup) popup.style.display = "none";
 }
 
 
 function handleTap(e) {
-    // 1. Check karein ki Silver active hai ya nahi
+    // Silver hai ya nahi check karein
     let isSilver = (silverExpiry && Date.now() < silverExpiry);
-    
-    // 2. Power set karein: Silver hai toh 0.10, Bronze hai toh 0.05
     let tapPower = isSilver ? 0.10 : 0.05;
 
-    if (energy <= 0) return showAlert("Energy 0! Please invite friend."); 
+    // Energy check
+    if (energy <= 0) {
+        // Agar showAlert function nahi hai, toh alert use karein
+        if (typeof showAlert === 'function') {
+            return showAlert("Energy 0! Please invite friend.");
+        } else {
+            return alert("Energy 0! Please invite friend.");
+        }
+    }
     
-    // 3. Balance mein dynamic power jodein
     balance += tapPower; 
     energy -= 1;
     updateUI(); 
     saveData();
 
-    // 4. Floating text update (+0.05 ya +0.10 dikhayega)
+    // Floating text positioning fix
     const plus = document.createElement('div');
     plus.className = 'plus-one'; 
-    plus.innerText = `+${tapPower.toFixed(2)}`; // Dynamic text
-    plus.style.left = e.clientX + 'px'; 
-    plus.style.top = e.clientY + 'px';
+    plus.innerText = `+${tapPower.toFixed(2)}`;
+    
+    // Desktop aur Mobile dono ke liye coordinates handle karna
+    const x = e.clientX || (e.touches && e.touches[0].clientX) || 0;
+    const y = e.clientY || (e.touches && e.touches[0].clientY) || 0;
+    
+    plus.style.left = x + 'px'; 
+    plus.style.top = y + 'px';
+    
     document.body.appendChild(plus);
     setTimeout(() => plus.remove(), 800);
 }
+
 
 // --- Daily Cash Claim ---
 async function claimDaily() {
@@ -779,41 +807,6 @@ async function claimSilver() {
         checkSilverStatus(); // Isse button "Silver Active" ho jayega
     }, 2000); 
 }
-
-
-function updateUI() {
-    // 1. Dono balance elements ko update karein (Main aur Wallet)
-    const formattedBalance = balance.toFixed(2);
-    
-    if(document.getElementById('balance')) {
-        document.getElementById('balance').innerText = formattedBalance;
-    }
-    if(document.getElementById('w-balance')) {
-        document.getElementById('w-balance').innerText = formattedBalance;
-    }
-
-    // 2. Energy ko bina decimal ke dikhayein
-    if(document.getElementById('energy')) {
-        document.getElementById('energy').innerText = Math.floor(energy);
-    }
-
-    // 3. Rank aur Badge Logic
-    const rankElement = document.getElementById('rank');
-    const now = Date.now();
-
-    if (rankElement) {
-        if (silverExpiry && now < silverExpiry) {
-            rankElement.innerHTML = "🏆 Silver";
-            rankElement.style.color = "#c0c0c0"; 
-            rankElement.style.textShadow = "0 0 8px rgba(192, 192, 192, 0.6)"; // Silver Glow
-        } else {
-            rankElement.innerHTML = "🏆 Bronze";
-            rankElement.style.color = "var(--gold)"; 
-            rankElement.style.textShadow = "none";
-        }
-    }
-}
-
 
         
 async function withdraw() {
