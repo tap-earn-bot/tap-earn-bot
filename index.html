@@ -397,11 +397,76 @@
     height: 100%;
     object-fit: cover;      /* Photo stretch nahi hogi */
 }
+#bot-loader {
+    position: fixed;
+    inset: 0;
+    background: #0d1117; /* Dark background */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 99999;
+    transition: opacity 0.5s ease;
+}
 
+.loader-content {
+    text-align: center;
+    width: 80%;
+}
+
+.loader-logo {
+    width: 80px;
+    margin-bottom: 20px;
+    animation: pulse 1.5s infinite ease-in-out;
+}
+
+.loader-bar-container {
+    width: 100%;
+    height: 6px;
+    background: #161b22;
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 20px 0;
+}
+
+.loader-bar {
+    width: 0%;
+    height: 100%;
+    background: linear-gradient(90deg, #f3ba2f, #ffd700);
+    box-shadow: 0 0 10px #f3ba2f;
+    animation: fillProgress 2.5s forwards ease-in-out;
+}
+
+.loader-text {
+    color: #8b949e;
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.1); opacity: 0.8; }
+}
+
+@keyframes fillProgress {
+    0% { width: 0%; }
+    100% { width: 100%; }
+    }
+    
 </style>
     
 </head>
 <body>
+    
+ <div id="bot-loader">
+    <div class="loader-content">
+        <img src="https://raw.githubusercontent.com/tap-earn-bot/tap-earn-bot/main/1000413486-removebg-preview.png" class="loader-logo">
+        <div class="loader-bar-container">
+            <div class="loader-bar"></div>
+        </div>
+        <p class="loader-text">Loading TapFortune...</p>
+    </div>
+ </div>
     
 <div id="customAlert" class="modal-overlay">
     <div class="modal-content">
@@ -1159,7 +1224,16 @@ setInterval(async () => {
     }
 }, 1000); 
 
-
+// Bot open hone ke 2.5 seconds baad loader ko hide karna
+window.addEventListener('load', () => {
+    setTimeout(() => {
+        const loader = document.getElementById('bot-loader');
+        loader.style.opacity = '0';
+        setTimeout(() => {
+            loader.style.display = 'none';
+        }, 500); // Fade effect ke liye thoda extra time
+    }, 2500); // 2.5 seconds loading time
+});
     
 </script>
     </body>
