@@ -612,10 +612,14 @@ function updateUI() {
     const balEl = document.getElementById('balance');
     const wBalEl = document.getElementById('w-balance');
     const enEl = document.getElementById('energy');
+        // --- YEH LINE ADD KAREIN (Referral ke liye) ---
+    const refEl = document.getElementById('ref-count'); 
     
     if(balEl) balEl.innerText = balance.toFixed(2);
     if(wBalEl) wBalEl.innerText = balance.toFixed(2);
     if(enEl) enEl.innerText = Math.floor(energy);
+        // --- YEH BHI ADD KAREIN ---
+    if(refEl) refEl.innerText = totalRefs || 0;
     
     // Rank Update Logic
     const rankElement = document.getElementById('rank');
