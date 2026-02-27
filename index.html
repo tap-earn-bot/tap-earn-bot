@@ -774,29 +774,46 @@ async function claimSilver() {
         
         document.getElementById("silverOverlay").style.display = "flex";
 
-        updateUI();
-        await saveData();
-        checkSilverStatus();
-    }, 2000);
+        updateUI(); // Isse screen par balance update hoga
+        await saveData(); // Isse database mein save hoga
+        checkSilverStatus(); // Isse button "Silver Active" ho jayega
+    }, 2000); 
 }
 
-function updateUI() {
-    // Balance ko 2 decimal tak dikhana (0.05 logic ke liye)
-    document.getElementById('balance').innerText = balance.toFixed(2);
-    document.getElementById('energy').innerText = Math.floor(energy);
 
+function updateUI() {
+    // 1. Dono balance elements ko update karein (Main aur Wallet)
+    const formattedBalance = balance.toFixed(2);
+    
+    if(document.getElementById('balance')) {
+        document.getElementById('balance').innerText = formattedBalance;
+    }
+    if(document.getElementById('w-balance')) {
+        document.getElementById('w-balance').innerText = formattedBalance;
+    }
+
+    // 2. Energy ko bina decimal ke dikhayein
+    if(document.getElementById('energy')) {
+        document.getElementById('energy').innerText = Math.floor(energy);
+    }
+
+    // 3. Rank aur Badge Logic
     const rankElement = document.getElementById('rank');
     const now = Date.now();
 
-    // Rank Update Logic
-    if (silverExpiry && now < silverExpiry) {
-        rankElement.innerHTML = "🏆 Silver";
-        rankElement.style.color = "#c0c0c0"; 
-    } else {
-        rankElement.innerHTML = "🏆 Bronze";
-        rankElement.style.color = "var(--gold)"; 
+    if (rankElement) {
+        if (silverExpiry && now < silverExpiry) {
+            rankElement.innerHTML = "🏆 Silver";
+            rankElement.style.color = "#c0c0c0"; 
+            rankElement.style.textShadow = "0 0 8px rgba(192, 192, 192, 0.6)"; // Silver Glow
+        } else {
+            rankElement.innerHTML = "🏆 Bronze";
+            rankElement.style.color = "var(--gold)"; 
+            rankElement.style.textShadow = "none";
+        }
     }
 }
+
 
         
 async function withdraw() {
