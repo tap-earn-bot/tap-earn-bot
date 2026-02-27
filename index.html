@@ -561,15 +561,28 @@ async function loadData() {
             totalRefs = data.totalRefs || 0;
             lastClaim = data.lastClaim || 0;
             lastEnergyClaim = data.lastEnergyClaim || 0;
-
-            // 1. Silver expiry ka data database se uthayein
             silverExpiry = data.silverExpiry || 0;
+
+            // --- Naya Logic: Offline Earning Calculation ---
+            const now = Date.now();
+            if (silverExpiry && now < silverExpiry) {
+                // Dekho user pichli baar kab online tha
+                let lastTime = data.lastSaveTime || now;
+                let secondsPassed = Math.floor((now - lastTime) / 1000);
+                
+                // 1. Silver Passive Balance (5.00 coins per hour)
+                // Math: (5 / 3600) * seconds
+                let earned = (secondsPassed / 3600) * 5;
+                balance += earned;
+
+                // 2. Silver Energy Refill (1 point per 10 seconds)
+                energy = Math.min(1000, energy + Math.floor(secondsPassed / 10));
+            }
+            // -----------------------------------------------
 
             updateUI();
             checkDailyStatus();
             checkEnergyStatus();
-            
-            // 2. Refresh ke baad check karein ki silver active hai ya nahi
             checkSilverStatus(); 
         }
     } catch (e) { console.error(e); }
@@ -577,25 +590,26 @@ async function loadData() {
 
 
 async function saveData() {
-    // Sabhi variables ko ek hi object mein rakhein
     const dataToSave = { 
         balance, 
         energy, 
         totalRefs, 
         lastClaim, 
-        lastEnergyClaim, // Ab ye database mein jayega
-        silverExpiry,
+        lastEnergyClaim,
+        silverExpiry, // Ye aapne pehle hi sahi lagaya hai
+        lastSaveTime: Date.now() // <--- Yeh nayi line zaroori hai!
     };
 
     try {
         await fetch(`${DB_BASE_URL}${userId}.json`, {
             method: 'PATCH',
-            body: JSON.stringify(dataToSave) // Poora object ek saath bhejein
+            body: JSON.stringify(dataToSave)
         });
     } catch (e) { 
         console.error("Save Error:", e); 
     }
 }
+
 
 
 function updateUI() {
@@ -659,9 +673,6 @@ function closeSilverPopup() {
 }
 
 
-function closeSilverPopup() {
-    document.getElementById("silverOverlay").style.display = "none";
-}
 function handleTap(e) {
     // 1. Check karein ki Silver active hai ya nahi
     let isSilver = (silverExpiry && Date.now() < silverExpiry);
