@@ -393,13 +393,13 @@
 .premium-badge {
     position: absolute;
     top: 12px;
-    right: -32px;
+    left: -32px;
     background: linear-gradient(135deg, #f3ba2f 0%, #ffd700 50%, #f3ba2f 100%);
     color: #000;
     font-size: 10px;
     font-weight: 900;
     padding: 5px 35px;
-    transform: rotate(45deg);
+    transform: rotate(-45deg);
     box-shadow: 0 4px 15px rgba(243, 186, 47, 0.4);
     text-transform: uppercase;
     letter-spacing: 1px;
@@ -523,37 +523,36 @@
         <button id="dailyBtn" class="btn-action" onclick="claimDaily()">Claim</button>
     </div>
 
+<div id="tasks" class="page">
+    <h2 style="color:var(--gold);">Quests</h2>
+
     <div class="glass-card" style="margin-top: 15px;">
         <div><b>Daily Energy</b><p style="font-size:12px; color:#777;">+ 100 ⚡ Every 24h</p></div>
         <button id="energyBtn" class="btn-action" onclick="claimEnergy()">Claim</button>
     </div>
 
-<div class="glass-card badge-container" style="margin-top: 15px;">
-    <div class="premium-badge">LIMITED</div>
-
-    <div>
-        <b>Silver Boost</b>
-        <p style="font-size:12px; color:#777;">- 1000 validity 24h only</p>
+    <div class="glass-card badge-container" style="margin-top: 15px;">
+        <div class="premium-badge">LIMITED</div>
+        <div>
+            <b>Silver Boost</b>
+            <p style="font-size:12px; color:#777;">- 1000 validity 24h only</p>
+        </div>
+        <button id="silverBtn" class="btn-action" onclick="claimSilver()">Claim</button>
     </div>
-    <button id="silverBtn" class="btn-action" onclick="claimSilver()">Claim</button>
-</div>
-
-
-<div id="wallet" class="page">
-    <h2 style="color: #f3ba2f; text-align: center; margin-bottom: 20px; font-weight: 800; letter-spacing: 1px;">My Bank</h2>
+</div> <div id="wallet" class="page"> <h2 style="color: #f3ba2f; text-align: center; margin-bottom: 20px; font-weight: 800;">My Bank</h2>
     
-    <div style="background: linear-gradient(145deg, #161b22, #0d1117); padding: 30px; border-radius: 28px; text-align: left; border: 1px solid #30363d; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
+    <div style="background: linear-gradient(145deg, #161b22, #0d1117); padding: 30px; border-radius: 28px; border: 1px solid #30363d;">
+        <p style="color: #8b949e; margin: 0; font-size: 14px;">Withdrawable</p>
+        <h1 style="color: #f3ba2f; font-size: 48px; margin: 10px 0;"><span id="w-balance">0.00</span></h1>
         
-        <p style="color: #8b949e; margin: 0; font-size: 14px; font-weight: 500;">Withdrawable</p>
+        <input type="text" id="upiId" class="upi-input" placeholder="Enter UPI ID" 
+               style="width: 100%; background: #0d1117; border: 1px solid #30363d; color: #fff; padding: 15px; border-radius: 12px; margin-bottom: 20px;">
         
-        <h1 style="color: #f3ba2f; font-size: 48px; margin: 10px 0; font-weight: 800;"><span id="w-balance">0.00</span></h1>
-        
-        <input type="text" id="upiId" class="upi-input" placeholder="Enter UPI ID (e.g. name@apl)" 
-               style="width: 100%; background: #0d1117; border: 1px solid #30363d; color: #fff; padding: 15px; border-radius: 12px; margin-bottom: 20px; outline: none;">
-        
-        <button class="btn-action" style="width: 100%; height: 55px; background: #f3ba2f; color: #000; border: none; border-radius: 15px; font-weight: 700; font-size: 16px; cursor: pointer; box-shadow: 0 4px 15px rgba(243, 186, 47, 0.3);" onclick="withdraw()">
+        <button class="btn-action" style="width: 100%; height: 55px; background: #f3ba2f; color: #000; border-radius: 15px;" onclick="withdraw()">
             WITHDRAW NOW
         </button>
+    </div>
+</div>
             
         <div id="txn-history" style="margin-top: 25px; border-top: 1px solid #30363d; padding-top: 20px;">
             <p style="color: #8b949e; font-size: 11px; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 600;">Recent History (Last 1)</p>
