@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Tap Fortune</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src='//libtl.com/sdk.js' data-zone='10661424' data-sdk='show_10661424'></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.9.6/lottie.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    <script src='//libtl.com/sdk.js' data-zone='10661424' data-sdk='show_10661424'></script>
 <style>
     :root { --gold: #ffcc00; --bg: #05070a; --card: #161a1e; --neon: #00f2ff; }
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
@@ -463,18 +463,24 @@
     </div>
 </div>
 
-<div id="InterstitialOverlay" style="display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.9); align-items: center; justify-content: center; z-index: 10000;">
-    <div class="reward-card">
+<div id="InterstitialOverlay" style="display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.95); align-items: center; justify-content: center; z-index: 10000; backdrop-filter: blur(5px);">
+    <div class="reward-card" style="border: 1px solid var(--gold); background: linear-gradient(180deg, #1a1a1a, #000);">
         <div class="sunburst"></div>
-        <div class="congrats-text">Congratulations on getting</div>
-        <div class="reward-amount" id="Interstitial-pop-amount">100</div>
-        <div class="reward-unit">again watch 2h letter</div> 
         
-        <img src="https://raw.githubusercontent.com/tap-earn-bot/tap-earn-bot/main/1000413486-removebg-preview.png" class="coin-stack">
+        <div class="congrats-text" style="text-transform: uppercase; letter-spacing: 1px; font-weight: 800;">Fortune Reward Unlocked!</div>
         
-        <button class="accept-btn" onclick="closeInterstitialPopup()">ACCEPT</button>
+        <div class="reward-amount" id="Interstitial-pop-amount" style="text-shadow: 0 0 20px rgba(243, 186, 47, 0.5);">10</div>
+        
+        <div class="reward-unit" style="color: #8b949e; font-size: 14px;">Fortune Coins added to your bank</div> 
+
+        <img src="https://raw.githubusercontent.com/tap-earn-bot/tap-earn-bot/main/1000413486-removebg-preview.png" class="coin-stack" style="width: 120px; margin: 20px 0;">
+        
+        <p style="color: #555; font-size: 11px; margin-bottom: 15px;">Next reward available in 2 hours</p>
+        
+        <button class="accept-btn" onclick="closeInterstitialPopup()" style="box-shadow: 0 4px 15px rgba(243, 186, 47, 0.3);">COLLECT NOW</button>
     </div>
 </div>
+
     
 <div id="overlay"></div>
 
@@ -523,11 +529,16 @@
         <button id="silverBtn" class="btn-action" onclick="claimSilver()">Claim</button>
     </div>
 
-    <div class="glass-card" style="margin-top: 15px;">
-        <div><b>watch a ads</b><p style="font-size:12px; color:#777;">watch ads claim + 10 🪙</p></div>
-        <button id="watchBtn" class="btn-action" onclick="claimInterstitial()">Claim</button>
+<div class="glass-card badge-container" style="margin-top: 15px; border-left: 4px solid var(--gold);">
+    <div class="premium-badge">HOT</div> <div style="flex: 1; text-align: left; padding-left: 10px;">
+        <b style="font-size: 15px; color: #fff;">Premium Video Quest</b>
+        <p style="font-size: 12px; color: #8b949e; margin-top: 4px;">Watch short clip to earn <span style="color: var(--gold); font-weight: bold;">+10.00 Cash</span></p>
     </div>
-</div> 
+    
+    <button id="watchBtn" class="btn-action" onclick="claimInterstitial()" style="min-width: 90px; height: 40px; font-size: 13px;">
+        START
+    </button>
+</div>
      
 <div id="wallet" class="page">
     <h2 style="color: #f3ba2f; text-align: center; margin-bottom: 20px; font-weight: 800; letter-spacing: 1px;">My Bank</h2>
