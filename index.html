@@ -8,6 +8,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.9.6/lottie.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src='//libtl.com/sdk.js' data-zone='10661424' data-sdk='show_10661424'></script>
 <style>
     :root { --gold: #ffcc00; --bg: #05070a; --card: #161a1e; --neon: #00f2ff; }
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
@@ -254,6 +255,20 @@
     justify-content: center;
     z-index: 10001;
 }
+#loadingOverlay4 {
+    display: none; /* By default hidden */
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.8);
+    z-index: 20000;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+#InterstitialOverlay {
+    display: none; /* JavaScript handle karega */
+}
 
 .premium-loader {
     width: 60px;
@@ -406,7 +421,10 @@
     <div class="premium-loader"></div>
     <div class="loading-text">Processing...</div>
 </div>
-    
+ <div id="loadingOverlay4">
+    <div class="premium-loader"></div>
+    <div class="loading-text">Processing...</div>
+ </div>   
 
 <div id="claimOverlay">
     <div class="reward-card">
@@ -442,6 +460,19 @@
         <img src="https://raw.githubusercontent.com/tap-earn-bot/tap-earn-bot/main/1000413486-removebg-preview.png" class="coin-stack">
         
         <button class="accept-btn" onclick="closeSilverPopup()">LET'S GO!</button>
+    </div>
+</div>
+
+<div id="InterstitialOverlay" style="display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.9); align-items: center; justify-content: center; z-index: 10000;">
+    <div class="reward-card">
+        <div class="sunburst"></div>
+        <div class="congrats-text">Congratulations on getting</div>
+        <div class="reward-amount" id="Interstitial-pop-amount">100</div>
+        <div class="reward-unit">again watch 2h letter</div> 
+        
+        <img src="https://raw.githubusercontent.com/tap-earn-bot/tap-earn-bot/main/1000413486-removebg-preview.png" class="coin-stack">
+        
+        <button class="accept-btn" onclick="closeInterstitialPopup()">ACCEPT</button>
     </div>
 </div>
     
@@ -490,6 +521,11 @@
     <div class="glass-card" style="margin-top: 15px;">
         <div><b>Silver Boost</b><p style="font-size:12px; color:#777;">- 1000 validity 24h only</p></div>
         <button id="silverBtn" class="btn-action" onclick="claimSilver()">Claim</button>
+    </div>
+
+    <div class="glass-card" style="margin-top: 15px;">
+        <div><b>watch a ads</b><p style="font-size:12px; color:#777;">watch ads claim + 10 🪙</p></div>
+        <button id="watchBtn" class="btn-action" onclick="claimInterstitial()">Claim</button>
     </div>
 </div> 
      
@@ -807,6 +843,76 @@ async function claimSilver() {
         checkSilverStatus(); // Isse button "Silver Active" ho jayega
     }, 2000); 
 }
+
+let lastAdClaimTime = localStorage.getItem('lastAdClaim') || 0;
+
+function claimInterstitial() {
+    const now = Date.now();
+    const waitTime = 2 * 60 * 60 * 1000; // 2 ghante milliseconds mein
+
+    // 1. Check karein ki 2 ghante hue ya nahi
+    if (now - lastAdClaimTime < waitTime) {
+        const remainingMin = Math.ceil((waitTime - (now - lastAdClaimTime)) / (60 * 1000));
+        tg.showAlert(`Please wait ${remainingMin} minutes before watching again!`);
+        return;
+    }
+
+    // 2. Loading start karein
+    document.getElementById('loadingOverlay4').style.display = 'flex';
+
+    // 3. Monetag Ad Trigger (Screenshot wala function)
+    show_10661424().then(() => {
+        // Ad khatam hone par loading band
+        document.getElementById('loadingOverlay4').style.display = 'none';
+
+        // 4. Reward Logic
+        balance += 10;
+        updateUI();
+        saveData();
+
+        // 5. Timer Set karein aur button disable karein
+        lastAdClaimTime = Date.now();
+        localStorage.setItem('lastAdClaim', lastAdClaimTime);
+        checkAdButtonStatus();
+
+        // 6. Success Popup dikhayein
+        document.getElementById('Interstitial-pop-amount').innerText = "10";
+        document.getElementById('InterstitialOverlay').style.display = 'flex';
+
+    }).catch((err) => {
+        document.getElementById('loadingOverlay4').style.display = 'none';
+        tg.showAlert("Ad not ready. Try again in a moment.");
+        console.error("Ad Error:", err);
+    });
+}
+
+// Button ko disable/enable karne ka function
+function checkAdButtonStatus() {
+    const now = Date.now();
+    const waitTime = 2 * 60 * 60 * 1000;
+    const btn = document.getElementById('watchBtn');
+
+    if (now - lastAdClaimTime < waitTime) {
+        btn.disabled = true;
+        btn.innerText = "Locked 🕒";
+        btn.style.opacity = "0.5";
+        btn.style.cursor = "not-allowed";
+    } else {
+        btn.disabled = false;
+        btn.innerText = "Claim";
+        btn.style.opacity = "1";
+        btn.style.cursor = "pointer";
+    }
+}
+
+// Popup band karne ka function
+function closeInterstitialPopup() {
+    document.getElementById('InterstitialOverlay').style.display = 'none';
+}
+
+// App khulne par button status check karein
+setInterval(checkAdButtonStatus, 60000); // Har minute check karega
+window.addEventListener('load', checkAdButtonStatus);
 
         
 async function withdraw() {
