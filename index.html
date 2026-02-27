@@ -494,27 +494,45 @@
 </div> 
     
     <div id="wallet" class="page"> <h2 style="color: #f3ba2f; text-align: center; margin-bottom: 20px; font-weight: 800;">My Bank</h2>    
-    <div style="background: linear-gradient(145deg, #161b22, #0d1117); padding: 30px; border-radius: 28px; border: 1px solid #30363d;">
+<div id="wallet" class="page"> 
+    <h2 style="color: #f3ba2f; text-align: center; margin-bottom: 20px; font-weight: 800;">My Bank</h2>    
+    
+    <div style="background: linear-gradient(145deg, #161b22, #0d1117); padding: 30px; border-radius: 28px; border: 1px solid #30363d; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
+        
         <p style="color: #8b949e; margin: 0; font-size: 14px;">Withdrawable</p>
         <h1 style="color: #f3ba2f; font-size: 48px; margin: 10px 0;"><span id="w-balance">0.00</span></h1>
         
         <input type="text" id="upiId" class="upi-input" placeholder="Enter UPI ID" 
-               style="width: 100%; background: #0d1117; border: 1px solid #30363d; color: #fff; padding: 15px; border-radius: 12px; margin-bottom: 20px;">
+               style="width: 100%; background: #0d1117; border: 1px solid #30363d; color: #fff; padding: 15px; border-radius: 12px; margin-bottom: 20px; outline: none;">
         
-        <button class="btn-action" style="width: 100%; height: 55px; background: #f3ba2f; color: #000; border-radius: 15px;" onclick="withdraw()">
+        <button class="btn-action" style="width: 100%; height: 55px; background: #f3ba2f; color: #000; border: none; border-radius: 15px; font-weight: 700; cursor: pointer;" onclick="withdraw()">
             WITHDRAW NOW
         </button>
-    </div>
-</div>
-            
+
         <div id="txn-history" style="margin-top: 25px; border-top: 1px solid #30363d; padding-top: 20px;">
             <p style="color: #8b949e; font-size: 11px; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 600;">Recent History (Last 1)</p>
             <div id="txn-list" style="display: flex; flex-direction: column; gap: 10px;">
-            <p id="no-txn" style="color: #484f58; font-size: 13px; text-align: center;">No history found</p>
+                <p id="no-txn" style="color: #484f58; font-size: 13px; text-align: center;">No history found</p>
             </div>
         </div>
-    </div>
-</div>
+        
+    </div> </div> ```
+
+
+
+---
+
+### Kya theek kiya maine?
+
+1.  **Hierarchy Fix:** `txn-history` ko Bank Card wale `div` ke andar daal diya hai. Isse yeh ek single "Bank Unit" ki tarah dikhega.
+2.  **Tag Balance:** Aapne pehle `wallet` page ko `txn-history` se pehle hi band kar diya tha, isliye history gayab ho rahi thi. Maine tags ko sequence mein band kiya hai.
+3.  **Visual Cleanliness:** `outline: none` aur `cursor: pointer` add kar diya hai taaki button aur input box zyada professional lagein.
+
+### Agla Step:
+Ise replace karne ke baad check karein ki **Withdraw Button** ke niche **History** aa rahi hai ya nahi. 
+
+**Kya aap chahte hain ki Withdraw button par click karte hi ek loading spinner (gol ghumne wala icon) bhi dikhe?**
+
     <div id="frens" class="page">
         <h2 style="color:var(--gold);">Referral Dashboard</h2>
         <div class="glass-card" style="flex-direction:column; text-align:center; padding:30px;">
