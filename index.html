@@ -934,16 +934,32 @@ function checkAdButtonStatus() {
 
 function closeInterstitialPopup() { document.getElementById('InterstitialOverlay').style.display = 'none'; }
         
-// Global Variables
+// --- RichAds Global Variables ---
 let lastRichAdClaimTime = parseInt(localStorage.getItem('lastRichAdClaim')) || 0;
 let richAdsInitialized = false;
+let richadsController = null; // Docs ke hisaab se variable name
+
+// Page load par initialize karein
+window.addEventListener('load', () => {
+    try {
+        richadsController = new window.TelegramAdsController();
+        richadsController.initialize({
+            pubId: "1003709", // Aapka Pub ID
+            appId: "6381",    // Aapka App ID
+            debug: false      // Live mode ke liye false
+        });
+        richAdsInitialized = true;
+    } catch (e) {
+        console.error("RichAds Init Error:", e);
+    }
+});
 
 async function claimRichads() {
     const now = Date.now();
-    const waitTime = 24 * 60 * 60 * 1000; // 24 hours
+    const waitTime = 24 * 60 * 60 * 1000;
 
     if (now - lastRichAdClaimTime < waitTime) {
-        const remainingHours = Math.ceil((waitTime - (now - lastRichAdClaimTime)) / (60 * 60 * 1000));
+        const remainingHours = Math.ceil((waitTime - (now - lastRichAdClaimTime)) / 3600000);
         return tg.showAlert(`Please wait ${remainingHours} hours!`);
     }
 
@@ -951,49 +967,37 @@ async function claimRichads() {
     const loader = document.getElementById('loadingOverlay5');
     if(loader) loader.style.display = 'flex';
 
-    try {
-        // 2. Initialization Logic
-        if (!window.TelegramAdsController) {
-            throw new Error("SDK not loaded");
-        }
+    // 2. Trigger Video Ad (Docs Step 4)
+    if (richadsController && richAdsInitialized) {
+        richadsController.triggerInterstitialVideo()
+            .then((result) => {
+                // Ad successfully completed
+                if(loader) loader.style.display = 'none';
 
-        if (!richAdsInitialized) {
-            await window.TelegramAdsController.initialize({
-                pubId: "1003709",
-                appId: "6381",
+                // 🎁 Reward & Database Sync
+                balance += 20;
+                updateUI(); 
+                
+                lastRichAdClaimTime = Date.now();
+                localStorage.setItem('lastRichAdClaim', lastRichAdClaimTime);
+                checkRichAdButtonStatus();
+
+                // Turant save karein
+                saveData(); 
+
+                // Success Popup
+                document.getElementById('Richads-pop-amount').innerText = "20";
+                document.getElementById('RichadsOverlay').style.display = 'flex';
+            })
+            .catch((result) => {
+                // Ad failed or rejected
+                if(loader) loader.style.display = 'none';
+                console.log("Ad Result:", result);
+                tg.showAlert("Video not available. Try again later.");
             });
-            richAdsInitialized = true;
-        }
-
-        // 3. Show Ad and Wait for Completion
-        // Humne yahan await lagaya hai taaki ad khatam hone ka wait ho
-        const result = await window.TelegramAdsController.show();
-        
-        // Ad band hote hi loading hatao
+    } else {
         if(loader) loader.style.display = 'none';
-
-        // 4. Reward & Sync
-        balance += 20;
-        updateUI(); // Immediate UI update
-        
-        lastRichAdClaimTime = Date.now();
-        localStorage.setItem('lastRichAdClaim', lastRichAdClaimTime);
-        checkRichAdButtonStatus();
-
-        // Database ko turant save karein (500 tap limit bypass)
-        await saveData(); 
-
-        // 5. Success Popup
-        const popAmt = document.getElementById('Richads-pop-amount');
-        if(popAmt) popAmt.innerText = "20";
-        const overlay = document.getElementById('RichadsOverlay');
-        if(overlay) overlay.style.display = 'flex';
-
-    } catch (err) {
-        // Agar ad load nahi hua toh loading ghumna band ho jayega
-        if(loader) loader.style.display = 'none';
-        console.error("RichAds Error:", err);
-        tg.showAlert("Ad not ready or blocked. Please try again in 5 seconds.");
+        tg.showAlert("Ad Controller not ready. Please refresh.");
     }
 }
 
