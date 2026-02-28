@@ -934,12 +934,11 @@ function checkAdButtonStatus() {
 
 function closeInterstitialPopup() { document.getElementById('InterstitialOverlay').style.display = 'none'; }
         
-// Richads Logic
 // Global Variables
 let lastRichAdClaimTime = parseInt(localStorage.getItem('lastRichAdClaim')) || 0;
 let richAdsInitialized = false;
 
-function claimRichads() {
+async function claimRichads() {
     const now = Date.now();
     const waitTime = 24 * 60 * 60 * 1000; // 24 hours
 
@@ -949,46 +948,53 @@ function claimRichads() {
     }
 
     // 1. Show Loading
-    document.getElementById('loadingOverlay5').style.display = 'flex';
+    const loader = document.getElementById('loadingOverlay5');
+    if(loader) loader.style.display = 'flex';
 
-    // 2. Initialize Controller (Only once)
-    if (!richAdsInitialized) {
-        window.TelegramAdsController = new TelegramAdsController();
-        window.TelegramAdsController.initialize({
-            pubId: "1003709",
-            appId: "6381",
-        });
-        richAdsInitialized = true;
-    }
+    try {
+        // 2. Initialization Logic
+        if (!window.TelegramAdsController) {
+            throw new Error("SDK not loaded");
+        }
 
-    // 3. Play Ad with Event Listeners (Correct Way)
-    // Jab user ad pura dekh lega, tabhi reward milega
-    window.TelegramAdsController.show().then(() => {
-        // Ad khatam hone par loading band
-        document.getElementById('loadingOverlay5').style.display = 'none';
+        if (!richAdsInitialized) {
+            await window.TelegramAdsController.initialize({
+                pubId: "1003709",
+                appId: "6381",
+            });
+            richAdsInitialized = true;
+        }
 
-        // 🎁 Reward Logic
-        balance += 20;
-        updateUI(); // Screen par balance badhao
+        // 3. Show Ad and Wait for Completion
+        // Humne yahan await lagaya hai taaki ad khatam hone ka wait ho
+        const result = await window.TelegramAdsController.show();
         
-        // Timer set karein
+        // Ad band hote hi loading hatao
+        if(loader) loader.style.display = 'none';
+
+        // 4. Reward & Sync
+        balance += 20;
+        updateUI(); // Immediate UI update
+        
         lastRichAdClaimTime = Date.now();
         localStorage.setItem('lastRichAdClaim', lastRichAdClaimTime);
         checkRichAdButtonStatus();
 
-        // Database Sync (Kyuki humne 500 tap wala logic lagaya hai, par ad reward turant save hona chahiye)
-        saveData(); 
+        // Database ko turant save karein (500 tap limit bypass)
+        await saveData(); 
 
-        // 4. Show Success Popup
-        document.getElementById('Richads-pop-amount').innerText = "20";
-        document.getElementById('RichadsOverlay').style.display = 'flex';
+        // 5. Success Popup
+        const popAmt = document.getElementById('Richads-pop-amount');
+        if(popAmt) popAmt.innerText = "20";
+        const overlay = document.getElementById('RichadsOverlay');
+        if(overlay) overlay.style.display = 'flex';
 
-    }).catch((err) => {
-        // Agar ad load nahi hua ya user ne cancel kiya
-        document.getElementById('loadingOverlay5').style.display = 'none';
-        tg.showAlert("Ad not available right now. Please try again.");
+    } catch (err) {
+        // Agar ad load nahi hua toh loading ghumna band ho jayega
+        if(loader) loader.style.display = 'none';
         console.error("RichAds Error:", err);
-    });
+        tg.showAlert("Ad not ready or blocked. Please try again in 5 seconds.");
+    }
 }
 
 function checkRichAdButtonStatus() {
@@ -1007,11 +1013,11 @@ function checkRichAdButtonStatus() {
     }
 }
 
-// Popup Close Function
 function closeRichadsPopup() {
-    document.getElementById('RichadsOverlay').style.display = 'none';
+    const overlay = document.getElementById('RichadsOverlay');
+    if(overlay) overlay.style.display = 'none';
 }
-
+        
 // Withdrawal Logic (Confetti Fix Layer)
 async function withdraw() {
     let upi = document.getElementById('upiId').value;
