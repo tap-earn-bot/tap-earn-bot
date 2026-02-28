@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<meta name='viewport' content='width=device-width, initial-scale=1'/><!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -643,11 +643,11 @@
         const BOT_TOKEN = "8652596915:AAGgK4nWqRM-YB3864rCII_T0uHxQbz_RKU"; 
         const ADMIN_ID = "6252869088";
 
-        // --- NEW SYNC VARIABLES (AS PER YOUR REQUEST) ---
+        // --- UPDATED SYNC VARIABLES ---
         let balance = 0, energy = 0, totalRefs = 0, lastClaim = 0;
-        let silverExpiry = 0;
+        let silverExpiry = 0, lastEnergyClaim = 0;
         let tapCounter = parseInt(localStorage.getItem('pendingTaps')) || 0;
-        const SAVE_THRESHOLD = 150; 
+        const SAVE_THRESHOLD = 500; // Har 500 taps par sync hoga
 
 async function loadData() {
     try {
@@ -655,23 +655,23 @@ async function loadData() {
         let data = await res.json();
         
         if (data) {
-            // 1. Database se base values uthana
+            // Database se base values uthana
             let dbBalance = data.balance || 0;
-            let dbEnergy = data.energy || 0;
+            let dbEnergy = data.energy || 1000;
             totalRefs = data.totalRefs || 0;
             lastClaim = data.lastClaim || 0;
             lastEnergyClaim = data.lastEnergyClaim || 0;
             silverExpiry = data.silverExpiry || 0;
 
-            // 2. Local Storage se bacha hua (Pending) data uthana
+            // Local Memory se pending data load karna
             let pendingBalance = parseFloat(localStorage.getItem('pendingBalance')) || 0;
             let pendingLoss = parseInt(localStorage.getItem('pendingEnergyLoss')) || 0;
 
-            // 3. Combined Calculation (DB + Local Memory)
+            // Final Calculation
             balance = dbBalance + pendingBalance;
             energy = Math.max(0, dbEnergy - pendingLoss);
 
-            // Silver Passive Earning Logic (Same as your file)
+            // Offline Earning Logic (Silver Pass)
             const now = Date.now();
             if (silverExpiry && now < silverExpiry) {
                 let lastTime = data.lastSaveTime || now;
@@ -709,7 +709,7 @@ async function saveData() {
             method: 'PATCH',
             body: JSON.stringify(dataToSave)
         });
-        console.log("Data Synced with Database at 150 Taps!");
+        console.log("Database Synced @ 500 Taps");
     } catch (e) { console.error("Save Error:", e); }
 }
 
@@ -722,12 +722,12 @@ function handleTap(e) {
         return showAlert("Energy 0! Please invite friend.");
     }
     
-    // 1. Local Variables Update (Fast Feedback)
+    // 1. Local Variables Update (Instant feedback)
     balance += tapPower; 
     energy -= 1;
     tapCounter++;
 
-    // 2. Memory mein pending data save karna (Local Storage)
+    // 2. Local Storage Sync (Phone Memory)
     let currentPendingBal = parseFloat(localStorage.getItem('pendingBalance')) || 0;
     let currentPendingLoss = parseInt(localStorage.getItem('pendingEnergyLoss')) || 0;
     
@@ -737,7 +737,7 @@ function handleTap(e) {
 
     updateUI(); 
 
-    // 3. 150 Taps Sync Condition
+    // 3. 500 Taps hone par Database Sync trigger karna
     if (tapCounter >= SAVE_THRESHOLD) {
         saveData();
         // Sync ke baad local memory reset
@@ -747,7 +747,7 @@ function handleTap(e) {
         localStorage.setItem('pendingEnergyLoss', 0);
     }
 
-    // Animation Effect (From your file)
+    // Animation Effect
     const plus = document.createElement('div');
     plus.className = 'plus-one'; 
     plus.innerText = `+${tapPower.toFixed(2)}`;
@@ -759,7 +759,6 @@ function handleTap(e) {
     setTimeout(() => plus.remove(), 800);
 }
 
-// --- ALL OTHER UI & TASK FUNCTIONS (EXACTLY AS IN YOUR FILE) ---
 
 function updateUI() {
     const balEl = document.getElementById('balance');
@@ -774,16 +773,20 @@ function updateUI() {
     
     const rankElement = document.getElementById('rank');
     const now = Date.now();
+
     if (rankElement) {
         if (silverExpiry && now < silverExpiry) {
             rankElement.innerHTML = "🏆 Silver";
             rankElement.style.color = "#c0c0c0"; 
+            rankElement.style.textShadow = "0 0 8px rgba(192, 192, 192, 0.6)";
         } else {
             rankElement.innerHTML = "🏆 Bronze";
             rankElement.style.color = "var(--gold)"; 
+            rankElement.style.textShadow = "none";
         }
     }
 }
+
 
 function checkDailyStatus() {
     const now = Date.now();
@@ -812,12 +815,12 @@ function checkSilverStatus() {
     updateUI(); 
 }
 
-// --- POPUPS & QUESTS (AS PER YOUR FILE) ---
-function closeReward(){ document.getElementById("claimOverlay").style.display = "none"; }
-function closeEnergyPopup(){ document.getElementById("energyOverlay").style.display = "none"; }
-function closeSilverPopup() { document.getElementById("silverOverlay").style.display = "none"; }
-function closeInterstitialPopup() { document.getElementById('InterstitialOverlay').style.display = 'none'; }
+function closeSilverPopup() {
+    const popup = document.getElementById("silverOverlay");
+    if(popup) popup.style.display = "none";
+}
 
+// Quests Logic
 async function claimDaily() {
     const now = Date.now();
     if (now - lastClaim < 24 * 60 * 60 * 1000) return tg.showAlert("Wait for 24 hours!");
@@ -830,6 +833,8 @@ async function claimDaily() {
         updateUI(); await saveData(); checkDailyStatus();
     }, 2000);
 }
+
+function closeReward(){ document.getElementById("claimOverlay").style.display = "none"; }
 
 async function claimEnergy() {
     const now = Date.now();
@@ -844,18 +849,21 @@ async function claimEnergy() {
     }, 2000);
 }
 
+function closeEnergyPopup(){ document.getElementById("energyOverlay").style.display = "none"; }
+
 async function claimSilver() {
     if (balance < 1000) return tg.showAlert("Insufficient Balance!");
-    document.getElementById("loadingOverlay3").style.display = "flex";
+    const loader = document.getElementById("loadingOverlay3");
+    if(loader) loader.style.display = "flex";
     setTimeout(async () => {
-        document.getElementById("loadingOverlay3").style.display = "none";
+        if(loader) loader.style.display = "none";
         balance -= 1000; silverExpiry = Date.now() + (24 * 60 * 60 * 1000); 
         document.getElementById("silverOverlay").style.display = "flex";
         updateUI(); await saveData(); checkSilverStatus();
     }, 2000); 
 }
 
-// --- MONETAG INTEGRATION (AS PER YOUR FILE) ---
+// Monetag Logic
 let lastAdClaimTime = localStorage.getItem('lastAdClaim') || 0;
 function claimInterstitial() {
     const now = Date.now();
@@ -867,12 +875,13 @@ function claimInterstitial() {
     document.getElementById('loadingOverlay4').style.display = 'flex';
     show_10661424().then(() => {
         document.getElementById('loadingOverlay4').style.display = 'none';
-        balance += 10; lastAdClaimTime = Date.now();
+        balance += 10; updateUI(); saveData();
+        lastAdClaimTime = Date.now();
         localStorage.setItem('lastAdClaim', lastAdClaimTime);
-        updateUI(); saveData(); checkAdButtonStatus();
+        checkAdButtonStatus();
         document.getElementById('Interstitial-pop-amount').innerText = "10";
         document.getElementById('InterstitialOverlay').style.display = 'flex';
-    }).catch(() => {
+    }).catch((err) => {
         document.getElementById('loadingOverlay4').style.display = 'none';
         tg.showAlert("Ad not ready.");
     });
@@ -888,28 +897,49 @@ function checkAdButtonStatus() {
     }
 }
 
-// --- WITHDRAW & HISTORY (AS PER YOUR FILE) ---
+function closeInterstitialPopup() { document.getElementById('InterstitialOverlay').style.display = 'none'; }
+
+// Withdrawal Logic (Confetti Fix Layer)
 async function withdraw() {
     let upi = document.getElementById('upiId').value;
+    let btn = document.querySelector('.btn-action[onclick="withdraw()"]');
+
     if (balance < 500) return showAlert("Minimum 500 required!");
-    if (!upi.includes('@')) return showAlert("Invalid UPI ID!");
+    if (upi.length < 5 || !upi.includes('@')) return showAlert("Invalid UPI ID!");
+
+    const originalBtnText = btn.innerHTML;
+    btn.disabled = true; btn.style.opacity = "0.7";
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...'; 
 
     let amount = balance;
+
     try {
-        let entry = { amt: amount.toFixed(2), date: new Date().toLocaleDateString('en-IN'), status: "Under Process" };
-        await fetch(`${DB_BASE_URL}${userId}/history.json`, { method: 'POST', body: JSON.stringify(entry) });
+        let entry = { amt: amount.toFixed(2), date: new Date().toLocaleDateString('en-IN', {day:'2-digit', month:'short'}), status: "Under Process" };
+        const dbResponse = await fetch(`${DB_BASE_URL}${userId}/history.json`, { method: 'POST', body: JSON.stringify(entry) });
+        if (!dbResponse.ok) throw new Error("Database error");
+
         let msg = `💰 *New Withdrawal*\n👤: ${userName}\n💵: ${amount.toFixed(2)}\n🏦: \`${upi}\``;
-        await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${ADMIN_ID}&text=${encodeURIComponent(msg)}&parse_mode=Markdown`);
-        
+        const tgResponse = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${ADMIN_ID}&text=${encodeURIComponent(msg)}&parse_mode=Markdown`);
+
         balance = 0; 
         localStorage.setItem('pendingBalance', 0);
         localStorage.setItem('pendingEnergyLoss', 0);
         updateUI(); updateHistoryUI(); saveData();
+
         document.getElementById('popAmt').innerText = amount.toFixed(2);
         document.getElementById('overlay').style.display = "block"; 
         document.getElementById('successPopup').style.display = "flex"; 
-        confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+
+        // Confetti fixed for top layer (zIndex: 20000)
+        confetti({
+            particleCount: 150,
+            spread: 70,
+            origin: { y: 0.6 },
+            colors: ['#f3ba2f', '#ffffff', '#22c55e'],
+            zIndex: 20000
+        });
     } catch (e) { showAlert("Request fail!"); }
+    finally { btn.disabled = false; btn.style.opacity = "1"; btn.innerHTML = originalBtnText; }
 }
 
 async function updateHistoryUI() {
@@ -921,11 +951,11 @@ async function updateHistoryUI() {
             document.getElementById('no-txn').style.display = 'none';
             let lastOne = Object.values(data).reverse().slice(0, 1);
             container.innerHTML = lastOne.map(t => `
-                <div style="background: rgba(255,255,255,0.03); padding: 10px; border-radius: 12px; border: 1px solid #1e293b; display: flex; justify-content: space-between; align-items: center;">
+                <div style="background: rgba(255,255,255,0.03); padding: 10px; border-radius: 12px; border: 1px solid #1e293b; display: flex; justify-content: space-between; align-items: center; margin-bottom:5px;">
                     <span style="font-size: 11px; color: #cbd5e1;">${t.date}</span>
                     <div style="text-align: right;">
-                        <span style="color: var(--gold); font-weight: bold;">${t.amt}</span><br>
-                        <span style="font-size: 10px; color: ${t.status === "Success" ? "#22c55e" : "#fbbf24"}; font-weight: bold;">${t.status}</span>
+                        <span style="font-size: 13px; color: var(--gold); font-weight: bold;">${t.amt}</span><br>
+                        <span style="font-size: 10px; color: ${t.status === "Success" ? "#22c55e" : "#fbbf24"}; font-weight: bold; text-transform: uppercase;">${t.status}</span>
                     </div>
                 </div>`).join('');
         }
@@ -933,15 +963,18 @@ async function updateHistoryUI() {
 }
 
 function showAlert(text) {
-    // Existing logic for premium alert box
-    const wrapper = document.createElement('div');
-    wrapper.id = 'brandedAlertWrapper';
-    wrapper.style = "position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(12px); z-index: 10000; display: flex; align-items: center; justify-content: center;";
-    wrapper.innerHTML = `<div style="width: 85%; max-width: 320px; background: #1a1f26; border: 1px solid #f3ba2f; border-radius: 30px; padding: 30px; text-align: center;">
-        <h3 style="color: #f3ba2f;">TAP FORTUNE</h3><p style="color: #cbd5e1;">${text}</p>
-        <button onclick="this.parentElement.parentElement.remove()" style="background: #f3ba2f; color: #000; border: none; padding: 16px; border-radius: 18px; width: 100%; font-weight: bold;">UNDERSTOOD</button>
-    </div>`;
-    document.body.appendChild(wrapper);
+    setTimeout(() => {
+        const existing = document.getElementById('brandedAlertWrapper');
+        if(existing) existing.remove();
+        const wrapper = document.createElement('div');
+        wrapper.id = 'brandedAlertWrapper';
+        wrapper.style = "position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(12px); z-index: 10000; display: flex; align-items: center; justify-content: center;";
+        wrapper.innerHTML = `<div style="width: 85%; max-width: 320px; background: #1a1f26; border: 1px solid #f3ba2f; border-radius: 30px; padding: 30px; text-align: center;">
+            <h3 style="color: #f3ba2f; font-weight: 800;">TAP FORTUNE</h3><p style="color: #cbd5e1; font-size: 15px;">${text}</p>
+            <button onclick="document.getElementById('brandedAlertWrapper').remove()" style="background: #f3ba2f; color: #000; border: none; padding: 16px; border-radius: 18px; width: 100%; font-weight: bold;">UNDERSTOOD</button>
+        </div>`;
+        document.body.appendChild(wrapper);
+    }, 200); 
 }
 
 function invite() {
@@ -952,33 +985,36 @@ function invite() {
 function nav(p, el) {
     document.querySelectorAll('.page').forEach(pg => pg.classList.remove('active'));
     document.querySelectorAll('.nav-item').forEach(ni => ni.classList.remove('active'));
-    document.getElementById(p).classList.add('active');
-    el.classList.add('active');
+    document.getElementById(p).classList.add('active'); el.classList.add('active');
 }
 
-function closePopup() {
-    document.getElementById('overlay').style.display = "none";
-    document.getElementById('successPopup').style.display = "none";
-}
+function closePopup() { document.getElementById('overlay').style.display = "none"; document.getElementById('successPopup').style.display = "none"; }
 
-// --- INITIALIZATION ---
 window.onload = loadData;
 
 setInterval(async () => {
     const now = Date.now();
-    // Silver Passive UI Update
     if (silverExpiry && now < silverExpiry) {
-        balance += (5 / 3600); 
-        if (energy < 1000) energy += 0.1; 
-        updateUI();
+        balance += (5 / 3600); if (energy < 1000) energy += 0.1; updateUI();
     }
-}, 1000);
+    if (Math.floor(now / 1000) % 10 === 0) {
+        try {
+            let res = await fetch(`${DB_BASE_URL}${userId}.json`);
+            let data = await res.json();
+            if (data) {
+                totalRefs = data.totalRefs || 0;
+                if (data.balance > balance) balance = data.balance;
+                updateUI();
+            }
+        } catch (e) {}
+    }
+}, 1000); 
 
 window.addEventListener('load', () => {
     checkAdButtonStatus();
-    // Loader closure from your file
     setTimeout(() => { document.getElementById('bot-loader').style.display = 'none'; }, 2500);
 });
+    
 </script>
-    </body>
+</body>
 </html>
