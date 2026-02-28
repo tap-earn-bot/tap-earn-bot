@@ -922,98 +922,72 @@ function claimInterstitial() {
     });
 }
         
-function checkAdButtonStatus() {
-    const now = Date.now();
-    const btn = document.getElementById('watchBtn');
-    if (now - lastAdClaimTime < (2 * 60 * 60 * 1000)) {
-        btn.disabled = true; btn.innerText = "Locked"; btn.style.opacity = "0.5";
-    } else {
-        btn.disabled = false; btn.innerText = "Claim"; btn.style.opacity = "1";
-    }
-}
-
-function closeInterstitialPopup() { document.getElementById('InterstitialOverlay').style.display = 'none'; }
-        
-// --- RichAds Global Variables ---
-let lastRichAdClaimTime = parseInt(localStorage.getItem('lastRichAdClaim')) || 0;
+// --- RichAds Global Setup ---
+let richadsController = null; 
 let richAdsInitialized = false;
-let richadsController = null; // Docs ke hisaab se variable name
+let lastRichAdClaimTime = parseInt(localStorage.getItem('lastRichAdClaim')) || 0;
 
-// Page load par initialize karein
+// App load hote hi RichAds ko "Warm up" (Ready) karein
 window.addEventListener('load', () => {
     try {
-        richadsController = new window.TelegramAdsController();
-        richadsController.initialize({
-            pubId: "1003709", // Aapka Pub ID
-            appId: "6381",    // Aapka App ID
-            debug: false      // Live mode ke liye false
-        });
-        richAdsInitialized = true;
+        if (window.TelegramAdsController) {
+            richadsController = new window.TelegramAdsController();
+            richadsController.initialize({
+                pubId: "1003709", // Aapka Pub ID
+                appId: "6381",    // Aapka App ID
+                debug: false      // Agar ad na dikhe toh ise true karke test karein
+            });
+            richAdsInitialized = true;
+            console.log("RichAds System Ready");
+        }
     } catch (e) {
-        console.error("RichAds Init Error:", e);
+        console.error("RichAds Connection Error:", e);
     }
 });
 
 async function claimRichads() {
     const now = Date.now();
-    const waitTime = 24 * 60 * 60 * 1000;
+    const waitTime = 24 * 60 * 60 * 1000; // 24 Hours
 
     if (now - lastRichAdClaimTime < waitTime) {
-        const remainingHours = Math.ceil((waitTime - (now - lastRichAdClaimTime)) / 3600000);
-        return tg.showAlert(`Please wait ${remainingHours} hours!`);
+        const remainingMin = Math.ceil((waitTime - (now - lastRichAdClaimTime)) / (60 * 1000));
+        return tg.showAlert(`Please wait ${remainingMin} minutes!`);
     }
 
-    // 1. Show Loading
     const loader = document.getElementById('loadingOverlay5');
     if(loader) loader.style.display = 'flex';
 
-    // 2. Trigger Video Ad (Docs Step 4)
+    // Docs ke mutabiq trigger method
     if (richadsController && richAdsInitialized) {
         richadsController.triggerInterstitialVideo()
             .then((result) => {
-                // Ad successfully completed
+                // Ad successfully watched
                 if(loader) loader.style.display = 'none';
 
-                // 🎁 Reward & Database Sync
                 balance += 20;
-                updateUI(); 
+                updateUI(); // Immediate feedback
                 
                 lastRichAdClaimTime = Date.now();
                 localStorage.setItem('lastRichAdClaim', lastRichAdClaimTime);
                 checkRichAdButtonStatus();
 
-                // Turant save karein
+                // 500 tap sync ko bypass karke turant save karein
                 saveData(); 
 
-                // Success Popup
                 document.getElementById('Richads-pop-amount').innerText = "20";
                 document.getElementById('RichadsOverlay').style.display = 'flex';
             })
-            .catch((result) => {
-                // Ad failed or rejected
+            .catch((error) => {
+                // Ad fail or user closed
                 if(loader) loader.style.display = 'none';
-                console.log("Ad Result:", result);
-                tg.showAlert("Video not available. Try again later.");
+                console.log("RichAds Catch:", error);
+                tg.showAlert("Video not available right now. Please try after some time.");
             });
     } else {
         if(loader) loader.style.display = 'none';
-        tg.showAlert("Ad Controller not ready. Please refresh.");
-    }
-}
-
-function checkRichAdButtonStatus() {
-    const now = Date.now();
-    const btn = document.getElementById('watchBtn2');
-    if (!btn) return;
-
-    if (now - lastRichAdClaimTime < (24 * 60 * 60 * 1000)) {
-        btn.disabled = true;
-        btn.innerText = "Locked";
-        btn.style.opacity = "0.5";
-    } else {
-        btn.disabled = false;
-        btn.innerText = "Claim +20";
-        btn.style.opacity = "1";
+        tg.showAlert("Ad Controller is initializing. Please wait 5 seconds.");
+        // Dubara koshish karein agar init nahi hua
+        if(!richAdsInitialized) window.location.reload(); 
     }
 }
 
