@@ -935,23 +935,23 @@ function checkAdButtonStatus() {
 function closeInterstitialPopup() { document.getElementById('InterstitialOverlay').style.display = 'none'; }
         
 // Richads Logic
-// Global
+// Global Variables
 let lastRichAdClaimTime = parseInt(localStorage.getItem('lastRichAdClaim')) || 0;
+let richAdsInitialized = false;
+
 function claimRichads() {
     const now = Date.now();
     const waitTime = 24 * 60 * 60 * 1000; // 24 hours
 
     if (now - lastRichAdClaimTime < waitTime) {
-        const remainingMin = Math.ceil(
-            (waitTime - (now - lastRichAdClaimTime)) / (60 * 1000)
-        );
-        return tg.showAlert(`Please wait ${remainingMin} minutes!`);
+        const remainingHours = Math.ceil((waitTime - (now - lastRichAdClaimTime)) / (60 * 60 * 1000));
+        return tg.showAlert(`Please wait ${remainingHours} hours!`);
     }
 
-    // show loading
+    // 1. Show Loading
     document.getElementById('loadingOverlay5').style.display = 'flex';
 
-    // ✅ INIT ONLY ON BUTTON CLICK (auto ad fix)
+    // 2. Initialize Controller (Only once)
     if (!richAdsInitialized) {
         window.TelegramAdsController = new TelegramAdsController();
         window.TelegramAdsController.initialize({
@@ -961,31 +961,40 @@ function claimRichads() {
         richAdsInitialized = true;
     }
 
-    // ✅ SHOW REWARDED / PLAYABLE AD
-    TelegramAdsController.show();
-
-    // ⏱ Reward after safe delay (industry standard)
-    setTimeout(() => {
+    // 3. Play Ad with Event Listeners (Correct Way)
+    // Jab user ad pura dekh lega, tabhi reward milega
+    window.TelegramAdsController.show().then(() => {
+        // Ad khatam hone par loading band
         document.getElementById('loadingOverlay5').style.display = 'none';
 
-        // 🎁 reward
+        // 🎁 Reward Logic
         balance += 20;
-        updateUI();
-        saveData();
-
+        updateUI(); // Screen par balance badhao
+        
+        // Timer set karein
         lastRichAdClaimTime = Date.now();
         localStorage.setItem('lastRichAdClaim', lastRichAdClaimTime);
-
         checkRichAdButtonStatus();
 
+        // Database Sync (Kyuki humne 500 tap wala logic lagaya hai, par ad reward turant save hona chahiye)
+        saveData(); 
+
+        // 4. Show Success Popup
         document.getElementById('Richads-pop-amount').innerText = "20";
         document.getElementById('RichadsOverlay').style.display = 'flex';
-    }, 30000); // 30 sec (video / playable safe time)
+
+    }).catch((err) => {
+        // Agar ad load nahi hua ya user ne cancel kiya
+        document.getElementById('loadingOverlay5').style.display = 'none';
+        tg.showAlert("Ad not available right now. Please try again.");
+        console.error("RichAds Error:", err);
+    });
 }
-        
+
 function checkRichAdButtonStatus() {
     const now = Date.now();
     const btn = document.getElementById('watchBtn2');
+    if (!btn) return;
 
     if (now - lastRichAdClaimTime < (24 * 60 * 60 * 1000)) {
         btn.disabled = true;
@@ -993,11 +1002,12 @@ function checkRichAdButtonStatus() {
         btn.style.opacity = "0.5";
     } else {
         btn.disabled = false;
-        btn.innerText = "Claim";
+        btn.innerText = "Claim +20";
         btn.style.opacity = "1";
     }
 }
 
+// Popup Close Function
 function closeRichadsPopup() {
     document.getElementById('RichadsOverlay').style.display = 'none';
 }
