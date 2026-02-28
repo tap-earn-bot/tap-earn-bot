@@ -139,7 +139,6 @@
     justify-content: center;
     z-index: 10000;
 }
-
 .reward-card {
     position: relative;
     width: 100%;
@@ -266,7 +265,19 @@
     align-items: center;
     justify-content: center;
     z-index: 10001;
+}
+    #loadingOverlay5 {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(8px);
+    display: none; /* JS se show hoga */
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 10001;
     }
+    
 .premium-loader {
     width: 60px;
     height: 60px;
@@ -474,21 +485,25 @@
     
 <div id="loadingOverlay">
     <div class="premium-loader"></div>
-    <div class="loading-text">Processing...</div>
+    <div class="loading-text"></div>
 </div>
 <div id="loadingOverlay2">
     <div class="premium-loader"></div>
-    <div class="loading-text">Processing...</div>
+    <div class="loading-text"></div>
 </div>
 <div id="loadingOverlay3">
     <div class="premium-loader"></div>
-    <div class="loading-text">Processing...</div>
+    <div class="loading-text"></div>
 </div>
  <div id="loadingOverlay4">
     <div class="premium-loader"></div>
-    <div class="loading-text">Processing...</div>
+    <div class="loading-text"></div>
  </div>   
-
+ <div id="loadingOverlay5">
+    <div class="premium-loader"></div>
+    <div class="loading-text"></div>
+ </div>
+    
 <div id="claimOverlay">
     <div class="reward-card">
         <div class="sunburst"></div>
@@ -541,6 +556,20 @@
     </div>
 </div>
 
+<div id="RichadsOverlay" style="display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.9); align-items: center; justify-content: center; z-index: 10000;">
+    <div class="reward-card">
+        <div class="sunburst"></div>
+        <div class="congrats-text">Congratulations on getting</div>
+        <div class="reward-amount" id="Richads-pop-amount">20</div>
+        <div class="reward-unit">TapFortune</div>
+        
+        <img src="https://raw.githubusercontent.com/tap-earn-bot/tap-earn-bot/main/1000410752-removebg-preview.png" class="coin-stack" style="filter: hue-rotate(180deg);">
+
+        <button class="accept-btn" onclick="closeRichadsPopup()">ACCEPT</button>
+    </div>
+</div>
+
+
     
 <div id="overlay"></div>
 
@@ -590,8 +619,13 @@
     </div>
 
     <div class="glass-card">
-        <div><b>Premium Video Quest</b><p style="font-size:12px; color:#777;"> watch short clip 2 earn +10 cash</p></div>
+        <div><b>Premium Video Quest</b><p style="font-size:12px; color:#777;">watch short clip earn +10 cash</p></div>
         <button id="watchBtn" class="btn-action" onclick="claimInterstitial()">Claim</button>
+    </div>
+    
+    <div class="glass-card">
+        <div><b>Premium Video Quest</b><p style="font-size:12px; color:#777;">watch short clip earn +10 cash</p></div>
+        <button id="watchBtn2" class="btn-action" onclick="claimRichads()">Claim</button>
     </div>
 </div>
      
@@ -887,7 +921,7 @@ function claimInterstitial() {
         tg.showAlert("Ad not ready.");
     });
 }
-
+        
 function checkAdButtonStatus() {
     const now = Date.now();
     const btn = document.getElementById('watchBtn');
@@ -899,6 +933,74 @@ function checkAdButtonStatus() {
 }
 
 function closeInterstitialPopup() { document.getElementById('InterstitialOverlay').style.display = 'none'; }
+        
+// Richads Logic
+// Global
+let lastRichAdClaimTime = parseInt(localStorage.getItem('lastRichAdClaim')) || 0;
+function claimRichads() {
+    const now = Date.now();
+    const waitTime = 24 * 60 * 60 * 1000; // 24 hours
+
+    if (now - lastRichAdClaimTime < waitTime) {
+        const remainingMin = Math.ceil(
+            (waitTime - (now - lastRichAdClaimTime)) / (60 * 1000)
+        );
+        return tg.showAlert(`Please wait ${remainingMin} minutes!`);
+    }
+
+    // show loading
+    document.getElementById('loadingOverlay5').style.display = 'flex';
+
+    // ✅ INIT ONLY ON BUTTON CLICK (auto ad fix)
+    if (!richAdsInitialized) {
+        window.TelegramAdsController = new TelegramAdsController();
+        window.TelegramAdsController.initialize({
+            pubId: "1003709",
+            appId: "6381",
+        });
+        richAdsInitialized = true;
+    }
+
+    // ✅ SHOW REWARDED / PLAYABLE AD
+    TelegramAdsController.show();
+
+    // ⏱ Reward after safe delay (industry standard)
+    setTimeout(() => {
+        document.getElementById('loadingOverlay5').style.display = 'none';
+
+        // 🎁 reward
+        balance += 20;
+        updateUI();
+        saveData();
+
+        lastRichAdClaimTime = Date.now();
+        localStorage.setItem('lastRichAdClaim', lastRichAdClaimTime);
+
+        checkRichAdButtonStatus();
+
+        document.getElementById('Richads-pop-amount').innerText = "20";
+        document.getElementById('RichadsOverlay').style.display = 'flex';
+    }, 30000); // 30 sec (video / playable safe time)
+}
+        
+function checkRichAdButtonStatus() {
+    const now = Date.now();
+    const btn = document.getElementById('watchBtn2');
+
+    if (now - lastRichAdClaimTime < (24 * 60 * 60 * 1000)) {
+        btn.disabled = true;
+        btn.innerText = "Locked";
+        btn.style.opacity = "0.5";
+    } else {
+        btn.disabled = false;
+        btn.innerText = "Claim";
+        btn.style.opacity = "1";
+    }
+}
+
+function closeRichadsPopup() {
+    document.getElementById('RichadsOverlay').style.display = 'none';
+}
 
 // Withdrawal Logic (Confetti Fix Layer)
 async function withdraw() {
