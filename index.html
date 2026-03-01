@@ -6,7 +6,6 @@
     <title>Tap Fortune</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src='//libtl.com/sdk.js' data-zone='10661424' data-sdk='show_10661424'></script>
-    <script src="https://richinfo.co/richpartners/telegram/js/tg-ob.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.9.6/lottie.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
@@ -139,6 +138,7 @@
     justify-content: center;
     z-index: 10000;
 }
+
 .reward-card {
     position: relative;
     width: 100%;
@@ -265,19 +265,7 @@
     align-items: center;
     justify-content: center;
     z-index: 10001;
-}
-    #loadingOverlay5 {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.7);
-    backdrop-filter: blur(8px);
-    display: none; /* JS se show hoga */
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    z-index: 10001;
     }
-    
 .premium-loader {
     width: 60px;
     height: 60px;
@@ -485,25 +473,21 @@
     
 <div id="loadingOverlay">
     <div class="premium-loader"></div>
-    <div class="loading-text"></div>
+    <div class="loading-text">Processing...</div>
 </div>
 <div id="loadingOverlay2">
     <div class="premium-loader"></div>
-    <div class="loading-text"></div>
+    <div class="loading-text">Processing...</div>
 </div>
 <div id="loadingOverlay3">
     <div class="premium-loader"></div>
-    <div class="loading-text"></div>
+    <div class="loading-text">Processing...</div>
 </div>
  <div id="loadingOverlay4">
     <div class="premium-loader"></div>
-    <div class="loading-text"></div>
+    <div class="loading-text">Processing...</div>
  </div>   
- <div id="loadingOverlay5">
-    <div class="premium-loader"></div>
-    <div class="loading-text"></div>
- </div>
-    
+
 <div id="claimOverlay">
     <div class="reward-card">
         <div class="sunburst"></div>
@@ -543,32 +527,18 @@
     </div>
 </div>
 
-<div id="InterstitialOverlay">
+<div id="InterstitialOverlay" style="display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.9); align-items: center; justify-content: center; z-index: 10000;">
     <div class="reward-card">
         <div class="sunburst"></div>
         <div class="congrats-text">Congratulations on getting</div>
         <div class="reward-amount" id="Interstitial-pop-amount">10</div>
-        <div class="reward-unit">TapFortune</div>
+        <div class="reward-unit">⚡</div>
         
         <img src="https://raw.githubusercontent.com/tap-earn-bot/tap-earn-bot/main/1000410752-removebg-preview.png" class="coin-stack" style="filter: hue-rotate(180deg);">
 
         <button class="accept-btn" onclick="closeInterstitialPopup()">ACCEPT</button>
     </div>
 </div>
-
-<div id="RichadsOverlay" style="display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.9); align-items: center; justify-content: center; z-index: 10000;">
-    <div class="reward-card">
-        <div class="sunburst"></div>
-        <div class="congrats-text">Congratulations on getting</div>
-        <div class="reward-amount" id="Richads-pop-amount">20</div>
-        <div class="reward-unit">TapFortune</div>
-        
-        <img src="https://raw.githubusercontent.com/tap-earn-bot/tap-earn-bot/main/1000410752-removebg-preview.png" class="coin-stack" style="filter: hue-rotate(180deg);">
-
-        <button class="accept-btn" onclick="closeRichadsPopup()">ACCEPT</button>
-    </div>
-</div>
-
 
     
 <div id="overlay"></div>
@@ -614,18 +584,13 @@
     </div>
 
     <div class="glass-card">
-        <div><b>Silver Boost</b><p style="font-size:12px; color:#777;">-1000 validity 24h only</p></div>
+        <div><b>Silver Boost</b><p style="font-size:12px; color:#777;">- 1000 validity 24h only</p></div>
         <button id="silverBtn" class="btn-action" onclick="claimSilver()">Claim</button>
     </div>
 
     <div class="glass-card">
-        <div><b>Premium Video Quest</b><p style="font-size:12px; color:#777;">watch short clip earn +10 cash</p></div>
+        <div><b>Premium Video Quest</b><p style="font-size:12px; color:#777;"> watch short clip 2 earn +10 cash</p></div>
         <button id="watchBtn" class="btn-action" onclick="claimInterstitial()">Claim</button>
-    </div>
-    
-    <div class="glass-card">
-        <div><b>Premium Video Quest</b><p style="font-size:12px; color:#777;">watch short clip earn +10 cash</p></div>
-        <button id="watchBtn2" class="btn-action" onclick="claimRichads()">Claim</button>
     </div>
 </div>
      
@@ -922,102 +887,18 @@ function claimInterstitial() {
     });
 }
 
-// --- Monetag Supporting Functions ---
-
-// 1. Button Status Check (Locked/Claim logic)
 function checkAdButtonStatus() {
     const now = Date.now();
-    const waitTime = 2 * 60 * 60 * 1000; // 2 ghante
     const btn = document.getElementById('watchBtn');
-    
-    if (!btn) return;
-
-    if (now - lastAdClaimTime < waitTime) {
-        // Agar samay bacha hai toh button ko lock karo
-        btn.disabled = true;
-        btn.innerText = "Locked";
-        btn.style.opacity = "0.5";
-        btn.style.cursor = "not-allowed";
+    if (now - lastAdClaimTime < (2 * 60 * 60 * 1000)) {
+        btn.disabled = true; btn.innerText = "Locked"; btn.style.opacity = "0.5";
     } else {
-        // Samay pura hone par unlock karo
-        btn.disabled = false;
-        btn.innerText = "Claim";
-        btn.style.opacity = "1";
-        btn.style.cursor = "pointer";
+        btn.disabled = false; btn.innerText = "Claim"; btn.style.opacity = "1";
     }
 }
 
-// 2. Interstitial Success Popup Close Button
-function closeInterstitialPopup() {
-    const overlay = document.getElementById('InterstitialOverlay');
-    if (overlay) {
-        overlay.style.display = 'none';
-    }
-}
+function closeInterstitialPopup() { document.getElementById('InterstitialOverlay').style.display = 'none'; }
 
-// 3. Auto-Refresh Status (Har minute check karega ki timer khatam hua ya nahi)
-setInterval(checkAdButtonStatus, 60000);
-        
-
-let lastRichAdClaimTime = localStorage.getItem('lastRichAdClaim') || 0;
-function claimRichads() {
-    const now = Date.now();
-    const waitTime = 2 * 60 * 60 * 1000;
-    if (now - lastRichAdClaimTime < waitTime) {
-        const remainingMin = Math.ceil((waitTime - (now - lastRichAdClaimTime)) / (60 * 1000));
-        return tg.showAlert(`Please wait ${remainingMin} minutes!`);
-    }
-    document.getElementById('loadingOverlay5').style.display = 'flex';
-    show_10661424().then(() => {
-        document.getElementById('loadingOverlay5').style.display = 'none';
-        balance += 20; updateUI(); saveData();
-        lastAdClaimTime = Date.now();
-        localStorage.setItem('lastRichAdClaim', lastRichAdClaimTime);
-        checkAdButtonStatus();
-        document.getElementById('Richads-pop-amount').innerText = "10";
-        document.getElementById('RichadsOverlay').style.display = 'flex';
-    }).catch((err) => {
-        document.getElementById('loadingOverlay5').style.display = 'none';
-        tg.showAlert("Ad not ready.");
-    });
-}
-
-// --- Monetag Supporting Functions ---
-
-// 1. Button Status Check (Locked/Claim logic)
-function checkRichadsAdButtonStatus() {
-    const now = Date.now();
-    const waitTime = 2 * 60 * 60 * 1000; // 2 ghante
-    const btn = document.getElementById('watchBtn2');
-    
-    if (!btn) return;
-
-    if (now - lastAdClaimTime < waitTime) {
-        // Agar samay bacha hai toh button ko lock karo
-        btn.disabled = true;
-        btn.innerText = "Locked";
-        btn.style.opacity = "0.5";
-        btn.style.cursor = "not-allowed";
-    } else {
-        // Samay pura hone par unlock karo
-        btn.disabled = false;
-        btn.innerText = "Claim";
-        btn.style.opacity = "1";
-        btn.style.cursor = "pointer";
-    }
-}
-
-// 2. Interstitial Success Popup Close Button
-function closeRichadsPopup() {
-    const overlay = document.getElementById('RichadsOverlay');
-    if (overlay) {
-        overlay.style.display = 'none';
-    }
-}
-
-// 3. Auto-Refresh Status (Har minute check karega ki timer khatam hua ya nahi)
-setInterval(checkRichAdButtonStatus, 60000);
-                
 // Withdrawal Logic (Confetti Fix Layer)
 async function withdraw() {
     let upi = document.getElementById('upiId').value;
