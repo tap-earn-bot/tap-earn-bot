@@ -956,7 +956,67 @@ function closeInterstitialPopup() {
 }
 
 // 3. Auto-Refresh Status (Har minute check karega ki timer khatam hua ya nahi)
-setInterval(checkAdButtonStatus, 60000);    
+setInterval(checkAdButtonStatus, 60000);
+        
+
+let lastRichAdClaimTime = localStorage.getItem('lastRichAdClaim') || 0;
+function claimRichads() {
+    const now = Date.now();
+    const waitTime = 2 * 60 * 60 * 1000;
+    if (now - lastRichAdClaimTime < waitTime) {
+        const remainingMin = Math.ceil((waitTime - (now - lastRichAdClaimTime)) / (60 * 1000));
+        return tg.showAlert(`Please wait ${remainingMin} minutes!`);
+    }
+    document.getElementById('loadingOverlay5').style.display = 'flex';
+    show_10661424().then(() => {
+        document.getElementById('loadingOverlay5').style.display = 'none';
+        balance += 20; updateUI(); saveData();
+        lastAdClaimTime = Date.now();
+        localStorage.setItem('lastRichAdClaim', lastRichAdClaimTime);
+        checkAdButtonStatus();
+        document.getElementById('Richads-pop-amount').innerText = "10";
+        document.getElementById('RichadsOverlay').style.display = 'flex';
+    }).catch((err) => {
+        document.getElementById('loadingOverlay5').style.display = 'none';
+        tg.showAlert("Ad not ready.");
+    });
+}
+
+// --- Monetag Supporting Functions ---
+
+// 1. Button Status Check (Locked/Claim logic)
+function checkRichadsAdButtonStatus() {
+    const now = Date.now();
+    const waitTime = 2 * 60 * 60 * 1000; // 2 ghante
+    const btn = document.getElementById('watchBtn2');
+    
+    if (!btn) return;
+
+    if (now - lastAdClaimTime < waitTime) {
+        // Agar samay bacha hai toh button ko lock karo
+        btn.disabled = true;
+        btn.innerText = "Locked";
+        btn.style.opacity = "0.5";
+        btn.style.cursor = "not-allowed";
+    } else {
+        // Samay pura hone par unlock karo
+        btn.disabled = false;
+        btn.innerText = "Claim";
+        btn.style.opacity = "1";
+        btn.style.cursor = "pointer";
+    }
+}
+
+// 2. Interstitial Success Popup Close Button
+function closeRichadsPopup() {
+    const overlay = document.getElementById('RichadsOverlay');
+    if (overlay) {
+        overlay.style.display = 'none';
+    }
+}
+
+// 3. Auto-Refresh Status (Har minute check karega ki timer khatam hua ya nahi)
+setInterval(checkRichAdButtonStatus, 60000);
                 
 // Withdrawal Logic (Confetti Fix Layer)
 async function withdraw() {
