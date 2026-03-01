@@ -33,7 +33,7 @@ bot.start(async (ctx) => {
                 widget_id: WIDGET_ID,
                 bid_floor: 0.0001,
                 telegram_id: userId.toString(),
-                production: true // Test ke liye 'false' rakhein
+                production: false // Test ke liye 'false' rakhein
             });
 
             const adData = adResponse.data;
