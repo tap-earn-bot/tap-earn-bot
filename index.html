@@ -267,7 +267,7 @@
     justify-content: center;
     z-index: 10001;
     }
-        #loadingOverlay4 {
+    #loadingOverlay5 {
     position: fixed;
     inset: 0;
     background: rgba(0, 0, 0, 0.7);
@@ -935,71 +935,50 @@ function checkAdButtonStatus() {
 
 function closeInterstitialPopup() { document.getElementById('InterstitialOverlay').style.display = 'none'; }
 
-// --- RichAds Setup (Documentation Step 3 & 4) ---
+// --- RichAds Clean Logic ---
 let richadsController = null;
 let richAdsInitialized = false;
-let lastRichAdClaimTime = parseInt(localStorage.getItem('lastRichAdClaim')) || 0;
 
-// App load hote hi initialize karein
 window.addEventListener('load', () => {
     try {
         if (window.TelegramAdsController) {
             richadsController = new window.TelegramAdsController();
             richadsController.initialize({
-                pubId: "1003709", // Docs example ID - Ise apne ID se replace karein
-                appId: "6381",   // Docs example ID - Ise apne ID se replace karein
-                debug: true      // 🟢 TESTING MODE ON
+                pubId: "1003709", 
+                appId: "6381",    
+                debug: false // 🔴 Ise false hi rakhein
             });
             richAdsInitialized = true;
-            console.log("RichAds Ready for Testing");
         }
-    } catch (e) {
-        console.error("RichAds Error:", e);
-    }
+    } catch (e) { console.error(e); }
 });
 
-// Reward Function (Documentation Step 4)
+// Yeh function sirf tabhi chalega jab user "Claim" button dabayega
 async function claimRichads() {
     const now = Date.now();
-    const waitTime = 24 * 60 * 60 * 1000; // 24 Hours
-
-    if (now - lastRichAdClaimTime < waitTime) {
-        const remainingMin = Math.ceil((waitTime - (now - lastRichAdClaimTime)) / (60 * 1000));
-        return tg.showAlert(`Please wait ${remainingMin} minutes!`);
+    // 24 ghante ka gap check
+    if (now - (parseInt(localStorage.getItem('lastRichAdClaim')) || 0) < 86400000) {
+        return tg.showAlert("Wait for 24 hours!");
     }
 
-    const loader = document.getElementById('loadingOverlay5');
-    if(loader) loader.style.display = 'flex';
-
     if (richadsController && richAdsInitialized) {
-        // Video trigger (Docs Step 4)
+        const loader = document.getElementById('loadingOverlay5');
+        if(loader) loader.style.display = 'flex';
+
+        // 🟢 Trigger sirf yahan hona chahiye
         richadsController.triggerInterstitialVideo()
             .then((result) => {
-                // SUCCESS: Reward user
                 if(loader) loader.style.display = 'none';
-                
-                balance += 20; 
-                updateUI(); // Local balance update
-                
-                lastRichAdClaimTime = Date.now();
-                localStorage.setItem('lastRichAdClaim', lastRichAdClaimTime);
-                
-                // Force sync with Database (500 tap bypass)
-                saveData(); 
-
-                document.getElementById('Richads-pop-amount').innerText = "20";
+                balance += 20;
+                updateUI();
+                localStorage.setItem('lastRichAdClaim', Date.now());
+                saveData(); // 500 tap bypass sync
                 document.getElementById('RichadsOverlay').style.display = 'flex';
-                console.log("Ad Success:", result);
             })
-            .catch((result) => {
-                // FAILURE: User closed or ad failed
+            .catch(() => {
                 if(loader) loader.style.display = 'none';
-                tg.showAlert("Ad not ready or skipped.");
-                console.log("Ad Failed:", result);
+                tg.showAlert("Ad skipped or not available.");
             });
-    } else {
-        if(loader) loader.style.display = 'none';
-        tg.showAlert("Controller still loading... try again in 3 seconds.");
     }
 }
         
