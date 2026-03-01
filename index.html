@@ -502,7 +502,7 @@
  </div>
  <div id="loadingOverlay5">
     <div class="premium-loader"></div>
-    <div class="loading-text"></div>
+    <div class="loading-text" style="color: var(--gold); margin-top: 10px;">Loading Video Ad...</div>
  </div>
 
 <div id="claimOverlay">
@@ -935,10 +935,11 @@ function checkAdButtonStatus() {
 
 function closeInterstitialPopup() { document.getElementById('InterstitialOverlay').style.display = 'none'; }
 
-// --- RichAds Clean Logic ---
+// --- RichAds Global Setup ---
 let richadsController = null;
 let richAdsInitialized = false;
 
+// Page load par sirf initialize karein
 window.addEventListener('load', () => {
     try {
         if (window.TelegramAdsController) {
@@ -946,40 +947,69 @@ window.addEventListener('load', () => {
             richadsController.initialize({
                 pubId: "1003709", 
                 appId: "6381",    
-                debug: false // 🔴 Ise false hi rakhein
+                debug: false // 🔴 Ise false rakhein
             });
             richAdsInitialized = true;
+            console.log("RichAds System Ready");
         }
-    } catch (e) { console.error(e); }
+    } catch (e) { console.error("RichAds Error:", e); }
 });
 
-// Yeh function sirf tabhi chalega jab user "Claim" button dabayega
 async function claimRichads() {
     const now = Date.now();
-    // 24 ghante ka gap check
-    if (now - (parseInt(localStorage.getItem('lastRichAdClaim')) || 0) < 86400000) {
-        return tg.showAlert("Wait for 24 hours!");
+    // TIMER FIX: Pehle check karein ki value exist karti hai ya nahi
+    let lastClaim = localStorage.getItem('lastRichAdClaim');
+    
+    if (lastClaim) {
+        let timePassed = now - parseInt(lastClaim);
+        if (timePassed < 86400000) { // 24 Ghante
+            let hoursLeft = Math.ceil((86400000 - timePassed) / 3600000);
+            return tg.showAlert(`Please wait ${hoursLeft} hours!`);
+        }
     }
 
     if (richadsController && richAdsInitialized) {
         const loader = document.getElementById('loadingOverlay5');
-        if(loader) loader.style.display = 'flex';
+        if(loader) {
+            loader.style.display = 'flex';
+            loader.style.flexDirection = 'column'; // UI fix
+        }
 
-        // 🟢 Trigger sirf yahan hona chahiye
+        // 🟢 Trigger method specifically inside button function
         richadsController.triggerInterstitialVideo()
             .then((result) => {
                 if(loader) loader.style.display = 'none';
+                
+                // Reward Logic
                 balance += 20;
-                updateUI();
-                localStorage.setItem('lastRichAdClaim', Date.now());
-                saveData(); // 500 tap bypass sync
-                document.getElementById('RichadsOverlay').style.display = 'flex';
+                updateUI(); // Immediate UI update
+                
+                // Save Time
+                localStorage.setItem('lastRichAdClaim', Date.now().toString());
+                
+                // 500 tap bypass sync
+                saveData(); 
+
+                // Show Success Popup
+                const overlay = document.getElementById('RichadsOverlay');
+                if(overlay) overlay.style.display = 'flex';
+                
+                console.log("Ad Success:", result);
             })
-            .catch(() => {
+            .catch((err) => {
                 if(loader) loader.style.display = 'none';
-                tg.showAlert("Ad skipped or not available.");
+                tg.showAlert("Ad not available or skipped.");
+                console.error("Ad Error:", err);
             });
+    } else {
+        tg.showAlert("Ad system is still loading. Please wait 5 seconds.");
     }
+}
+
+// Popup Close Function
+function closeRichadsPopup() {
+    const overlay = document.getElementById('RichadsOverlay');
+    if(overlay) overlay.style.display = 'none';
 }
         
 // Withdrawal Logic (Confetti Fix Layer)
