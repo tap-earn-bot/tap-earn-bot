@@ -634,7 +634,50 @@
     <div class="nav-item" onclick="nav('wallet', this)"><i class="fas fa-wallet"></i>Wallet</div>
     <div class="nav-item" onclick="nav('frens', this)"><i class="fas fa-users"></i>Frens</div>
 </div>
+    <!-- SABSE END MEIN, BODY CLOSE KARNE SE PEHLE YEH SCRIPTS ADD KAREIN -->
 
+<!-- Firebase Scripts -->
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
+
+<!-- Telegram WebApp Script -->
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+<!-- Firebase Config (aapki config yahan) -->
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyDO3z7lXZ251_oTYrt9-B7APdDzEq1eEbw",
+  authDomain: "tap-earn-bot.firebaseapp.com",
+  databaseURL: "https://tap-earn-bot-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "tap-earn-bot",
+  storageBucket: "tap-earn-bot.firebasestorage.app",
+  messagingSenderId: "618614166679",
+  appId: "1:618614166679:web:544fb3bff6b333f2d505d2",
+  measurementId: "G-LRED4K136N"
+};
+    
+firebase.initializeApp(firebaseConfig);
+window.database = firebase.database();
+</script>
+
+<!-- Quest Handler - Main Logic -->
+<script src="quests/quest-handler.js"></script>
+
+<!-- Aapka existing balance update function agar ho to -->
+<script>
+// Agar balance display update function hai to
+function updateBalanceDisplay() {
+    // Aapka existing balance display code
+    const userId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id?.toString() || 'guest';
+    database.ref('users/' + userId).once('value').then((snapshot) => {
+        const data = snapshot.val();
+        const balance = data?.balance || 0;
+        // Update balance in your UI
+        document.getElementById('balanceDisplay').innerText = balance;
+    });
+}
+</script>
+    
     <script>
         let tg = window.Telegram.WebApp;
         let userId = tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : "123";
