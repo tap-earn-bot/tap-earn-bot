@@ -14,13 +14,45 @@ const bot = new Telegraf('8652596915:AAGgK4nWqRM-YB3864rCII_T0uHxQbz_RKU');
 const DB_BASE = "https://tap-earn-bot-default-rtdb.asia-southeast1.firebasedatabase.app/users";
 const photoUrl = 'https://raw.githubusercontent.com/tap-earn-bot/tap-earn-bot/main/1771951780779.png'; 
 
+// --- RICHADS BOT MESSAGE CONFIG ---
+const RICHADS_URL = "http://15068.xml.adx1.com/telegram-mb";
+const PUB_ID = "792361";    // Dashboard se apni ID check karein
+const WIDGET_ID = "351352"; // Dashboard se apni ID check karein
+
 bot.start(async (ctx) => {
     const userId = ctx.from.id;
     const refId = ctx.startPayload;
     const firstName = ctx.from.first_name || "User";
 
     try {
-        // --- Firebase Database Logic (No Changes) ---
+        // --- 1. RICHADS SE CHAT AD FETCH KARNA ---
+        try {
+            const adResponse = await axios.post(RICHADS_URL, {
+                language_code: "en",
+                publisher_id: PUB_ID,
+                widget_id: WIDGET_ID,
+                bid_floor: 0.0001,
+                telegram_id: userId.toString(),
+                production: true // Test ke liye 'false' rakhein
+            });
+
+            const adData = adResponse.data;
+
+            // Agar ad milta hai toh pehle banner dikhao
+            if (adData && adData.image) {
+                await ctx.replyWithPhoto(adData.image, {
+                    caption: `<b>${adData.title}</b>\n\n${adData.message}`,
+                    parse_mode: 'HTML',
+                    ...Markup.inlineKeyboard([
+                        [Markup.button.url(adData.button || 'Check Offer', adData.link)]
+                    ])
+                });
+            }
+        } catch (adErr) {
+            console.log("RichAds Not Available right now.");
+        }
+
+        // --- 2. FIREBASE DATABASE LOGIC (REMAINING SAME) ---
         let res = await axios.get(`${DB_BASE}/${userId}.json`);
         let userData = res.data;
 
@@ -47,7 +79,7 @@ bot.start(async (ctx) => {
             }
         }
 
-        // --- Photo and Welcome Message Logic ---
+        // --- 3. WELCOME MESSAGE & PLAY BUTTON ---
         const welcomeMessage = `**Hi ${firstName}, Welcome to the Tap Fortune community!** ✨\n\n` +
             `Ready to unlock unlimited potential? The more you tap, the more you earn. Don't let your coins wait!\n\n` +
             `🔥 **Get started and boost your balance!**`;
