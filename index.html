@@ -202,9 +202,19 @@
         font-weight: 800;
         border: none;
         cursor: pointer;
+        opacity: 0.7;
+        transition: opacity 0.3s;
     }
     
-    .tg-go-btn:disabled { background: #b2d6ee; cursor: not-allowed; }
+    .tg-go-btn:disabled { 
+        background: #b2d6ee; 
+        cursor: not-allowed;
+        opacity: 0.7;
+    }
+    
+    .tg-go-btn:enabled {
+        opacity: 1;
+    }
     
     .tg-powered-text {
         font-size: 11px;
@@ -255,7 +265,7 @@
     position: fixed;
     inset: 0;
     background: rgba(0, 0, 0, 0.9);
-    display: none; /* JS se control hoga */
+    display: none;
     align-items: center;
     justify-content: center;
     z-index: 10000;
@@ -274,24 +284,21 @@
     to { transform: scale(1); opacity: 1; }
 }
 
-/* Background Rays Effect - Fixed for Full Screen */
-/* Background Rays Effect - Small Circle behind coins */
+/* Background Rays Effect */
 .sunburst {
     position: absolute;
-    top: 50%;         /* Coins ke center ke hisaab se adjust karein */
+    top: 50%;
     left: 50%;
-    width: 350px;     /* Size chhota kar diya (Photo ke liye perfect) */
-    height: 350px;    /* Width aur Height barabar rakhein */
+    width: 350px;
+    height: 350px;
     transform: translate(-50%, -50%);
     background: repeating-conic-gradient(
         from 0deg,
-        rgba(255, 255, 255, 0.12) 0deg 15deg, /* Thoda zyada visible kiya */
+        rgba(255, 255, 255, 0.12) 0deg 15deg,
         transparent 15deg 30deg
     );
-    /* Soft edges ke liye mask ya radial gradient */
     -webkit-mask-image: radial-gradient(circle, black 30%, transparent 70%);
     mask-image: radial-gradient(circle, black 30%, transparent 70%);
-    
     animation: rotateRays 15s linear infinite;
     z-index: -1; 
     pointer-events: none; 
@@ -344,50 +351,18 @@
     text-transform: uppercase;
 }
 /* Premium Loader Style */
-#loadingOverlay {
+#loadingOverlay, #loadingOverlay2, #loadingOverlay3, #loadingOverlay4 {
     position: fixed;
     inset: 0;
     background: rgba(0, 0, 0, 0.7);
     backdrop-filter: blur(8px);
-    display: none; /* JS se show hoga */
+    display: none;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     z-index: 10001;
 }
-    #loadingOverlay2 {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.7);
-    backdrop-filter: blur(8px);
-    display: none; /* JS se show hoga */
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    z-index: 10001;
-}
-    #loadingOverlay3 {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.7);
-    backdrop-filter: blur(8px);
-    display: none; /* JS se show hoga */
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    z-index: 10001;
-}
-    #loadingOverlay4 {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.7);
-    backdrop-filter: blur(8px);
-    display: none; /* JS se show hoga */
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    z-index: 10001;
-    }
+
 .premium-loader {
     width: 60px;
     height: 60px;
@@ -415,12 +390,11 @@
 @keyframes pulseText {
     0%, 100% { opacity: 0.5; }
     50% { opacity: 1; }
-    }
-
+}
 
 .modal-content {
     background: #121212;
-    border: 2px solid #f3ba2f; /* Gold Border */
+    border: 2px solid #f3ba2f;
     border-radius: 24px;
     padding: 30px;
     width: 85%;
@@ -451,7 +425,7 @@
 .modal-overlay {
     display: none;
     position: fixed;
-    inset: 0; /* poori screen cover karne ke liye */
+    inset: 0;
     background: rgba(0, 0, 0, 0.85);
     backdrop-filter: blur(8px);
     z-index: 10000;
@@ -466,7 +440,7 @@
     background: rgba(0, 0, 0, 0.4); 
     backdrop-filter: blur(10px);    
     -webkit-backdrop-filter: blur(10px);
-    z-index: 1000; /* Confetti isse zyada hona chahiye (2000) */
+    z-index: 1000;
 }
 
 #successPopup {
@@ -484,15 +458,14 @@
     position: fixed;
     top: 50%; left: 50%;
     transform: translate(-50%, -50%);
-    z-index: 1001; /* Popup overlay ke upar */
+    z-index: 1001;
 }
 
-/* Text aur Button ki width fix karne ke liye */
 #successPopup h2 { margin: 10px 0; font-size: 22px; color: #f3ba2f; }
 #successPopup p { margin: 10px 0; color: #fff; font-size: 16px; }
 
 #successPopup .btn-action {
-    width: 100%; /* Button ab side mein nahi balki niche aayega */
+    width: 100%;
     margin-top: 15px;
     padding: 12px;
     background: #f3ba2f;
@@ -501,24 +474,24 @@
     border-radius: 10px;
     font-weight: bold;
 }
-    .popup-photo-container {
-    width: 100px;           /* Photo ki width */
-    height: 100px;          /* Photo ki height */
-    margin-bottom: 15px;    /* Heading se thodi doori */
+.popup-photo-container {
+    width: 100px;
+    height: 100px;
+    margin-bottom: 15px;
     overflow: hidden;
-    border-radius: 50%;     /* Agar aap photo gol (circle) chahte hain */
-    border: 2px solid var(--gold); /* Photo ke charo taraf gold border */
+    border-radius: 50%;
+    border: 2px solid var(--gold);
 }
 
 #popupImage {
     width: 100%;
     height: 100%;
-    object-fit: cover;      /* Photo stretch nahi hogi */
+    object-fit: cover;
 }
 #bot-loader {
     position: fixed;
     inset: 0;
-    background: #0d1117; /* Dark background */
+    background: #0d1117;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -569,14 +542,13 @@
 @keyframes fillProgress {
     0% { width: 0%; }
     100% { width: 100%; }
-    }
-    
+}
 </style>
     
 </head>
 <body>
     
- <div id="bot-loader">
+<div id="bot-loader">
     <div class="loader-content">
         <img src="https://raw.githubusercontent.com/tap-earn-bot/tap-earn-bot/main/1000410752-removebg-preview.png" class="loader-logo">
         <div class="loader-bar-container">
@@ -584,7 +556,7 @@
         </div>
         <p class="loader-text">Loading TapFortune...</p>
     </div>
- </div>
+</div>
     
 <div id="customAlert" class="modal-overlay">
     <div class="modal-content">
@@ -605,10 +577,10 @@
     <div class="premium-loader"></div>
     <div class="loading-text">Processing...</div>
 </div>
- <div id="loadingOverlay4">
+<div id="loadingOverlay4">
     <div class="premium-loader"></div>
     <div class="loading-text">Processing...</div>
- </div>   
+</div>   
 
 <div id="claimOverlay">
     <div class="reward-card">
@@ -616,9 +588,7 @@
         <div class="congrats-text">Congratulations on getting</div>
         <div class="reward-amount" id="pop-amount">5</div>
         <div class="reward-unit">TapFortune</div>
-        
         <img src="https://raw.githubusercontent.com/tap-earn-bot/tap-earn-bot/main/1000410752-removebg-preview.png" class="coin-stack">
-        
         <button class="accept-btn" onclick="closeReward()">ACCEPT</button>
     </div>
 </div>
@@ -629,9 +599,7 @@
         <div class="congrats-text">Congratulations on getting</div>
         <div class="reward-amount" id="energy-pop-amount">100</div>
         <div class="reward-unit">TapFortune</div>
-        
         <img src="https://raw.githubusercontent.com/tap-earn-bot/tap-earn-bot/main/1000412177-removebg-preview.png" class="coin-stack" style="filter: hue-rotate(180deg);">
-        
         <button class="accept-btn" onclick="closeEnergyPopup()">ACCEPT</button>
     </div>
 </div>
@@ -642,9 +610,7 @@
         <div class="congrats-text">Silver Level is Now</div>
         <div class="reward-amount" id="silver-pop-status" style="color: #c0c0c0; font-size: 28px;">ACTIVATED</div>
         <div class="reward-unit">For 24 Hours</div> 
-        
         <img src="https://raw.githubusercontent.com/tap-earn-bot/tap-earn-bot/main/1000413486-removebg-preview.png" class="coin-stack">
-        
         <button class="accept-btn" onclick="closeSilverPopup()">LET'S GO!</button>
     </div>
 </div>
@@ -655,14 +621,12 @@
         <div class="congrats-text">Congratulations on getting</div>
         <div class="reward-amount" id="Interstitial-pop-amount">10</div>
         <div class="reward-unit">⚡</div>
-        
         <img src="https://raw.githubusercontent.com/tap-earn-bot/tap-earn-bot/main/1000410752-removebg-preview.png" class="coin-stack" style="filter: hue-rotate(180deg);">
-
         <button class="accept-btn" onclick="closeInterstitialPopup()">ACCEPT</button>
     </div>
 </div>
 
-<!-- Telegram Quest Page (Hidden by default) -->
+<!-- Telegram Quest Page -->
 <div id="telegramQuestPage">
     <div class="tg-header">
         <div class="tg-close-btn" onclick="closeTelegramQuest()">Close</div>
@@ -690,35 +654,32 @@
     </div>
 </div>
 
-    
 <div id="overlay"></div>
 
 <div id="successPopup">
     <div class="popup-photo-container">
         <img src="https://raw.githubusercontent.com/tap-earn-bot/tap-earn-bot/main/1000410752-removebg-preview.png" alt="Withdrawal" id="popupImage">
     </div>
-    
     <h2>Withdrawal Requested!</h2>
     <p>Your <span id="popAmt">0</span> request is being processed</p>
-    
     <button class="btn-action" onclick="closePopup()">GOT IT</button>
 </div>
 
-    <div class="header">
-        <div class="badge">⚡ <span id="energy">...</span> / 1000</div>
-        <div class="badge" id="rank" style="color:var(--gold)">🏆 Bronze</div>
-    </div>
+<div class="header">
+    <div class="badge">⚡ <span id="energy">...</span> / 1000</div>
+    <div class="badge" id="rank" style="color:var(--gold)">🏆 Bronze</div>
+</div>
 
-    <div id="home" class="page active">
-        <div class="balance-amount"><span id="balance">0.00</span></div>
-        <div class="tap-area">
-            <div class="ring"></div>
-            <div class="tap-circle" onclick="handleTap(event)">
-                <img src="https://cdn-icons-png.flaticon.com/512/217/217853.png">
-            </div>
+<div id="home" class="page active">
+    <div class="balance-amount"><span id="balance">0.00</span></div>
+    <div class="tap-area">
+        <div class="ring"></div>
+        <div class="tap-circle" onclick="handleTap(event)">
+            <img src="https://cdn-icons-png.flaticon.com/512/217/217853.png">
         </div>
-        <p style="color:var(--neon); font-size:14px; font-weight:bold;">Unlimited Potential</p>
     </div>
+    <p style="color:var(--neon); font-size:14px; font-weight:bold;">Unlimited Potential</p>
+</div>
 
 <div id="tasks" class="page">
     <h2 style="color:var(--gold);">Quests</h2>
@@ -743,7 +704,7 @@
         <button id="watchBtn" class="btn-action" onclick="claimInterstitial()">Claim</button>
     </div>
     
-    <!-- NEW BUTTON ADDED HERE -->
+    <!-- NEW BUTTON -->
     <div class="glass-card">
         <div><b>Telegram Verification Quest</b><p style="font-size:12px; color:#777;"> complete verification earn +10 cash</p></div>
         <button id="telegramQuestBtn" class="btn-action" onclick="startTelegramQuest()">Start</button>
@@ -815,7 +776,7 @@ const database = firebase.database();
 
 <script>
 // ============================================
-// MAIN APPLICATION CODE
+// MAIN APPLICATION CODE - COMPLETE & FIXED
 // ============================================
 
 let tg = window.Telegram.WebApp;
@@ -1035,7 +996,7 @@ function closeSilverPopup() { document.getElementById("silverOverlay").style.dis
 function closeInterstitialPopup() { document.getElementById('InterstitialOverlay').style.display = 'none'; }
 
 // ============================================
-// EXISTING QUESTS
+// EXISTING QUESTS (Daily Reward Style)
 // ============================================
 async function claimDaily() {
     const now = Date.now();
@@ -1108,19 +1069,19 @@ function checkAdButtonStatus() {
 }
 
 // ============================================
-// NEW TELEGRAM QUEST FUNCTIONS
+// NEW TELEGRAM QUEST - EXACTLY LIKE DAILY REWARD
 // ============================================
 
 // Start Telegram Quest
 function startTelegramQuest() {
-    // Show loading
+    // Show loading (like daily reward)
     document.getElementById('loadingOverlay4').style.display = 'flex';
     
     // Store current user ID and reward
     tgQuestUserId = userId;
     tgQuestReward = 10;
     
-    // 2.5 seconds loading
+    // 2.5 seconds loading (like daily reward)
     setTimeout(() => {
         document.getElementById('loadingOverlay4').style.display = 'none';
         
@@ -1181,27 +1142,11 @@ function startTelegramQuestTimer() {
         }
     }, 1000);
     
-    // GO button click handler
+    // GO button click handler - EXACTLY LIKE DAILY REWARD
     goBtn.onclick = function() {
         if (goBtn.disabled) return;
-        completeTelegramQuest();
-    };
-}
-
-// Complete Quest and Add Balance
-async function completeTelegramQuest() {
-    // Show loading
-    document.getElementById('loadingOverlay4').style.display = 'flex';
-    
-    try {
-        // Update Firebase
-        await updateFirebaseBalance(tgQuestReward, 'telegram_quest');
         
-        // Update local balance
-        balance += tgQuestReward;
-        updateUI();
-        
-        // Hide Telegram Quest page
+        // Hide quest page
         document.getElementById('telegramQuestPage').style.display = 'none';
         
         // Show main app
@@ -1209,29 +1154,34 @@ async function completeTelegramQuest() {
         document.querySelector('.navbar').style.display = 'flex';
         document.getElementById('home').classList.add('active');
         
-        // Hide loading
-        document.getElementById('loadingOverlay4').style.display = 'none';
+        // Show loading (like daily reward)
+        document.getElementById('loadingOverlay4').style.display = 'flex';
         
-        // Show success popup
-        document.getElementById('Interstitial-pop-amount').innerText = tgQuestReward.toString();
-        document.getElementById('InterstitialOverlay').style.display = 'flex';
-        
-        // Save data
-        saveData();
-        
-    } catch (error) {
-        console.error('Error:', error);
-        document.getElementById('loadingOverlay4').style.display = 'none';
-        tg.showAlert('Error completing quest. Please try again.');
-        
-        // Return to main app
-        document.getElementById('telegramQuestPage').style.display = 'none';
-        document.querySelectorAll('.page').forEach(p => p.style.display = '');
-        document.querySelector('.navbar').style.display = 'flex';
-    }
+        // Simulate processing (like daily reward)
+        setTimeout(async () => {
+            // Hide loading
+            document.getElementById('loadingOverlay4').style.display = 'none';
+            
+            // Update Firebase
+            await updateFirebaseBalance(tgQuestReward, 'telegram_quest');
+            
+            // Update local balance
+            balance += tgQuestReward;
+            updateUI();
+            
+            // Show popup with reward (InterstitialOverlay)
+            document.getElementById('Interstitial-pop-amount').innerText = tgQuestReward.toString();
+            document.getElementById('InterstitialOverlay').style.display = 'flex';
+            
+            // Save data
+            saveData();
+            
+            console.log('Quest completed! +' + tgQuestReward);
+        }, 1500); // 1.5 second delay like daily reward
+    };
 }
 
-// Close Telegram Quest
+// Close Telegram Quest (without completing)
 function closeTelegramQuest() {
     // Clear timer
     if (tgQuestTimer) clearInterval(tgQuestTimer);
