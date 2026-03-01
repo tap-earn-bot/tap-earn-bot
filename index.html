@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Tap Fortune</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script src="https://richinfo.co/richpartners/telegram/js/tg-ob.js"></script>
     <script src='//libtl.com/sdk.js' data-zone='10661424' data-sdk='show_10661424'></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.9.6/lottie.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -267,18 +266,6 @@
     justify-content: center;
     z-index: 10001;
     }
-    #loadingOverlay5 {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.7);
-    backdrop-filter: blur(8px);
-    display: none; /* JS se show hoga */
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    z-index: 10001;
-    }
-    
 .premium-loader {
     width: 60px;
     height: 60px;
@@ -486,24 +473,20 @@
     
 <div id="loadingOverlay">
     <div class="premium-loader"></div>
-    <div class="loading-text"></div>
+    <div class="loading-text">Processing...</div>
 </div>
 <div id="loadingOverlay2">
     <div class="premium-loader"></div>
-    <div class="loading-text"></div>
+    <div class="loading-text">Processing...</div>
 </div>
 <div id="loadingOverlay3">
     <div class="premium-loader"></div>
-    <div class="loading-text"></div>
+    <div class="loading-text">Processing...</div>
 </div>
  <div id="loadingOverlay4">
     <div class="premium-loader"></div>
-    <div class="loading-text"></div>
- </div>
- <div id="loadingOverlay5">
-    <div class="premium-loader"></div>
-    <div class="loading-text" style="color: var(--gold); margin-top: 10px;">Loading Video Ad...</div>
- </div>
+    <div class="loading-text">Processing...</div>
+ </div>   
 
 <div id="claimOverlay">
     <div class="reward-card">
@@ -557,20 +540,6 @@
     </div>
 </div>
 
-<div id="RichadsOverlay" style="display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.9); align-items: center; justify-content: center; z-index: 10000;">
-    <div class="reward-card">
-        <div class="sunburst"></div>
-        <div class="congrats-text">Congratulations on getting</div>
-        <div class="reward-amount" id="Richads-pop-amount">10</div>
-        <div class="reward-unit">⚡</div>
-        
-        <img src="https://raw.githubusercontent.com/tap-earn-bot/tap-earn-bot/main/1000410752-removebg-preview.png" class="coin-stack" style="filter: hue-rotate(180deg);">
-
-        <button class="accept-btn" onclick="closeRichadsPopup()">ACCEPT</button>
-    </div>
-</div>
-
-
     
 <div id="overlay"></div>
 
@@ -620,13 +589,8 @@
     </div>
 
     <div class="glass-card">
-        <div><b>Premium Video Quest</b><p style="font-size:12px; color:#777;">watch short clip 2 earn +10 cash</p></div>
+        <div><b>Premium Video Quest</b><p style="font-size:12px; color:#777;"> watch short clip 2 earn +10 cash</p></div>
         <button id="watchBtn" class="btn-action" onclick="claimInterstitial()">Claim</button>
-    </div>
-    
-        <div class="glass-card">
-        <div><b>Premium Video Quest</b><p style="font-size:12px; color:#777;">watch short clip 2 earn +10 cash</p></div>
-        <button id="watchBtn2" class="btn-action" onclick="claimRichads()">Claim</button>
     </div>
 </div>
      
@@ -935,83 +899,6 @@ function checkAdButtonStatus() {
 
 function closeInterstitialPopup() { document.getElementById('InterstitialOverlay').style.display = 'none'; }
 
-// --- RichAds Global Setup ---
-let richadsController = null;
-let richAdsInitialized = false;
-
-// Page load par sirf initialize karein
-window.addEventListener('load', () => {
-    try {
-        if (window.TelegramAdsController) {
-            richadsController = new window.TelegramAdsController();
-            richadsController.initialize({
-                pubId: "1003709", 
-                appId: "6381",    
-                debug: false // 🔴 Ise false rakhein
-            });
-            richAdsInitialized = true;
-            console.log("RichAds System Ready");
-        }
-    } catch (e) { console.error("RichAds Error:", e); }
-});
-
-async function claimRichads() {
-    const now = Date.now();
-    // TIMER FIX: Pehle check karein ki value exist karti hai ya nahi
-    let lastClaim = localStorage.getItem('lastRichAdClaim');
-    
-    if (lastClaim) {
-        let timePassed = now - parseInt(lastClaim);
-        if (timePassed < 86400000) { // 24 Ghante
-            let hoursLeft = Math.ceil((86400000 - timePassed) / 3600000);
-            return tg.showAlert(`Please wait ${hoursLeft} hours!`);
-        }
-    }
-
-    if (richadsController && richAdsInitialized) {
-        const loader = document.getElementById('loadingOverlay5');
-        if(loader) {
-            loader.style.display = 'flex';
-            loader.style.flexDirection = 'column'; // UI fix
-        }
-
-        // 🟢 Trigger method specifically inside button function
-        richadsController.triggerInterstitialVideo()
-            .then((result) => {
-                if(loader) loader.style.display = 'none';
-                
-                // Reward Logic
-                balance += 20;
-                updateUI(); // Immediate UI update
-                
-                // Save Time
-                localStorage.setItem('lastRichAdClaim', Date.now().toString());
-                
-                // 500 tap bypass sync
-                saveData(); 
-
-                // Show Success Popup
-                const overlay = document.getElementById('RichadsOverlay');
-                if(overlay) overlay.style.display = 'flex';
-                
-                console.log("Ad Success:", result);
-            })
-            .catch((err) => {
-                if(loader) loader.style.display = 'none';
-                tg.showAlert("Ad not available or skipped.");
-                console.error("Ad Error:", err);
-            });
-    } else {
-        tg.showAlert("Ad system is still loading. Please wait 5 seconds.");
-    }
-}
-
-// Popup Close Function
-function closeRichadsPopup() {
-    const overlay = document.getElementById('RichadsOverlay');
-    if(overlay) overlay.style.display = 'none';
-}
-        
 // Withdrawal Logic (Confetti Fix Layer)
 async function withdraw() {
     let upi = document.getElementById('upiId').value;
