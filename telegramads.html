@@ -132,13 +132,139 @@ body {
     color: #999;
     margin-top: 12px;
 }
+
+body {
+    background-color: #6da273;
+    background-image: url('https://raw.githubusercontent.com/tap-earn-bot/tap-earn-bot/main/telegram_pattern_hd.png');
+    background-size: 450px;
+    background-repeat: repeat;
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* HEADER */
+.top-header {
+    background: rgba(28, 28, 29, 0.98);
+    padding: 12px 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: white;
+}
+.close-btn { font-size: 16px; font-weight: 500; color: #248bcf; }
+.header-title { font-size: 17px; font-weight: 700; }
+.three-dots { font-size: 22px; font-weight: bold; }
+
+/* PROGRESS */
+.progress-box { width: 100%; height: 4.5px; background: #333; }
+.progress-fill { width: 0%; height: 100%; background: #248bcf; transition: width 1s linear; }
+
+/* VIEWPORT */
+.viewport {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.timer-overlay {
+    background: rgba(255,255,255,0.15);
+    color: white;
+    padding: 6px 18px;
+    border-radius: 22px;
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 15px;
+    border: 1px solid rgba(255,255,255,0.3);
+    backdrop-filter: blur(10px);
+}
+
+/* POPUP CARD */
+.popup-card {
+    width: 90%;
+    max-width: 340px;
+    margin: 16px auto;
+}
+
+.ad-image {
+    width: 100%;
+    display: block;
+    border-radius: 15px 15px 0 0;
+}
+
+/* WHITE TEXT */
+.popup-text-box {
+    background: #ffffff;
+    color: #000;
+    padding: 12px;
+    font-size: 15px;
+    font-weight: 500;
+    text-align: center;
+    border-radius: 0 0 10px 10px;
+}
+
+/* TELEGRAM GLASS BUTTON */
+.tg-soft-btn {
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(6px);
+    color: #ffffff;
+    font-weight: 500;
+    border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.tg-big {
+    width: 100%;
+    padding: 14px 0;
+    font-size: 17px;
+    display: block;
+    margin-top: 12px;
+}
+
+.tg-soft-btn:active {
+    background: rgba(255,255,255,0.28);
+    transform: scale(0.97);
+}
+
+/* BOTTOM */
+.bottom-bar {
+    background: white;
+    padding: 20px;
+    text-align: center;
+}
+
+.go-btn {
+    background: #248bcf;
+    color: white;
+    width: 100%;
+    max-width: 320px;
+    padding: 15px;
+    border-radius: 12px;
+    font-size: 18px;
+    font-weight: 800;
+    border: none;
+}
+
+.go-btn:disabled { background: #b2d6ee; }
+
+.powered-text {
+    font-size: 11px;
+    color: #999;
+    margin-top: 12px;
+}
 </style>
 </head>
-
 <body>
 
 <div class="top-header">
-    <div class="close-btn">Close</div>
+    <div class="close-btn" onclick="handleClose()">Close</div>
     <div class="header-title">Verification Quest</div>
     <div class="three-dots">⋮</div>
 </div>
@@ -153,10 +279,7 @@ body {
     <div class="popup-card">
         <img src="https://raw.githubusercontent.com/tap-earn-bot/tap-earn-bot/main/1771951780779.png" class="ad-image">
         <div class="popup-text-box">Reward claim karne ke liye tap karo</div>
-<button class="tg-soft-btn tg-big" id="claimBtn"
-        data-link="https://example.com/claim">
-    CLAIM REWARD
-</button>
+        <button class="tg-soft-btn tg-big" id="claimBtn">CLAIM REWARD</button>
     </div>
 </div>
 
@@ -165,29 +288,49 @@ body {
     <div class="powered-text">Powered by Telegram Ad Platform</div>
 </div>
 
-<script>
-let seconds = 30;
+<!-- Telegram WebApp Script -->
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
 
+<script>
+// ============ TELEGRAM INIT ============
+const tg = window.Telegram?.WebApp;
+if (tg) {
+    tg.expand();
+    tg.ready();
+}
+
+// ============ URL SE PARAMETERS ============
+const urlParams = new URLSearchParams(window.location.search);
+const userId = urlParams.get('userId') || 'guest';
+const reward = urlParams.get('reward') || 10;
+const timestamp = urlParams.get('timestamp');
+
+console.log('User:', userId, 'Reward:', reward);
+
+// ============ TIMER SETUP ============
+let seconds = 30;
 const pBar = document.getElementById('pBar');
 const timerTxt = document.getElementById('timer');
 const goBtn = document.getElementById('goBtn');
 const claimBtn = document.getElementById('claimBtn');
 
-// links
-const afterTimerRedirect = "https://example.com/after-timer"; // GO ke baad auto redirect
-const claimLink = claimBtn.getAttribute("data-link");
-
-// GO button hamesha disabled rahe jab tak timer hai
+// GO button initially disabled
 goBtn.disabled = true;
 
-// CLAIM button click (always enabled)
+// ============ CLAIM BUTTON (PROMOTIONAL LINK) ============
+const promotionalLink = "https://t.me/your_channel"; // YAHAN APNA LINK DAALEIN
+
 claimBtn.onclick = () => {
-    if (claimLink) {
-        window.location.href = claimLink;
+    if (tg) {
+        tg.openLink(promotionalLink);
+    } else {
+        window.open(promotionalLink, '_blank');
     }
 };
 
-// Countdown
+// ============ COUNTDOWN TIMER ============
 const countdown = setInterval(() => {
     seconds--;
 
@@ -198,15 +341,35 @@ const countdown = setInterval(() => {
 
     if (seconds <= 0) {
         clearInterval(countdown);
-
         timerTxt.innerText = "DONE!";
-
-        // thoda sa delay for natural feel
-        setTimeout(() => {
-            window.location.href = afterTimerRedirect;
-        }, 800);
+        
+        // Enable GO button
+        goBtn.disabled = false;
     }
 }, 1000);
+
+// ============ GO BUTTON CLICK HANDLER ============
+goBtn.onclick = function() {
+    if (goBtn.disabled) return;
+    
+    // Redirect back to index with completion flag
+    const redirectUrl = `../index.html?quest_completed=true&reward=${reward}&userId=${userId}&timestamp=${Date.now()}`;
+    
+    if (tg) {
+        tg.openLink(redirectUrl);
+    } else {
+        window.location.href = redirectUrl;
+    }
+};
+
+// ============ CLOSE HANDLER ============
+function handleClose() {
+    if (tg) {
+        tg.close();
+    } else {
+        window.location.href = '../index.html';
+    }
+}
 </script>
 </body>
 </html>
