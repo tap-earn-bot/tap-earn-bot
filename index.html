@@ -78,6 +78,7 @@
     /* Other UI Elements */
     .glass-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; padding: 18px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
     .btn-action { background: var(--gold); color: black; border: none; padding: 12px 20px; border-radius: 12px; font-weight: 800; cursor: pointer; }
+    .btn-action:disabled { opacity: 0.5; cursor: not-allowed; }
     
     /* Navigation Bar */
     .navbar { position: fixed; bottom: 0; width: 100%; height: 85px; background: #0c0e12; display: flex; justify-content: space-around; border-top: 1px solid #1f2229; padding-top: 10px; }
@@ -93,7 +94,7 @@
     .upi-input { width: 100%; padding: 15px; border-radius: 12px; border: 1px solid #334155; background: #0c0e12; color: white; margin-bottom: 15px; font-size: 16px; outline: none; }
     #successPopup { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80%; background: #161a1e; border-radius: 25px; padding: 30px; text-align: center; z-index: 100; border: 1px solid var(--gold); box-shadow: 0 0 50px rgba(0,0,0,1); }
     
-    /* Telegram Ads Page Styles - Hidden by default */
+    /* Telegram Ads Page Styles */
     #telegramQuestPage {
         position: fixed;
         inset: 0;
@@ -229,9 +230,10 @@
   to   { transform: rotate(360deg); }
 }
 
-#dailyBtn {
+#dailyBtn, #energyBtn, #silverBtn, #watchBtn, #telegramQuestBtn {
   cursor: pointer;
 }
+
 /* popup entry animation */
 @keyframes popIn {
   from { transform: scale(0.85); opacity: 0; }
@@ -260,7 +262,7 @@
   animation: spin 1s linear infinite, pulse 1.4s ease-in-out infinite;
 }
 
-/* --- New Popup Styles (Exactly like image) --- */
+/* --- Popup Styles --- */
 #claimOverlay {
     position: fixed;
     inset: 0;
@@ -284,7 +286,6 @@
     to { transform: scale(1); opacity: 1; }
 }
 
-/* Background Rays Effect */
 .sunburst {
     position: absolute;
     top: 50%;
@@ -350,6 +351,7 @@
     margin-top: 20px;
     text-transform: uppercase;
 }
+
 /* Premium Loader Style */
 #loadingOverlay, #loadingOverlay2, #loadingOverlay3, #loadingOverlay4 {
     position: fixed;
@@ -422,6 +424,7 @@
     margin-top: 15px;
     text-transform: uppercase;
 }
+
 .modal-overlay {
     display: none;
     position: fixed;
@@ -432,6 +435,7 @@
     justify-content: center;
     align-items: center;
 }
+
 #overlay {
     display: none;
     position: fixed;
@@ -474,6 +478,7 @@
     border-radius: 10px;
     font-weight: bold;
 }
+
 .popup-photo-container {
     width: 100px;
     height: 100px;
@@ -488,6 +493,7 @@
     height: 100%;
     object-fit: cover;
 }
+
 #bot-loader {
     position: fixed;
     inset: 0;
@@ -704,7 +710,7 @@
         <button id="watchBtn" class="btn-action" onclick="claimInterstitial()">Claim</button>
     </div>
     
-    <!-- NEW BUTTON -->
+    <!-- NEW TELEGRAM VERIFICATION QUEST BUTTON -->
     <div class="glass-card">
         <div><b>Telegram Verification Quest</b><p style="font-size:12px; color:#777;"> complete verification earn +10 cash</p></div>
         <button id="telegramQuestBtn" class="btn-action" onclick="startTelegramQuest()">Start</button>
@@ -770,53 +776,44 @@ const firebaseConfig = {
     measurementId: "G-LRED4K136N"
 };
     
-// Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 const database = firebase.database();
-
-// Test Firebase connection
-console.log("Firebase Connected: " + firebase.app().name);
 </script>
 
 <script>
 // ============================================
-// MAIN APPLICATION CODE - FIXED VERSION
+// MAIN APPLICATION CODE - WITH 2 HOUR LOCK
 // ============================================
 
-// Telegram WebApp se user ID lena - BINA LOGIN KE
 let tg = window.Telegram.WebApp;
 tg.expand();
 tg.ready();
 
-// User ID directly Telegram se - auto login
-let userId = tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id.toString() : "guest_" + Date.now();
+let userId = tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : "123";
 let userName = tg.initDataUnsafe.user ? tg.initDataUnsafe.user.first_name : "User";
-
-console.log("User ID:", userId);
-console.log("User Name:", userName);
-
 const DB_BASE_URL = "https://tap-earn-bot-default-rtdb.asia-southeast1.firebasedatabase.app/users/";
 const BOT_TOKEN = "8652596915:AAGgK4nWqRM-YB3864rCII_T0uHxQbz_RKU"; 
 const ADMIN_ID = "6252869088";
 
 // --- SYNC VARIABLES ---
-let balance = 0, energy = 1000, totalRefs = 0, lastClaim = 0, lastEnergyClaim = 0;
-let silverExpiry = 0;
+let balance = 0, energy = 0, totalRefs = 0, lastClaim = 0;
+let silverExpiry = 0, lastEnergyClaim = 0;
 let tapCounter = parseInt(localStorage.getItem('pendingTaps')) || 0;
-const SAVE_THRESHOLD = 150; 
+const SAVE_THRESHOLD = 500;
 
 // --- TELEGRAM QUEST VARIABLES ---
 let tgQuestSeconds = 30;
 let tgQuestTimer = null;
 let tgQuestReward = 10;
 let questInProgress = false;
+let lastTelegramQuestTime = localStorage.getItem('lastTelegramQuest_' + userId) || 0;
+const QUEST_COOLDOWN = 2 * 60 * 60 * 1000; // 2 hours
 
 // ============================================
-// LOAD DATA FROM FIREBASE (NO LOGIN NEEDED)
+// LOAD DATA
 // ============================================
 async function loadData() {
     try {
-        console.log("Loading data for user:", userId);
         let res = await fetch(`${DB_BASE_URL}${userId}.json`);
         let data = await res.json();
         
@@ -841,29 +838,22 @@ async function loadData() {
                 balance += (secondsPassed / 3600) * 5;
                 energy = Math.min(1000, energy + Math.floor(secondsPassed / 10));
             }
-        } else {
-            // New user - create default data
-            balance = 0;
-            energy = 1000;
-            await saveData();
-        }
 
-        updateUI();
-        checkDailyStatus();
-        checkEnergyStatus();
-        checkSilverStatus(); 
-        updateHistoryUI();
+            updateUI();
+            checkDailyStatus();
+            checkEnergyStatus();
+            checkSilverStatus();
+            checkTelegramQuestStatus();
+            updateHistoryUI();
+        }
     } catch (e) { 
         console.error("Firebase Error:", e);
-        // Default values on error
-        balance = 0;
-        energy = 1000;
         updateUI(); 
     }
 }
 
 // ============================================
-// SAVE DATA TO FIREBASE (NO LOGIN NEEDED)
+// SAVE DATA
 // ============================================
 async function saveData() {
     const dataToSave = { 
@@ -881,60 +871,8 @@ async function saveData() {
             method: 'PATCH',
             body: JSON.stringify(dataToSave)
         });
-        console.log("Data Synced with Database!");
-        return true;
-    } catch (e) { 
-        console.error("Save Error:", e);
-        return false;
-    }
-}
-
-// ============================================
-// FIREBASE BALANCE UPDATE - FIXED VERSION
-// ============================================
-async function updateFirebaseBalance(amount, reason = 'quest') {
-    return new Promise(async (resolve, reject) => {
-        try {
-            console.log(`Updating balance for ${userId}: +${amount} for ${reason}`);
-            
-            // Pehle current data fetch karo
-            let res = await fetch(`${DB_BASE_URL}${userId}.json`);
-            let currentData = await res.json();
-            
-            // New balance calculate karo
-            let newBalance = (currentData?.balance || 0) + amount;
-            
-            // Update data
-            let updateData = {
-                balance: newBalance,
-                lastUpdate: new Date().toISOString(),
-                lastReason: reason,
-                totalQuests: (currentData?.totalQuests || 0) + 1
-            };
-            
-            // Firebase mein save karo
-            let saveRes = await fetch(`${DB_BASE_URL}${userId}.json`, {
-                method: 'PATCH',
-                body: JSON.stringify(updateData)
-            });
-            
-            if (saveRes.ok) {
-                console.log("✅ Balance updated successfully! New balance:", newBalance);
-                
-                // Local balance bhi update karo
-                balance += amount;
-                updateUI();
-                
-                resolve(true);
-            } else {
-                console.error("Firebase update failed");
-                reject(false);
-            }
-        } catch (error) {
-            console.error("Firebase error:", error);
-            reject(false);
-        }
-    });
+        console.log("Database Synced @ 500 Taps");
+    } catch (e) { console.error("Save Error:", e); }
 }
 
 // ============================================
@@ -981,7 +919,7 @@ function handleTap(e) {
 }
 
 // ============================================
-// UI UPDATE FUNCTIONS
+// UI UPDATE
 // ============================================
 function updateUI() {
     const balEl = document.getElementById('balance');
@@ -996,6 +934,7 @@ function updateUI() {
     
     const rankElement = document.getElementById('rank');
     const now = Date.now();
+
     if (rankElement) {
         if (silverExpiry && now < silverExpiry) {
             rankElement.innerHTML = "🏆 Silver";
@@ -1007,6 +946,9 @@ function updateUI() {
     }
 }
 
+// ============================================
+// CHECK BUTTON STATUSES
+// ============================================
 function checkDailyStatus() {
     const now = Date.now();
     if (now - lastClaim < 24 * 60 * 60 * 1000) {
@@ -1034,20 +976,57 @@ function checkSilverStatus() {
     updateUI(); 
 }
 
+function checkAdButtonStatus() {
+    const now = Date.now();
+    const btn = document.getElementById('watchBtn');
+    if (now - lastAdClaimTime < (2 * 60 * 60 * 1000)) {
+        btn.disabled = true; btn.innerText = "Locked"; btn.style.opacity = "0.5";
+    } else {
+        btn.disabled = false; btn.innerText = "Claim"; btn.style.opacity = "1";
+    }
+}
+
+function checkTelegramQuestStatus() {
+    const now = Date.now();
+    const btn = document.getElementById('telegramQuestBtn');
+    lastTelegramQuestTime = localStorage.getItem('lastTelegramQuest_' + userId) || 0;
+    
+    if (now - lastTelegramQuestTime < QUEST_COOLDOWN) {
+        // Button disable with "Locked" text (no alert)
+        if (btn) { 
+            btn.disabled = true; 
+            btn.innerText = "Locked"; 
+            btn.style.opacity = "0.5";
+        }
+    } else {
+        // Button enable
+        if (btn) { 
+            btn.disabled = false; 
+            btn.innerText = "Start"; 
+            btn.style.opacity = "1";
+        }
+    }
+}
+
 // ============================================
 // POPUP FUNCTIONS
 // ============================================
+function closeSilverPopup() {
+    const popup = document.getElementById("silverOverlay");
+    if(popup) popup.style.display = "none";
+}
+
 function closeReward(){ document.getElementById("claimOverlay").style.display = "none"; }
+
 function closeEnergyPopup(){ document.getElementById("energyOverlay").style.display = "none"; }
-function closeSilverPopup() { document.getElementById("silverOverlay").style.display = "none"; }
+
 function closeInterstitialPopup() { 
     document.getElementById('InterstitialOverlay').style.display = 'none'; 
-    // Refresh balance after popup close
     loadData();
 }
 
 // ============================================
-// EXISTING QUESTS (Daily Reward Style)
+// EXISTING QUESTS
 // ============================================
 async function claimDaily() {
     const now = Date.now();
@@ -1077,17 +1056,21 @@ async function claimEnergy() {
 
 async function claimSilver() {
     if (balance < 1000) return tg.showAlert("Insufficient Balance!");
-    document.getElementById("loadingOverlay3").style.display = "flex";
+    const loader = document.getElementById("loadingOverlay3");
+    if(loader) loader.style.display = "flex";
     setTimeout(async () => {
-        document.getElementById("loadingOverlay3").style.display = "none";
+        if(loader) loader.style.display = "none";
         balance -= 1000; silverExpiry = Date.now() + (24 * 60 * 60 * 1000); 
         document.getElementById("silverOverlay").style.display = "flex";
         updateUI(); await saveData(); checkSilverStatus();
     }, 2000); 
 }
 
-// --- MONETAG INTEGRATION ---
+// ============================================
+// MONETAG INTEGRATION
+// ============================================
 let lastAdClaimTime = localStorage.getItem('lastAdClaim') || 0;
+
 function claimInterstitial() {
     const now = Date.now();
     const waitTime = 2 * 60 * 60 * 1000;
@@ -1098,41 +1081,31 @@ function claimInterstitial() {
     document.getElementById('loadingOverlay4').style.display = 'flex';
     show_10661424().then(() => {
         document.getElementById('loadingOverlay4').style.display = 'none';
-        balance += 10; lastAdClaimTime = Date.now();
+        balance += 10; updateUI(); saveData();
+        lastAdClaimTime = Date.now();
         localStorage.setItem('lastAdClaim', lastAdClaimTime);
-        updateUI(); saveData(); checkAdButtonStatus();
+        checkAdButtonStatus();
         document.getElementById('Interstitial-pop-amount').innerText = "10";
         document.getElementById('InterstitialOverlay').style.display = 'flex';
-    }).catch(() => {
+    }).catch((err) => {
         document.getElementById('loadingOverlay4').style.display = 'none';
         tg.showAlert("Ad not ready.");
     });
 }
 
-function checkAdButtonStatus() {
-    const now = Date.now();
-    const btn = document.getElementById('watchBtn');
-    if (now - lastAdClaimTime < (2 * 60 * 60 * 1000)) {
-        btn.disabled = true; btn.innerText = "Locked"; btn.style.opacity = "0.5";
-    } else {
-        btn.disabled = false; btn.innerText = "Claim"; btn.style.opacity = "1";
-    }
-}
-
 // ============================================
-// NEW TELEGRAM QUEST - FIXED VERSION
+// TELEGRAM QUEST - 2 HOUR LOCK (NO ALERT)
 // ============================================
-
-// Start Telegram Quest
 function startTelegramQuest() {
+    // Check if button is disabled
+    const btn = document.getElementById('telegramQuestBtn');
+    if (btn.disabled) return; // Silently return - no alert
+    
     if (questInProgress) return;
     questInProgress = true;
     
     // Show loading
     document.getElementById('loadingOverlay4').style.display = 'flex';
-    
-    // Store reward
-    tgQuestReward = 10;
     
     // 2.5 seconds loading
     setTimeout(() => {
@@ -1150,7 +1123,6 @@ function startTelegramQuest() {
     }, 2500);
 }
 
-// Start Timer
 function startTelegramQuestTimer() {
     tgQuestSeconds = 30;
     const timerEl = document.getElementById('tgTimer');
@@ -1158,12 +1130,9 @@ function startTelegramQuestTimer() {
     const goBtn = document.getElementById('tgGoBtn');
     const claimBtn = document.getElementById('tgClaimBtn');
     
-    // Reset
     goBtn.disabled = true;
     progressBar.style.width = '0%';
-    timerEl.innerText = '00:30';
     
-    // Promotional Link for Claim Button
     const promotionalLink = "https://t.me/tapfortunebot";
     
     claimBtn.onclick = () => {
@@ -1174,10 +1143,8 @@ function startTelegramQuestTimer() {
         }
     };
     
-    // Clear previous timer if exists
     if (tgQuestTimer) clearInterval(tgQuestTimer);
     
-    // Start countdown
     tgQuestTimer = setInterval(() => {
         tgQuestSeconds--;
         
@@ -1196,75 +1163,64 @@ function startTelegramQuestTimer() {
         }
     }, 1000);
     
-    // GO button click handler - FIXED VERSION
     goBtn.onclick = async function() {
         if (goBtn.disabled) return;
-        
-        // Disable button to prevent double click
         goBtn.disabled = true;
         
-        // Hide quest page
         document.getElementById('telegramQuestPage').style.display = 'none';
-        
-        // Show loading
         document.getElementById('loadingOverlay4').style.display = 'flex';
         
         try {
-            // Update Firebase balance - wait for completion
-            await updateFirebaseBalance(tgQuestReward, 'telegram_quest');
+            // Update balance
+            balance += tgQuestReward;
+            await saveData();
             
-            // Show main app - TASKS page
+            // Update Firebase directly
+            await fetch(`${DB_BASE_URL}${userId}.json`, {
+                method: 'PATCH',
+                body: JSON.stringify({ balance: balance })
+            });
+            
+            // Set 2 hour lock in localStorage
+            const now = Date.now();
+            localStorage.setItem('lastTelegramQuest_' + userId, now.toString());
+            lastTelegramQuestTime = now;
+            
+            // Show main app - Tasks page
             document.querySelectorAll('.page').forEach(p => p.style.display = '');
             document.querySelector('.navbar').style.display = 'flex';
-            
-            // Activate Tasks page
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.getElementById('tasks').classList.add('active');
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             document.querySelectorAll('.nav-item')[1].classList.add('active');
             
-            // Hide loading
             document.getElementById('loadingOverlay4').style.display = 'none';
             
-            // Show popup with reward
+            // Show popup
             document.getElementById('Interstitial-pop-amount').innerText = tgQuestReward.toString();
             document.getElementById('InterstitialOverlay').style.display = 'flex';
             
-            // Save data
-            await saveData();
-            
-            console.log('✅ Quest completed! +' + tgQuestReward);
+            updateUI();
+            checkTelegramQuestStatus();
             
         } catch (error) {
-            console.error("Quest completion error:", error);
+            console.error("Error:", error);
             document.getElementById('loadingOverlay4').style.display = 'none';
-            tg.showAlert("Error completing quest. Please try again.");
-            
-            // Show main app even if error
-            document.querySelectorAll('.page').forEach(p => p.style.display = '');
-            document.querySelector('.navbar').style.display = 'flex';
-            document.getElementById('home').classList.add('active');
         }
         
         questInProgress = false;
     };
 }
 
-// Close Telegram Quest (without completing)
 function closeTelegramQuest() {
     if (!questInProgress) return;
     
-    // Clear timer
     if (tgQuestTimer) clearInterval(tgQuestTimer);
     
-    // Hide quest page
     document.getElementById('telegramQuestPage').style.display = 'none';
     
-    // Show main app - TASKS page
     document.querySelectorAll('.page').forEach(p => p.style.display = '');
     document.querySelector('.navbar').style.display = 'flex';
-    
-    // Activate Tasks page
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     document.getElementById('tasks').classList.add('active');
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -1274,29 +1230,47 @@ function closeTelegramQuest() {
 }
 
 // ============================================
-// WITHDRAW & HISTORY
+// WITHDRAWAL FUNCTIONS
 // ============================================
 async function withdraw() {
     let upi = document.getElementById('upiId').value;
+    let btn = document.querySelector('.btn-action[onclick="withdraw()"]');
+
     if (balance < 500) return showAlert("Minimum 500 required!");
-    if (!upi.includes('@')) return showAlert("Invalid UPI ID!");
+    if (upi.length < 5 || !upi.includes('@')) return showAlert("Invalid UPI ID!");
+
+    const originalBtnText = btn.innerHTML;
+    btn.disabled = true; btn.style.opacity = "0.7";
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...'; 
 
     let amount = balance;
+
     try {
-        let entry = { amt: amount.toFixed(2), date: new Date().toLocaleDateString('en-IN'), status: "Under Process" };
-        await fetch(`${DB_BASE_URL}${userId}/history.json`, { method: 'POST', body: JSON.stringify(entry) });
+        let entry = { amt: amount.toFixed(2), date: new Date().toLocaleDateString('en-IN', {day:'2-digit', month:'short'}), status: "Under Process" };
+        const dbResponse = await fetch(`${DB_BASE_URL}${userId}/history.json`, { method: 'POST', body: JSON.stringify(entry) });
+        if (!dbResponse.ok) throw new Error("Database error");
+
         let msg = `💰 *New Withdrawal*\n👤: ${userName}\n💵: ${amount.toFixed(2)}\n🏦: \`${upi}\``;
         await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${ADMIN_ID}&text=${encodeURIComponent(msg)}&parse_mode=Markdown`);
-        
+
         balance = 0; 
         localStorage.setItem('pendingBalance', 0);
         localStorage.setItem('pendingEnergyLoss', 0);
         updateUI(); updateHistoryUI(); saveData();
+
         document.getElementById('popAmt').innerText = amount.toFixed(2);
         document.getElementById('overlay').style.display = "block"; 
         document.getElementById('successPopup').style.display = "flex"; 
-        confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+
+        confetti({
+            particleCount: 150,
+            spread: 70,
+            origin: { y: 0.6 },
+            colors: ['#f3ba2f', '#ffffff', '#22c55e'],
+            zIndex: 20000
+        });
     } catch (e) { showAlert("Request fail!"); }
+    finally { btn.disabled = false; btn.style.opacity = "1"; btn.innerHTML = originalBtnText; }
 }
 
 async function updateHistoryUI() {
@@ -1308,11 +1282,11 @@ async function updateHistoryUI() {
             document.getElementById('no-txn').style.display = 'none';
             let lastOne = Object.values(data).reverse().slice(0, 1);
             container.innerHTML = lastOne.map(t => `
-                <div style="background: rgba(255,255,255,0.03); padding: 10px; border-radius: 12px; border: 1px solid #1e293b; display: flex; justify-content: space-between; align-items: center;">
+                <div style="background: rgba(255,255,255,0.03); padding: 10px; border-radius: 12px; border: 1px solid #1e293b; display: flex; justify-content: space-between; align-items: center; margin-bottom:5px;">
                     <span style="font-size: 11px; color: #cbd5e1;">${t.date}</span>
                     <div style="text-align: right;">
-                        <span style="color: var(--gold); font-weight: bold;">${t.amt}</span><br>
-                        <span style="font-size: 10px; color: ${t.status === "Success" ? "#22c55e" : "#fbbf24"}; font-weight: bold;">${t.status}</span>
+                        <span style="font-size: 13px; color: var(--gold); font-weight: bold;">${t.amt}</span><br>
+                        <span style="font-size: 10px; color: ${t.status === "Success" ? "#22c55e" : "#fbbf24"}; font-weight: bold; text-transform: uppercase;">${t.status}</span>
                     </div>
                 </div>`).join('');
         }
@@ -1323,14 +1297,18 @@ async function updateHistoryUI() {
 // UTILITY FUNCTIONS
 // ============================================
 function showAlert(text) {
-    const wrapper = document.createElement('div');
-    wrapper.id = 'brandedAlertWrapper';
-    wrapper.style = "position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(12px); z-index: 10000; display: flex; align-items: center; justify-content: center;";
-    wrapper.innerHTML = `<div style="width: 85%; max-width: 320px; background: #1a1f26; border: 1px solid #f3ba2f; border-radius: 30px; padding: 30px; text-align: center;">
-        <h3 style="color: #f3ba2f;">TAP FORTUNE</h3><p style="color: #cbd5e1;">${text}</p>
-        <button onclick="this.parentElement.parentElement.remove()" style="background: #f3ba2f; color: #000; border: none; padding: 16px; border-radius: 18px; width: 100%; font-weight: bold;">UNDERSTOOD</button>
-    </div>`;
-    document.body.appendChild(wrapper);
+    setTimeout(() => {
+        const existing = document.getElementById('brandedAlertWrapper');
+        if(existing) existing.remove();
+        const wrapper = document.createElement('div');
+        wrapper.id = 'brandedAlertWrapper';
+        wrapper.style = "position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(12px); z-index: 10000; display: flex; align-items: center; justify-content: center;";
+        wrapper.innerHTML = `<div style="width: 85%; max-width: 320px; background: #1a1f26; border: 1px solid #f3ba2f; border-radius: 30px; padding: 30px; text-align: center;">
+            <h3 style="color: #f3ba2f; font-weight: 800;">TAP FORTUNE</h3><p style="color: #cbd5e1; font-size: 15px;">${text}</p>
+            <button onclick="document.getElementById('brandedAlertWrapper').remove()" style="background: #f3ba2f; color: #000; border: none; padding: 16px; border-radius: 18px; width: 100%; font-weight: bold;">UNDERSTOOD</button>
+        </div>`;
+        document.body.appendChild(wrapper);
+    }, 200); 
 }
 
 function invite() {
@@ -1341,30 +1319,33 @@ function invite() {
 function nav(p, el) {
     document.querySelectorAll('.page').forEach(pg => pg.classList.remove('active'));
     document.querySelectorAll('.nav-item').forEach(ni => ni.classList.remove('active'));
-    document.getElementById(p).classList.add('active');
-    el.classList.add('active');
+    document.getElementById(p).classList.add('active'); el.classList.add('active');
 }
 
-function closePopup() {
-    document.getElementById('overlay').style.display = "none";
-    document.getElementById('successPopup').style.display = "none";
+function closePopup() { 
+    document.getElementById('overlay').style.display = "none"; 
+    document.getElementById('successPopup').style.display = "none"; 
 }
 
 // ============================================
 // INITIALIZATION
 // ============================================
 window.onload = function() {
-    console.log("App starting for user:", userId);
     loadData();
     checkAdButtonStatus();
+    checkTelegramQuestStatus();
     
-    // Hide loader
     setTimeout(() => { 
         document.getElementById('bot-loader').style.display = 'none'; 
     }, 2500);
 };
 
-// Passive income update
+// Auto-refresh button status every minute
+setInterval(() => {
+    checkTelegramQuestStatus();
+    checkAdButtonStatus();
+}, 60000);
+
 setInterval(async () => {
     const now = Date.now();
     if (silverExpiry && now < silverExpiry) {
@@ -1372,8 +1353,19 @@ setInterval(async () => {
         if (energy < 1000) energy += 0.1; 
         updateUI();
     }
-}, 1000);
+    if (Math.floor(now / 1000) % 10 === 0) {
+        try {
+            let res = await fetch(`${DB_BASE_URL}${userId}.json`);
+            let data = await res.json();
+            if (data) {
+                totalRefs = data.totalRefs || 0;
+                if (data.balance > balance) balance = data.balance;
+                updateUI();
+            }
+        } catch (e) {}
+    }
+}, 1000); 
 
 </script>
-    </body>
+</body>
 </html>
