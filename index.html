@@ -770,24 +770,37 @@ const firebaseConfig = {
     measurementId: "G-LRED4K136N"
 };
     
+// Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 const database = firebase.database();
+
+// Test Firebase connection
+console.log("Firebase Connected: " + firebase.app().name);
 </script>
 
 <script>
 // ============================================
-// MAIN APPLICATION CODE - COMPLETE & FIXED
+// MAIN APPLICATION CODE - FIXED VERSION
 // ============================================
 
+// Telegram WebApp se user ID lena - BINA LOGIN KE
 let tg = window.Telegram.WebApp;
-let userId = tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : "123";
+tg.expand();
+tg.ready();
+
+// User ID directly Telegram se - auto login
+let userId = tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id.toString() : "guest_" + Date.now();
 let userName = tg.initDataUnsafe.user ? tg.initDataUnsafe.user.first_name : "User";
+
+console.log("User ID:", userId);
+console.log("User Name:", userName);
+
 const DB_BASE_URL = "https://tap-earn-bot-default-rtdb.asia-southeast1.firebasedatabase.app/users/";
 const BOT_TOKEN = "8652596915:AAGgK4nWqRM-YB3864rCII_T0uHxQbz_RKU"; 
 const ADMIN_ID = "6252869088";
 
 // --- SYNC VARIABLES ---
-let balance = 0, energy = 0, totalRefs = 0, lastClaim = 0, lastEnergyClaim = 0;
+let balance = 0, energy = 1000, totalRefs = 0, lastClaim = 0, lastEnergyClaim = 0;
 let silverExpiry = 0;
 let tapCounter = parseInt(localStorage.getItem('pendingTaps')) || 0;
 const SAVE_THRESHOLD = 150; 
@@ -795,20 +808,21 @@ const SAVE_THRESHOLD = 150;
 // --- TELEGRAM QUEST VARIABLES ---
 let tgQuestSeconds = 30;
 let tgQuestTimer = null;
-let tgQuestUserId = null;
 let tgQuestReward = 10;
+let questInProgress = false;
 
 // ============================================
-// LOAD DATA FROM FIREBASE
+// LOAD DATA FROM FIREBASE (NO LOGIN NEEDED)
 // ============================================
 async function loadData() {
     try {
+        console.log("Loading data for user:", userId);
         let res = await fetch(`${DB_BASE_URL}${userId}.json`);
         let data = await res.json();
         
         if (data) {
             let dbBalance = data.balance || 0;
-            let dbEnergy = data.energy || 0;
+            let dbEnergy = data.energy || 1000;
             totalRefs = data.totalRefs || 0;
             lastClaim = data.lastClaim || 0;
             lastEnergyClaim = data.lastEnergyClaim || 0;
@@ -827,21 +841,29 @@ async function loadData() {
                 balance += (secondsPassed / 3600) * 5;
                 energy = Math.min(1000, energy + Math.floor(secondsPassed / 10));
             }
-
-            updateUI();
-            checkDailyStatus();
-            checkEnergyStatus();
-            checkSilverStatus(); 
-            updateHistoryUI();
+        } else {
+            // New user - create default data
+            balance = 0;
+            energy = 1000;
+            await saveData();
         }
+
+        updateUI();
+        checkDailyStatus();
+        checkEnergyStatus();
+        checkSilverStatus(); 
+        updateHistoryUI();
     } catch (e) { 
         console.error("Firebase Error:", e);
+        // Default values on error
+        balance = 0;
+        energy = 1000;
         updateUI(); 
     }
 }
 
 // ============================================
-// SAVE DATA TO FIREBASE
+// SAVE DATA TO FIREBASE (NO LOGIN NEEDED)
 // ============================================
 async function saveData() {
     const dataToSave = { 
@@ -860,33 +882,58 @@ async function saveData() {
             body: JSON.stringify(dataToSave)
         });
         console.log("Data Synced with Database!");
-    } catch (e) { console.error("Save Error:", e); }
+        return true;
+    } catch (e) { 
+        console.error("Save Error:", e);
+        return false;
+    }
 }
 
 // ============================================
-// FIREBASE BALANCE UPDATE FUNCTION
+// FIREBASE BALANCE UPDATE - FIXED VERSION
 // ============================================
 async function updateFirebaseBalance(amount, reason = 'quest') {
-    const userRef = database.ref('users/' + userId);
-    
-    return userRef.transaction((currentData) => {
-        if (currentData) {
-            currentData.balance = (currentData.balance || 0) + amount;
-            currentData.lastUpdate = firebase.database.ServerValue.TIMESTAMP;
-            currentData.lastReason = reason;
-            currentData.totalQuests = (currentData.totalQuests || 0) + 1;
-        } else {
-            currentData = { 
-                balance: amount,
-                createdAt: firebase.database.ServerValue.TIMESTAMP,
-                lastUpdate: firebase.database.ServerValue.TIMESTAMP,
-                telegramId: userId,
-                username: userName,
-                totalQuests: 1,
-                lastReason: reason
+    return new Promise(async (resolve, reject) => {
+        try {
+            console.log(`Updating balance for ${userId}: +${amount} for ${reason}`);
+            
+            // Pehle current data fetch karo
+            let res = await fetch(`${DB_BASE_URL}${userId}.json`);
+            let currentData = await res.json();
+            
+            // New balance calculate karo
+            let newBalance = (currentData?.balance || 0) + amount;
+            
+            // Update data
+            let updateData = {
+                balance: newBalance,
+                lastUpdate: new Date().toISOString(),
+                lastReason: reason,
+                totalQuests: (currentData?.totalQuests || 0) + 1
             };
+            
+            // Firebase mein save karo
+            let saveRes = await fetch(`${DB_BASE_URL}${userId}.json`, {
+                method: 'PATCH',
+                body: JSON.stringify(updateData)
+            });
+            
+            if (saveRes.ok) {
+                console.log("✅ Balance updated successfully! New balance:", newBalance);
+                
+                // Local balance bhi update karo
+                balance += amount;
+                updateUI();
+                
+                resolve(true);
+            } else {
+                console.error("Firebase update failed");
+                reject(false);
+            }
+        } catch (error) {
+            console.error("Firebase error:", error);
+            reject(false);
         }
-        return currentData;
     });
 }
 
@@ -993,7 +1040,11 @@ function checkSilverStatus() {
 function closeReward(){ document.getElementById("claimOverlay").style.display = "none"; }
 function closeEnergyPopup(){ document.getElementById("energyOverlay").style.display = "none"; }
 function closeSilverPopup() { document.getElementById("silverOverlay").style.display = "none"; }
-function closeInterstitialPopup() { document.getElementById('InterstitialOverlay').style.display = 'none'; }
+function closeInterstitialPopup() { 
+    document.getElementById('InterstitialOverlay').style.display = 'none'; 
+    // Refresh balance after popup close
+    loadData();
+}
 
 // ============================================
 // EXISTING QUESTS (Daily Reward Style)
@@ -1069,23 +1120,25 @@ function checkAdButtonStatus() {
 }
 
 // ============================================
-// NEW TELEGRAM QUEST - EXACTLY LIKE DAILY REWARD
+// NEW TELEGRAM QUEST - FIXED VERSION
 // ============================================
 
 // Start Telegram Quest
 function startTelegramQuest() {
+    if (questInProgress) return;
+    questInProgress = true;
+    
     // Show loading
     document.getElementById('loadingOverlay4').style.display = 'flex';
     
-    // Store current user ID and reward
-    tgQuestUserId = userId;
+    // Store reward
     tgQuestReward = 10;
     
     // 2.5 seconds loading
     setTimeout(() => {
         document.getElementById('loadingOverlay4').style.display = 'none';
         
-        // Hide main app pages but remember which page was active
+        // Hide main app pages
         document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
         document.querySelector('.navbar').style.display = 'none';
         
@@ -1108,6 +1161,7 @@ function startTelegramQuestTimer() {
     // Reset
     goBtn.disabled = true;
     progressBar.style.width = '0%';
+    timerEl.innerText = '00:30';
     
     // Promotional Link for Claim Button
     const promotionalLink = "https://t.me/tapfortunebot";
@@ -1142,59 +1196,71 @@ function startTelegramQuestTimer() {
         }
     }, 1000);
     
-    // GO button click handler
-    goBtn.onclick = function() {
+    // GO button click handler - FIXED VERSION
+    goBtn.onclick = async function() {
         if (goBtn.disabled) return;
+        
+        // Disable button to prevent double click
+        goBtn.disabled = true;
         
         // Hide quest page
         document.getElementById('telegramQuestPage').style.display = 'none';
         
-        // Show main app - specifically TASKS page (jahan se aaye the)
-        document.querySelectorAll('.page').forEach(p => p.style.display = '');
-        document.querySelector('.navbar').style.display = 'flex';
-        
-        // Activate Tasks page
-        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-        document.getElementById('tasks').classList.add('active');
-        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-        document.querySelectorAll('.nav-item')[1].classList.add('active'); // Tasks nav item
-        
         // Show loading
         document.getElementById('loadingOverlay4').style.display = 'flex';
         
-        // Simulate processing (like daily reward)
-        setTimeout(async () => {
+        try {
+            // Update Firebase balance - wait for completion
+            await updateFirebaseBalance(tgQuestReward, 'telegram_quest');
+            
+            // Show main app - TASKS page
+            document.querySelectorAll('.page').forEach(p => p.style.display = '');
+            document.querySelector('.navbar').style.display = 'flex';
+            
+            // Activate Tasks page
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById('tasks').classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.querySelectorAll('.nav-item')[1].classList.add('active');
+            
             // Hide loading
             document.getElementById('loadingOverlay4').style.display = 'none';
             
-            // Update Firebase
-            await updateFirebaseBalance(tgQuestReward, 'telegram_quest');
-            
-            // Update local balance
-            balance += tgQuestReward;
-            updateUI();
-            
-            // Show popup with reward in tasks page
+            // Show popup with reward
             document.getElementById('Interstitial-pop-amount').innerText = tgQuestReward.toString();
             document.getElementById('InterstitialOverlay').style.display = 'flex';
             
             // Save data
-            saveData();
+            await saveData();
             
-            console.log('Quest completed! +' + tgQuestReward);
-        }, 1500);
+            console.log('✅ Quest completed! +' + tgQuestReward);
+            
+        } catch (error) {
+            console.error("Quest completion error:", error);
+            document.getElementById('loadingOverlay4').style.display = 'none';
+            tg.showAlert("Error completing quest. Please try again.");
+            
+            // Show main app even if error
+            document.querySelectorAll('.page').forEach(p => p.style.display = '');
+            document.querySelector('.navbar').style.display = 'flex';
+            document.getElementById('home').classList.add('active');
+        }
+        
+        questInProgress = false;
     };
 }
 
 // Close Telegram Quest (without completing)
 function closeTelegramQuest() {
+    if (!questInProgress) return;
+    
     // Clear timer
     if (tgQuestTimer) clearInterval(tgQuestTimer);
     
     // Hide quest page
     document.getElementById('telegramQuestPage').style.display = 'none';
     
-    // Show main app - TASKS page (jahan se aaye the)
+    // Show main app - TASKS page
     document.querySelectorAll('.page').forEach(p => p.style.display = '');
     document.querySelector('.navbar').style.display = 'flex';
     
@@ -1202,7 +1268,9 @@ function closeTelegramQuest() {
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     document.getElementById('tasks').classList.add('active');
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-    document.querySelectorAll('.nav-item')[1].classList.add('active'); // Tasks nav item
+    document.querySelectorAll('.nav-item')[1].classList.add('active');
+    
+    questInProgress = false;
 }
 
 // ============================================
@@ -1286,11 +1354,14 @@ function closePopup() {
 // INITIALIZATION
 // ============================================
 window.onload = function() {
+    console.log("App starting for user:", userId);
     loadData();
     checkAdButtonStatus();
     
     // Hide loader
-    setTimeout(() => { document.getElementById('bot-loader').style.display = 'none'; }, 2500);
+    setTimeout(() => { 
+        document.getElementById('bot-loader').style.display = 'none'; 
+    }, 2500);
 };
 
 // Passive income update
