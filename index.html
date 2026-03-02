@@ -1074,18 +1074,18 @@ function checkAdButtonStatus() {
 
 // Start Telegram Quest
 function startTelegramQuest() {
-    // Show loading (like daily reward)
+    // Show loading
     document.getElementById('loadingOverlay4').style.display = 'flex';
     
     // Store current user ID and reward
     tgQuestUserId = userId;
     tgQuestReward = 10;
     
-    // 2.5 seconds loading (like daily reward)
+    // 2.5 seconds loading
     setTimeout(() => {
         document.getElementById('loadingOverlay4').style.display = 'none';
         
-        // Hide main app pages
+        // Hide main app pages but remember which page was active
         document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
         document.querySelector('.navbar').style.display = 'none';
         
@@ -1142,19 +1142,24 @@ function startTelegramQuestTimer() {
         }
     }, 1000);
     
-    // GO button click handler - EXACTLY LIKE DAILY REWARD
+    // GO button click handler
     goBtn.onclick = function() {
         if (goBtn.disabled) return;
         
         // Hide quest page
         document.getElementById('telegramQuestPage').style.display = 'none';
         
-        // Show main app
+        // Show main app - specifically TASKS page (jahan se aaye the)
         document.querySelectorAll('.page').forEach(p => p.style.display = '');
         document.querySelector('.navbar').style.display = 'flex';
-        document.getElementById('home').classList.add('active');
         
-        // Show loading (like daily reward)
+        // Activate Tasks page
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.getElementById('tasks').classList.add('active');
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        document.querySelectorAll('.nav-item')[1].classList.add('active'); // Tasks nav item
+        
+        // Show loading
         document.getElementById('loadingOverlay4').style.display = 'flex';
         
         // Simulate processing (like daily reward)
@@ -1169,7 +1174,7 @@ function startTelegramQuestTimer() {
             balance += tgQuestReward;
             updateUI();
             
-            // Show popup with reward (InterstitialOverlay)
+            // Show popup with reward in tasks page
             document.getElementById('Interstitial-pop-amount').innerText = tgQuestReward.toString();
             document.getElementById('InterstitialOverlay').style.display = 'flex';
             
@@ -1177,7 +1182,7 @@ function startTelegramQuestTimer() {
             saveData();
             
             console.log('Quest completed! +' + tgQuestReward);
-        }, 1500); // 1.5 second delay like daily reward
+        }, 1500);
     };
 }
 
@@ -1189,10 +1194,15 @@ function closeTelegramQuest() {
     // Hide quest page
     document.getElementById('telegramQuestPage').style.display = 'none';
     
-    // Show main app
+    // Show main app - TASKS page (jahan se aaye the)
     document.querySelectorAll('.page').forEach(p => p.style.display = '');
     document.querySelector('.navbar').style.display = 'flex';
-    document.getElementById('home').classList.add('active');
+    
+    // Activate Tasks page
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('tasks').classList.add('active');
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.querySelectorAll('.nav-item')[1].classList.add('active'); // Tasks nav item
 }
 
 // ============================================
@@ -1278,30 +1288,6 @@ function closePopup() {
 window.onload = function() {
     loadData();
     checkAdButtonStatus();
-    
-    // Check for quest completion from URL
-    const urlParams = new URLSearchParams(window.location.search);
-    const completed = urlParams.get('quest_completed');
-    const reward = urlParams.get('reward');
-    const questUserId = urlParams.get('userId');
-    
-    if (completed === 'true' && reward && questUserId === userId) {
-        // Update balance
-        balance += parseInt(reward);
-        updateFirebaseBalance(parseInt(reward), 'url_completion')
-            .then(() => {
-                updateUI();
-                document.getElementById('Interstitial-pop-amount').innerText = reward;
-                document.getElementById('InterstitialOverlay').style.display = 'flex';
-                
-                // Clean URL
-                const url = new URL(window.location);
-                url.searchParams.delete('quest_completed');
-                url.searchParams.delete('reward');
-                url.searchParams.delete('userId');
-                window.history.replaceState({}, document.title, url);
-            });
-    }
     
     // Hide loader
     setTimeout(() => { document.getElementById('bot-loader').style.display = 'none'; }, 2500);
