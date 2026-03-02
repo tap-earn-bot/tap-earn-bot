@@ -782,7 +782,7 @@ const database = firebase.database();
 
 <script>
 // ============================================
-// MAIN APPLICATION CODE - PERFECT BALANCE FIX
+// MAIN APPLICATION CODE - MULTI-ACCOUNT FIX
 // ============================================
 
 let tg = window.Telegram.WebApp;
@@ -795,13 +795,22 @@ const DB_BASE_URL = "https://tap-earn-bot-default-rtdb.asia-southeast1.firebased
 const BOT_TOKEN = "8652596915:AAGgK4nWqRM-YB3864rCII_T0uHxQbz_RKU"; 
 const ADMIN_ID = "6252869088";
 
+console.log("Current User ID:", userId); // Debug
+
+// --- USER-SPECIFIC STORAGE KEYS ---
+function getStorageKey(key) {
+    return key + '_' + userId;
+}
+
 // --- SYNC VARIABLES ---
 let balance = 0;
-let dbBalance = 0; // Track database balance separately
+let dbBalance = 0;
 let energy = 0;
-let totalRefs = 0, lastClaim = 0;
-let silverExpiry = 0, lastEnergyClaim = 0;
-let tapCounter = parseInt(localStorage.getItem('pendingTaps')) || 0;
+let totalRefs = 0, lastClaim = 0, lastEnergyClaim = 0;
+let silverExpiry = 0;
+
+// User-specific storage values
+let tapCounter = parseInt(localStorage.getItem(getStorageKey('pendingTaps'))) || 0;
 const SAVE_THRESHOLD = 500;
 
 // --- TELEGRAM QUEST VARIABLES ---
@@ -809,11 +818,14 @@ let tgQuestSeconds = 30;
 let tgQuestTimer = null;
 let tgQuestReward = 10;
 let questInProgress = false;
-let lastTelegramQuestTime = localStorage.getItem('lastTelegramQuest_' + userId) || 0;
+let lastTelegramQuestTime = localStorage.getItem(getStorageKey('lastTelegramQuest')) || 0;
 const QUEST_COOLDOWN = 2 * 60 * 60 * 1000; // 2 hours
 
+// Monetag
+let lastAdClaimTime = localStorage.getItem(getStorageKey('lastAdClaim')) || 0;
+
 // ============================================
-// LOAD DATA - FIXED BALANCE CALCULATION
+// LOAD DATA - USER SPECIFIC
 // ============================================
 async function loadData() {
     try {
@@ -822,7 +834,6 @@ async function loadData() {
         let data = await res.json();
         
         if (data) {
-            // Store database balance separately
             dbBalance = data.balance || 0;
             let dbEnergy = typeof data.energy === 'number' ? data.energy : 1000;
             
@@ -831,25 +842,21 @@ async function loadData() {
             lastEnergyClaim = data.lastEnergyClaim || 0;
             silverExpiry = data.silverExpiry || 0;
 
-            // Pending calculations
-            let pendingBalance = parseFloat(localStorage.getItem('pendingBalance')) || 0;
-            let pendingLoss = parseInt(localStorage.getItem('pendingEnergyLoss')) || 0;
+            // User-specific pending data
+            let pendingBalance = parseFloat(localStorage.getItem(getStorageKey('pendingBalance'))) || 0;
+            let pendingLoss = parseInt(localStorage.getItem(getStorageKey('pendingEnergyLoss'))) || 0;
             
-            // FINAL FIX: Balance = Database Balance + Pending Balance ONLY
             balance = dbBalance + pendingBalance;
             
-            // Energy calculation
             let calculatedEnergy = dbEnergy - pendingLoss;
             energy = Math.max(0, calculatedEnergy);
 
-            console.log(`LOAD: DB=${dbBalance}, Pending=${pendingBalance}, Display=${balance}`);
+            console.log(`User ${userId}: DB=${dbBalance}, Pending=${pendingBalance}, Display=${balance}`);
 
-            // Silver passive earnings (apply to display balance only)
             const now = Date.now();
             if (silverExpiry && now < silverExpiry) {
                 let lastTime = data.lastSaveTime || now;
                 let secondsPassed = Math.floor((now - lastTime) / 1000);
-                // Add to display balance only, not to dbBalance
                 balance += (secondsPassed / 3600) * 5;
                 
                 let regenEnergy = Math.floor(secondsPassed / 10);
@@ -860,6 +867,7 @@ async function loadData() {
             checkDailyStatus();
             checkEnergyStatus();
             checkSilverStatus();
+            checkAdButtonStatus();
             checkTelegramQuestStatus();
             updateHistoryUI();
         } else {
@@ -877,15 +885,13 @@ async function loadData() {
 }
 
 // ============================================
-// SAVE DATA - FIXED
+// SAVE DATA - USER SPECIFIC
 // ============================================
 async function saveData() {
-    // Calculate current database balance (balance - pending)
-    let pendingBalance = parseFloat(localStorage.getItem('pendingBalance')) || 0;
+    let pendingBalance = parseFloat(localStorage.getItem(getStorageKey('pendingBalance'))) || 0;
     let newDbBalance = balance - pendingBalance;
     
-    // Calculate database energy (energy + pendingLoss)
-    let pendingLoss = parseInt(localStorage.getItem('pendingEnergyLoss')) || 0;
+    let pendingLoss = parseInt(localStorage.getItem(getStorageKey('pendingEnergyLoss'))) || 0;
     let dbEnergy = energy + pendingLoss;
     
     const dataToSave = { 
@@ -903,15 +909,13 @@ async function saveData() {
             method: 'PATCH',
             body: JSON.stringify(dataToSave)
         });
-        console.log(`SAVE: Display=${balance}, Pending=${pendingBalance}, DB Saved=${newDbBalance}`);
-        
-        // Update dbBalance after successful save
+        console.log(`User ${userId} saved`);
         dbBalance = newDbBalance;
     } catch (e) { console.error("Save Error:", e); }
 }
 
 // ============================================
-// HANDLE TAP - FIXED
+// HANDLE TAP - USER SPECIFIC STORAGE
 // ============================================
 function handleTap(e) {
     let isSilver = (silverExpiry && Date.now() < silverExpiry);
@@ -921,30 +925,25 @@ function handleTap(e) {
         return showAlert("Energy 0! Please invite friend.");
     }
     
-    // Update display balance
     balance += tapPower; 
     energy -= 1;
     tapCounter++;
 
-    // Update pending in localStorage
-    let currentPendingBal = parseFloat(localStorage.getItem('pendingBalance')) || 0;
-    let currentPendingLoss = parseInt(localStorage.getItem('pendingEnergyLoss')) || 0;
+    let currentPendingBal = parseFloat(localStorage.getItem(getStorageKey('pendingBalance'))) || 0;
+    let currentPendingLoss = parseInt(localStorage.getItem(getStorageKey('pendingEnergyLoss'))) || 0;
     
-    localStorage.setItem('pendingBalance', (currentPendingBal + tapPower).toFixed(2));
-    localStorage.setItem('pendingEnergyLoss', currentPendingLoss + 1);
-    localStorage.setItem('pendingTaps', tapCounter);
+    localStorage.setItem(getStorageKey('pendingBalance'), (currentPendingBal + tapPower).toFixed(2));
+    localStorage.setItem(getStorageKey('pendingEnergyLoss'), currentPendingLoss + 1);
+    localStorage.setItem(getStorageKey('pendingTaps'), tapCounter);
 
     updateUI(); 
 
-    // Auto-save after threshold
     if (tapCounter >= SAVE_THRESHOLD) {
         saveData();
-        // Don't reset pending, just counter
         tapCounter = 0;
-        localStorage.setItem('pendingTaps', 0);
+        localStorage.setItem(getStorageKey('pendingTaps'), 0);
     }
 
-    // Animation
     const plus = document.createElement('div');
     plus.className = 'plus-one'; 
     plus.innerText = `+${tapPower.toFixed(2)}`;
@@ -957,7 +956,7 @@ function handleTap(e) {
 }
 
 // ============================================
-// CLAIM DAILY - FIXED DOUBLE ADD
+// CLAIM FUNCTIONS - USER SPECIFIC STORAGE
 // ============================================
 async function claimDaily() {
     const now = Date.now();
@@ -968,13 +967,11 @@ async function claimDaily() {
     setTimeout(async () => {
         document.getElementById("loadingOverlay").style.display = "none";
         
-        // Add to display balance only
         balance += 5; 
         lastClaim = now;
         
-        // Update pending balance
-        let currentPending = parseFloat(localStorage.getItem('pendingBalance')) || 0;
-        localStorage.setItem('pendingBalance', (currentPending + 5).toFixed(2));
+        let currentPending = parseFloat(localStorage.getItem(getStorageKey('pendingBalance'))) || 0;
+        localStorage.setItem(getStorageKey('pendingBalance'), (currentPending + 5).toFixed(2));
         
         document.getElementById('pop-amount').innerText = "5.00";
         document.getElementById("claimOverlay").style.display = "flex";
@@ -985,9 +982,6 @@ async function claimDaily() {
     }, 2000);
 }
 
-// ============================================
-// CLAIM ENERGY - FIXED
-// ============================================
 async function claimEnergy() {
     const now = Date.now();
     if (now - lastEnergyClaim < 24 * 60 * 60 * 1000) return tg.showAlert("Wait for 24 hours!");
@@ -997,7 +991,6 @@ async function claimEnergy() {
     setTimeout(async () => {
         document.getElementById("loadingOverlay2").style.display = "none";
         
-        // Add energy directly
         energy += 100; 
         lastEnergyClaim = now;
         
@@ -1010,9 +1003,6 @@ async function claimEnergy() {
     }, 2000);
 }
 
-// ============================================
-// CLAIM SILVER - FIXED
-// ============================================
 async function claimSilver() {
     if (balance < 1000) return tg.showAlert("Insufficient Balance!");
     
@@ -1021,12 +1011,10 @@ async function claimSilver() {
     setTimeout(async () => {
         document.getElementById("loadingOverlay3").style.display = "none";
         
-        // Subtract from display balance
         balance -= 1000; 
         
-        // Update pending balance (negative)
-        let currentPending = parseFloat(localStorage.getItem('pendingBalance')) || 0;
-        localStorage.setItem('pendingBalance', (currentPending - 1000).toFixed(2));
+        let currentPending = parseFloat(localStorage.getItem(getStorageKey('pendingBalance'))) || 0;
+        localStorage.setItem(getStorageKey('pendingBalance'), (currentPending - 1000).toFixed(2));
         
         silverExpiry = Date.now() + (24 * 60 * 60 * 1000); 
         
@@ -1037,11 +1025,6 @@ async function claimSilver() {
         checkSilverStatus();
     }, 2000); 
 }
-
-// ============================================
-// MONETAG - FIXED
-// ============================================
-let lastAdClaimTime = localStorage.getItem('lastAdClaim') || 0;
 
 function claimInterstitial() {
     const now = Date.now();
@@ -1057,15 +1040,13 @@ function claimInterstitial() {
     show_10661424().then(() => {
         document.getElementById('loadingOverlay4').style.display = 'none';
         
-        // Add to display balance
         balance += 10; 
         
-        // Update pending
-        let currentPending = parseFloat(localStorage.getItem('pendingBalance')) || 0;
-        localStorage.setItem('pendingBalance', (currentPending + 10).toFixed(2));
+        let currentPending = parseFloat(localStorage.getItem(getStorageKey('pendingBalance'))) || 0;
+        localStorage.setItem(getStorageKey('pendingBalance'), (currentPending + 10).toFixed(2));
         
         lastAdClaimTime = Date.now();
-        localStorage.setItem('lastAdClaim', lastAdClaimTime);
+        localStorage.setItem(getStorageKey('lastAdClaim'), lastAdClaimTime);
         
         updateUI(); 
         saveData();
@@ -1079,9 +1060,6 @@ function claimInterstitial() {
     });
 }
 
-// ============================================
-// TELEGRAM QUEST - FIXED
-// ============================================
 function startTelegramQuest() {
     const btn = document.getElementById('telegramQuestBtn');
     if (btn.disabled) return;
@@ -1151,16 +1129,13 @@ function startTelegramQuestTimer() {
         document.getElementById('loadingOverlay4').style.display = 'flex';
         
         try {
-            // Add to display balance
             balance += tgQuestReward;
             
-            // Update pending
-            let currentPending = parseFloat(localStorage.getItem('pendingBalance')) || 0;
-            localStorage.setItem('pendingBalance', (currentPending + tgQuestReward).toFixed(2));
+            let currentPending = parseFloat(localStorage.getItem(getStorageKey('pendingBalance'))) || 0;
+            localStorage.setItem(getStorageKey('pendingBalance'), (currentPending + tgQuestReward).toFixed(2));
             
-            // Set 2 hour lock
             const now = Date.now();
-            localStorage.setItem('lastTelegramQuest_' + userId, now.toString());
+            localStorage.setItem(getStorageKey('lastTelegramQuest'), now.toString());
             lastTelegramQuestTime = now;
             
             await saveData();
@@ -1235,7 +1210,7 @@ function updateUI() {
 }
 
 // ============================================
-// CHECK BUTTON STATUSES
+// BUTTON STATUS CHECKS
 // ============================================
 function checkDailyStatus() {
     const now = Date.now();
@@ -1273,6 +1248,8 @@ function checkSilverStatus() {
 function checkAdButtonStatus() {
     const now = Date.now();
     const btn = document.getElementById('watchBtn');
+    lastAdClaimTime = localStorage.getItem(getStorageKey('lastAdClaim')) || 0;
+    
     if (now - lastAdClaimTime < (2 * 60 * 60 * 1000)) {
         btn.disabled = true; btn.innerText = "Locked"; btn.style.opacity = "0.5";
     } else {
@@ -1283,7 +1260,7 @@ function checkAdButtonStatus() {
 function checkTelegramQuestStatus() {
     const now = Date.now();
     const btn = document.getElementById('telegramQuestBtn');
-    lastTelegramQuestTime = localStorage.getItem('lastTelegramQuest_' + userId) || 0;
+    lastTelegramQuestTime = localStorage.getItem(getStorageKey('lastTelegramQuest')) || 0;
     
     if (now - lastTelegramQuestTime < QUEST_COOLDOWN) {
         if (btn) { 
@@ -1309,16 +1286,14 @@ function closeSilverPopup() {
 }
 
 function closeReward(){ document.getElementById("claimOverlay").style.display = "none"; }
-
 function closeEnergyPopup(){ document.getElementById("energyOverlay").style.display = "none"; }
-
 function closeInterstitialPopup() { 
     document.getElementById('InterstitialOverlay').style.display = 'none'; 
     loadData();
 }
 
 // ============================================
-// WITHDRAWAL - FIXED
+// WITHDRAWAL - USER SPECIFIC
 // ============================================
 async function withdraw() {
     let upi = document.getElementById('upiId').value;
@@ -1341,15 +1316,12 @@ async function withdraw() {
         let msg = `💰 *New Withdrawal*\n👤: ${userName}\n💵: ${amount.toFixed(2)}\n🏦: \`${upi}\``;
         await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${ADMIN_ID}&text=${encodeURIComponent(msg)}&parse_mode=Markdown`);
 
-        // Reset display balance to 0
         balance = 0; 
         
-        // Reset pending balance to 0
-        localStorage.setItem('pendingBalance', '0');
+        localStorage.setItem(getStorageKey('pendingBalance'), '0');
         
-        // Keep energy and pending loss as is
         tapCounter = 0;
-        localStorage.setItem('pendingTaps', '0');
+        localStorage.setItem(getStorageKey('pendingTaps'), '0');
         
         await saveData();
         updateUI(); 
@@ -1444,7 +1416,7 @@ window.onload = function() {
     }, 2500);
 };
 
-// Auto-refresh button status every minute
+// Auto-refresh button status
 setInterval(() => {
     checkTelegramQuestStatus();
     checkAdButtonStatus();
