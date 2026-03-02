@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<meta name='viewport' content='width=device-width, initial-scale=1'/><!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -9,9 +9,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.9.6/lottie.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    <!-- Firebase Scripts -->
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
 <style>
     :root { --gold: #ffcc00; --bg: #05070a; --card: #161a1e; --neon: #00f2ff; }
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
@@ -78,7 +75,6 @@
     /* Other UI Elements */
     .glass-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; padding: 18px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
     .btn-action { background: var(--gold); color: black; border: none; padding: 12px 20px; border-radius: 12px; font-weight: 800; cursor: pointer; }
-    .btn-action:disabled { opacity: 0.5; cursor: not-allowed; }
     
     /* Navigation Bar */
     .navbar { position: fixed; bottom: 0; width: 100%; height: 85px; background: #0c0e12; display: flex; justify-content: space-around; border-top: 1px solid #1f2229; padding-top: 10px; }
@@ -93,135 +89,6 @@
     /* UPI & Popups */
     .upi-input { width: 100%; padding: 15px; border-radius: 12px; border: 1px solid #334155; background: #0c0e12; color: white; margin-bottom: 15px; font-size: 16px; outline: none; }
     #successPopup { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80%; background: #161a1e; border-radius: 25px; padding: 30px; text-align: center; z-index: 100; border: 1px solid var(--gold); box-shadow: 0 0 50px rgba(0,0,0,1); }
-    
-    /* Telegram Ads Page Styles */
-    #telegramQuestPage {
-        position: fixed;
-        inset: 0;
-        background-color: #6da273;
-        background-image: url('https://raw.githubusercontent.com/tap-earn-bot/tap-earn-bot/main/telegram_pattern_hd.png');
-        background-size: 450px;
-        background-repeat: repeat;
-        display: none;
-        flex-direction: column;
-        z-index: 20000;
-        overflow: hidden;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    }
-    
-    .tg-header {
-        background: rgba(28, 28, 29, 0.98);
-        padding: 12px 18px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        color: white;
-    }
-    .tg-close-btn { font-size: 16px; font-weight: 500; color: #248bcf; cursor: pointer; }
-    .tg-header-title { font-size: 17px; font-weight: 700; }
-    .tg-three-dots { font-size: 22px; font-weight: bold; }
-    
-    .tg-progress-box { width: 100%; height: 4.5px; background: #333; }
-    .tg-progress-fill { width: 0%; height: 100%; background: #248bcf; transition: width 1s linear; }
-    
-    .tg-viewport {
-        flex-grow: 1;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-    }
-    
-    .tg-timer-overlay {
-        background: rgba(255,255,255,0.15);
-        color: white;
-        padding: 6px 18px;
-        border-radius: 22px;
-        font-size: 18px;
-        font-weight: 700;
-        margin-bottom: 15px;
-        border: 1px solid rgba(255,255,255,0.3);
-        backdrop-filter: blur(10px);
-    }
-    
-    .tg-popup-card {
-        width: 90%;
-        max-width: 340px;
-        margin: 16px auto;
-    }
-    
-    .tg-ad-image {
-        width: 100%;
-        display: block;
-        border-radius: 15px 15px 0 0;
-    }
-    
-    .tg-popup-text-box {
-        background: #ffffff;
-        color: #000;
-        padding: 12px;
-        font-size: 15px;
-        font-weight: 500;
-        text-align: center;
-        border-radius: 0 0 10px 10px;
-    }
-    
-    .tg-soft-btn {
-        background: rgba(255,255,255,0.15);
-        backdrop-filter: blur(6px);
-        color: #ffffff;
-        font-weight: 500;
-        border: 1px solid rgba(255,255,255,0.25);
-        border-radius: 14px;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        width: 100%;
-        padding: 14px 0;
-        font-size: 17px;
-        margin-top: 12px;
-    }
-    
-    .tg-soft-btn:active {
-        background: rgba(255,255,255,0.28);
-        transform: scale(0.97);
-    }
-    
-    .tg-bottom-bar {
-        background: white;
-        padding: 20px;
-        text-align: center;
-    }
-    
-    .tg-go-btn {
-        background: #248bcf;
-        color: white;
-        width: 100%;
-        max-width: 320px;
-        padding: 15px;
-        border-radius: 12px;
-        font-size: 18px;
-        font-weight: 800;
-        border: none;
-        cursor: pointer;
-        opacity: 0.7;
-        transition: opacity 0.3s;
-    }
-    
-    .tg-go-btn:disabled { 
-        background: #b2d6ee; 
-        cursor: not-allowed;
-        opacity: 0.7;
-    }
-    
-    .tg-go-btn:enabled {
-        opacity: 1;
-    }
-    
-    .tg-powered-text {
-        font-size: 11px;
-        color: #999;
-        margin-top: 12px;
-    }
 </style>
 
 <style>
@@ -230,10 +97,9 @@
   to   { transform: rotate(360deg); }
 }
 
-#dailyBtn, #energyBtn, #silverBtn, #watchBtn, #telegramQuestBtn {
+#dailyBtn {
   cursor: pointer;
 }
-
 /* popup entry animation */
 @keyframes popIn {
   from { transform: scale(0.85); opacity: 0; }
@@ -262,12 +128,12 @@
   animation: spin 1s linear infinite, pulse 1.4s ease-in-out infinite;
 }
 
-/* --- Popup Styles --- */
+/* --- New Popup Styles (Exactly like image) --- */
 #claimOverlay {
     position: fixed;
     inset: 0;
     background: rgba(0, 0, 0, 0.9);
-    display: none;
+    display: none; /* JS se control hoga */
     align-items: center;
     justify-content: center;
     z-index: 10000;
@@ -286,20 +152,24 @@
     to { transform: scale(1); opacity: 1; }
 }
 
+/* Background Rays Effect - Fixed for Full Screen */
+/* Background Rays Effect - Small Circle behind coins */
 .sunburst {
     position: absolute;
-    top: 50%;
+    top: 50%;         /* Coins ke center ke hisaab se adjust karein */
     left: 50%;
-    width: 350px;
-    height: 350px;
+    width: 350px;     /* Size chhota kar diya (Photo ke liye perfect) */
+    height: 350px;    /* Width aur Height barabar rakhein */
     transform: translate(-50%, -50%);
     background: repeating-conic-gradient(
         from 0deg,
-        rgba(255, 255, 255, 0.12) 0deg 15deg,
+        rgba(255, 255, 255, 0.12) 0deg 15deg, /* Thoda zyada visible kiya */
         transparent 15deg 30deg
     );
+    /* Soft edges ke liye mask ya radial gradient */
     -webkit-mask-image: radial-gradient(circle, black 30%, transparent 70%);
     mask-image: radial-gradient(circle, black 30%, transparent 70%);
+    
     animation: rotateRays 15s linear infinite;
     z-index: -1; 
     pointer-events: none; 
@@ -351,20 +221,51 @@
     margin-top: 20px;
     text-transform: uppercase;
 }
-
 /* Premium Loader Style */
-#loadingOverlay, #loadingOverlay2, #loadingOverlay3, #loadingOverlay4 {
+#loadingOverlay {
     position: fixed;
     inset: 0;
     background: rgba(0, 0, 0, 0.7);
     backdrop-filter: blur(8px);
-    display: none;
+    display: none; /* JS se show hoga */
     flex-direction: column;
     align-items: center;
     justify-content: center;
     z-index: 10001;
 }
-
+    #loadingOverlay2 {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(8px);
+    display: none; /* JS se show hoga */
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 10001;
+}
+    #loadingOverlay3 {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(8px);
+    display: none; /* JS se show hoga */
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 10001;
+}
+    #loadingOverlay4 {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(8px);
+    display: none; /* JS se show hoga */
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 10001;
+    }
 .premium-loader {
     width: 60px;
     height: 60px;
@@ -392,11 +293,12 @@
 @keyframes pulseText {
     0%, 100% { opacity: 0.5; }
     50% { opacity: 1; }
-}
+    }
+
 
 .modal-content {
     background: #121212;
-    border: 2px solid #f3ba2f;
+    border: 2px solid #f3ba2f; /* Gold Border */
     border-radius: 24px;
     padding: 30px;
     width: 85%;
@@ -424,18 +326,16 @@
     margin-top: 15px;
     text-transform: uppercase;
 }
-
 .modal-overlay {
     display: none;
     position: fixed;
-    inset: 0;
+    inset: 0; /* poori screen cover karne ke liye */
     background: rgba(0, 0, 0, 0.85);
     backdrop-filter: blur(8px);
     z-index: 10000;
     justify-content: center;
     align-items: center;
 }
-
 #overlay {
     display: none;
     position: fixed;
@@ -444,7 +344,7 @@
     background: rgba(0, 0, 0, 0.4); 
     backdrop-filter: blur(10px);    
     -webkit-backdrop-filter: blur(10px);
-    z-index: 1000;
+    z-index: 1000; /* Confetti isse zyada hona chahiye (2000) */
 }
 
 #successPopup {
@@ -462,14 +362,15 @@
     position: fixed;
     top: 50%; left: 50%;
     transform: translate(-50%, -50%);
-    z-index: 1001;
+    z-index: 1001; /* Popup overlay ke upar */
 }
 
+/* Text aur Button ki width fix karne ke liye */
 #successPopup h2 { margin: 10px 0; font-size: 22px; color: #f3ba2f; }
 #successPopup p { margin: 10px 0; color: #fff; font-size: 16px; }
 
 #successPopup .btn-action {
-    width: 100%;
+    width: 100%; /* Button ab side mein nahi balki niche aayega */
     margin-top: 15px;
     padding: 12px;
     background: #f3ba2f;
@@ -478,26 +379,24 @@
     border-radius: 10px;
     font-weight: bold;
 }
-
-.popup-photo-container {
-    width: 100px;
-    height: 100px;
-    margin-bottom: 15px;
+    .popup-photo-container {
+    width: 100px;           /* Photo ki width */
+    height: 100px;          /* Photo ki height */
+    margin-bottom: 15px;    /* Heading se thodi doori */
     overflow: hidden;
-    border-radius: 50%;
-    border: 2px solid var(--gold);
+    border-radius: 50%;     /* Agar aap photo gol (circle) chahte hain */
+    border: 2px solid var(--gold); /* Photo ke charo taraf gold border */
 }
 
 #popupImage {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: cover;      /* Photo stretch nahi hogi */
 }
-
 #bot-loader {
     position: fixed;
     inset: 0;
-    background: #0d1117;
+    background: #0d1117; /* Dark background */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -548,13 +447,14 @@
 @keyframes fillProgress {
     0% { width: 0%; }
     100% { width: 100%; }
-}
+    }
+    
 </style>
     
 </head>
 <body>
     
-<div id="bot-loader">
+ <div id="bot-loader">
     <div class="loader-content">
         <img src="https://raw.githubusercontent.com/tap-earn-bot/tap-earn-bot/main/1000410752-removebg-preview.png" class="loader-logo">
         <div class="loader-bar-container">
@@ -562,7 +462,7 @@
         </div>
         <p class="loader-text">Loading TapFortune...</p>
     </div>
-</div>
+ </div>
     
 <div id="customAlert" class="modal-overlay">
     <div class="modal-content">
@@ -583,10 +483,10 @@
     <div class="premium-loader"></div>
     <div class="loading-text">Processing...</div>
 </div>
-<div id="loadingOverlay4">
+ <div id="loadingOverlay4">
     <div class="premium-loader"></div>
     <div class="loading-text">Processing...</div>
-</div>   
+ </div>   
 
 <div id="claimOverlay">
     <div class="reward-card">
@@ -594,7 +494,9 @@
         <div class="congrats-text">Congratulations on getting</div>
         <div class="reward-amount" id="pop-amount">5</div>
         <div class="reward-unit">TapFortune</div>
+        
         <img src="https://raw.githubusercontent.com/tap-earn-bot/tap-earn-bot/main/1000410752-removebg-preview.png" class="coin-stack">
+        
         <button class="accept-btn" onclick="closeReward()">ACCEPT</button>
     </div>
 </div>
@@ -605,7 +507,9 @@
         <div class="congrats-text">Congratulations on getting</div>
         <div class="reward-amount" id="energy-pop-amount">100</div>
         <div class="reward-unit">TapFortune</div>
+        
         <img src="https://raw.githubusercontent.com/tap-earn-bot/tap-earn-bot/main/1000412177-removebg-preview.png" class="coin-stack" style="filter: hue-rotate(180deg);">
+        
         <button class="accept-btn" onclick="closeEnergyPopup()">ACCEPT</button>
     </div>
 </div>
@@ -616,7 +520,9 @@
         <div class="congrats-text">Silver Level is Now</div>
         <div class="reward-amount" id="silver-pop-status" style="color: #c0c0c0; font-size: 28px;">ACTIVATED</div>
         <div class="reward-unit">For 24 Hours</div> 
+        
         <img src="https://raw.githubusercontent.com/tap-earn-bot/tap-earn-bot/main/1000413486-removebg-preview.png" class="coin-stack">
+        
         <button class="accept-btn" onclick="closeSilverPopup()">LET'S GO!</button>
     </div>
 </div>
@@ -627,65 +533,42 @@
         <div class="congrats-text">Congratulations on getting</div>
         <div class="reward-amount" id="Interstitial-pop-amount">10</div>
         <div class="reward-unit">⚡</div>
+        
         <img src="https://raw.githubusercontent.com/tap-earn-bot/tap-earn-bot/main/1000410752-removebg-preview.png" class="coin-stack" style="filter: hue-rotate(180deg);">
+
         <button class="accept-btn" onclick="closeInterstitialPopup()">ACCEPT</button>
     </div>
 </div>
 
-<!-- Telegram Quest Page -->
-<div id="telegramQuestPage">
-    <div class="tg-header">
-        <div class="tg-close-btn" onclick="closeTelegramQuest()">Close</div>
-        <div class="tg-header-title">Verification Quest</div>
-        <div class="tg-three-dots">⋮</div>
-    </div>
     
-    <div class="tg-progress-box">
-        <div id="tgProgressBar" class="tg-progress-fill"></div>
-    </div>
-    
-    <div class="tg-viewport">
-        <div id="tgTimer" class="tg-timer-overlay">00:30</div>
-        
-        <div class="tg-popup-card">
-            <img src="https://raw.githubusercontent.com/tap-earn-bot/tap-earn-bot/main/1771951780779.png" class="tg-ad-image">
-            <div class="tg-popup-text-box">Reward claim karne ke liye tap karo</div>
-            <button class="tg-soft-btn" id="tgClaimBtn">CLAIM REWARD</button>
-        </div>
-    </div>
-    
-    <div class="tg-bottom-bar">
-        <button id="tgGoBtn" class="tg-go-btn" disabled>GO!</button>
-        <div class="tg-powered-text">Powered by Telegram Ad Platform</div>
-    </div>
-</div>
-
 <div id="overlay"></div>
 
 <div id="successPopup">
     <div class="popup-photo-container">
         <img src="https://raw.githubusercontent.com/tap-earn-bot/tap-earn-bot/main/1000410752-removebg-preview.png" alt="Withdrawal" id="popupImage">
     </div>
+    
     <h2>Withdrawal Requested!</h2>
     <p>Your <span id="popAmt">0</span> request is being processed</p>
+    
     <button class="btn-action" onclick="closePopup()">GOT IT</button>
 </div>
 
-<div class="header">
-    <div class="badge">⚡ <span id="energy">...</span> / 1000</div>
-    <div class="badge" id="rank" style="color:var(--gold)">🏆 Bronze</div>
-</div>
-
-<div id="home" class="page active">
-    <div class="balance-amount"><span id="balance">0.00</span></div>
-    <div class="tap-area">
-        <div class="ring"></div>
-        <div class="tap-circle" onclick="handleTap(event)">
-            <img src="https://cdn-icons-png.flaticon.com/512/217/217853.png">
-        </div>
+    <div class="header">
+        <div class="badge">⚡ <span id="energy">...</span> / 1000</div>
+        <div class="badge" id="rank" style="color:var(--gold)">🏆 Bronze</div>
     </div>
-    <p style="color:var(--neon); font-size:14px; font-weight:bold;">Unlimited Potential</p>
-</div>
+
+    <div id="home" class="page active">
+        <div class="balance-amount"><span id="balance">0.00</span></div>
+        <div class="tap-area">
+            <div class="ring"></div>
+            <div class="tap-circle" onclick="handleTap(event)">
+                <img src="https://cdn-icons-png.flaticon.com/512/217/217853.png">
+            </div>
+        </div>
+        <p style="color:var(--neon); font-size:14px; font-weight:bold;">Unlimited Potential</p>
+    </div>
 
 <div id="tasks" class="page">
     <h2 style="color:var(--gold);">Quests</h2>
@@ -708,12 +591,6 @@
     <div class="glass-card">
         <div><b>Premium Video Quest</b><p style="font-size:12px; color:#777;"> watch short clip 2 earn +10 cash</p></div>
         <button id="watchBtn" class="btn-action" onclick="claimInterstitial()">Claim</button>
-    </div>
-    
-    <!-- NEW TELEGRAM VERIFICATION QUEST BUTTON -->
-    <div class="glass-card">
-        <div><b>Telegram Verification Quest</b><p style="font-size:12px; color:#777;"> complete verification earn +10 cash</p></div>
-        <button id="telegramQuestBtn" class="btn-action" onclick="startTelegramQuest()">Start</button>
     </div>
 </div>
      
@@ -740,10 +617,7 @@
                 <p id="no-txn" style="color: #484f58; font-size: 13px; text-align: center;">No history found</p>
             </div>
         </div>
-    </div> 
-</div> 
-
-<div id="frens" class="page">
+    </div> </div> <div id="frens" class="page">
     <h2 style="color:var(--gold); text-align: center;">Referral Dashboard</h2>
     <div class="glass-card" style="display: flex; flex-direction:column; text-align:center; padding:30px; margin-top: 10px;">
         <div class="badge" style="margin-bottom:15px; display: inline-block;">
@@ -754,90 +628,50 @@
             INVITE FRIENDS
         </button>
     </div>
-</div> 
-
-<div class="navbar">
+</div> <div class="navbar">
     <div class="nav-item active" onclick="nav('home', this)"><i class="fas fa-home"></i>Home</div>
     <div class="nav-item" onclick="nav('tasks', this)"><i class="fas fa-bolt"></i>Tasks</div>
     <div class="nav-item" onclick="nav('wallet', this)"><i class="fas fa-wallet"></i>Wallet</div>
     <div class="nav-item" onclick="nav('frens', this)"><i class="fas fa-users"></i>Frens</div>
 </div>
 
-<!-- Firebase Config -->
-<script>
-const firebaseConfig = {
-    apiKey: "AIzaSyDO3z7lXZ251_oTYrt9-B7APdDzEq1eEbw",
-    authDomain: "tap-earn-bot.firebaseapp.com",
-    databaseURL: "https://tap-earn-bot-default-rtdb.asia-southeast1.firebasedatabase.app",
-    projectId: "tap-earn-bot",
-    storageBucket: "tap-earn-bot.firebasestorage.app",
-    messagingSenderId: "618614166679",
-    appId: "1:618614166679:web:544fb3bff6b333f2d505d2",
-    measurementId: "G-LRED4K136N"
-};
-    
-firebase.initializeApp(firebaseConfig);
-const database = firebase.database();
-</script>
+    <script>
+        let tg = window.Telegram.WebApp;
+        let userId = tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : "123";
+        let userName = tg.initDataUnsafe.user ? tg.initDataUnsafe.user.first_name : "User";
+        const DB_BASE_URL = "https://tap-earn-bot-default-rtdb.asia-southeast1.firebasedatabase.app/users/";
+        const BOT_TOKEN = "8652596915:AAGgK4nWqRM-YB3864rCII_T0uHxQbz_RKU"; 
+        const ADMIN_ID = "6252869088";
 
-<script>
-// ============================================
-// MAIN APPLICATION CODE - ENERGY FIXED
-// ============================================
+        // --- UPDATED SYNC VARIABLES ---
+        let balance = 0, energy = 0, totalRefs = 0, lastClaim = 0;
+        let silverExpiry = 0, lastEnergyClaim = 0;
+        let tapCounter = parseInt(localStorage.getItem('pendingTaps')) || 0;
+        const SAVE_THRESHOLD = 500; // Har 500 taps par sync hoga
 
-let tg = window.Telegram.WebApp;
-tg.expand();
-tg.ready();
-
-let userId = tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : "123";
-let userName = tg.initDataUnsafe.user ? tg.initDataUnsafe.user.first_name : "User";
-const DB_BASE_URL = "https://tap-earn-bot-default-rtdb.asia-southeast1.firebasedatabase.app/users/";
-const BOT_TOKEN = "8652596915:AAGgK4nWqRM-YB3864rCII_T0uHxQbz_RKU"; 
-const ADMIN_ID = "6252869088";
-
-// --- SYNC VARIABLES ---
-let balance = 0, energy = 0, totalRefs = 0, lastClaim = 0;
-let silverExpiry = 0, lastEnergyClaim = 0;
-let tapCounter = parseInt(localStorage.getItem('pendingTaps')) || 0;
-const SAVE_THRESHOLD = 500;
-
-// --- TELEGRAM QUEST VARIABLES ---
-let tgQuestSeconds = 30;
-let tgQuestTimer = null;
-let tgQuestReward = 10;
-let questInProgress = false;
-let lastTelegramQuestTime = localStorage.getItem('lastTelegramQuest_' + userId) || 0;
-const QUEST_COOLDOWN = 2 * 60 * 60 * 1000; // 2 hours
-
-// ============================================
-// LOAD DATA - FIXED ENERGY ISSUE
-// ============================================
 async function loadData() {
     try {
         let res = await fetch(`${DB_BASE_URL}${userId}.json`);
         let data = await res.json();
         
         if (data) {
+            // Database se base values uthana
             let dbBalance = data.balance || 0;
-            // FIX: Ensure energy is always a valid number and not reset to 1000
-            let dbEnergy = typeof data.energy === 'number' ? data.energy : 1000;
-            
+            let dbEnergy = data.energy || 1000;
             totalRefs = data.totalRefs || 0;
             lastClaim = data.lastClaim || 0;
             lastEnergyClaim = data.lastEnergyClaim || 0;
             silverExpiry = data.silverExpiry || 0;
 
+            // Local Memory se pending data load karna
             let pendingBalance = parseFloat(localStorage.getItem('pendingBalance')) || 0;
             let pendingLoss = parseInt(localStorage.getItem('pendingEnergyLoss')) || 0;
 
+            // Final Calculation
             balance = dbBalance + pendingBalance;
-            
-            // FIX: Proper energy calculation
             energy = Math.max(0, dbEnergy - pendingLoss);
-            
-            // Ensure energy doesn't exceed 1000
-            if (energy > 1000) energy = 1000;
 
+            // Offline Earning Logic (Silver Pass)
             const now = Date.now();
             if (silverExpiry && now < silverExpiry) {
                 let lastTime = data.lastSaveTime || now;
@@ -849,30 +683,20 @@ async function loadData() {
             updateUI();
             checkDailyStatus();
             checkEnergyStatus();
-            checkSilverStatus();
-            checkTelegramQuestStatus();
+            checkSilverStatus(); 
             updateHistoryUI();
-        } else {
-            // New user - initialize with default values
-            balance = 0;
-            energy = 1000;
-            await saveData();
-            updateUI();
         }
     } catch (e) { 
         console.error("Firebase Error:", e);
-        // Don't reset energy on error - keep existing values
         updateUI(); 
     }
 }
 
-// ============================================
-// SAVE DATA - FIXED ENERGY SAVE
-// ============================================
 async function saveData() {
+    // Database mein final calculated values save hongi
     const dataToSave = { 
         balance: parseFloat(balance.toFixed(2)), 
-        energy: Math.floor(energy),  // Save current energy value
+        energy: Math.floor(energy), 
         totalRefs, 
         lastClaim, 
         lastEnergyClaim,
@@ -885,25 +709,25 @@ async function saveData() {
             method: 'PATCH',
             body: JSON.stringify(dataToSave)
         });
-        console.log("Database Synced - Energy:", energy);
+        console.log("Database Synced @ 500 Taps");
     } catch (e) { console.error("Save Error:", e); }
 }
 
-// ============================================
-// HANDLE TAP
-// ============================================
 function handleTap(e) {
     let isSilver = (silverExpiry && Date.now() < silverExpiry);
     let tapPower = isSilver ? 0.10 : 0.05;
 
+    // Energy check
     if (energy < 1) {
         return showAlert("Energy 0! Please invite friend.");
     }
     
+    // 1. Local Variables Update (Instant feedback)
     balance += tapPower; 
     energy -= 1;
     tapCounter++;
 
+    // 2. Local Storage Sync (Phone Memory)
     let currentPendingBal = parseFloat(localStorage.getItem('pendingBalance')) || 0;
     let currentPendingLoss = parseInt(localStorage.getItem('pendingEnergyLoss')) || 0;
     
@@ -913,14 +737,17 @@ function handleTap(e) {
 
     updateUI(); 
 
+    // 3. 500 Taps hone par Database Sync trigger karna
     if (tapCounter >= SAVE_THRESHOLD) {
         saveData();
+        // Sync ke baad local memory reset
         tapCounter = 0;
         localStorage.setItem('pendingTaps', 0);
         localStorage.setItem('pendingBalance', 0);
         localStorage.setItem('pendingEnergyLoss', 0);
     }
 
+    // Animation Effect
     const plus = document.createElement('div');
     plus.className = 'plus-one'; 
     plus.innerText = `+${tapPower.toFixed(2)}`;
@@ -932,9 +759,7 @@ function handleTap(e) {
     setTimeout(() => plus.remove(), 800);
 }
 
-// ============================================
-// UI UPDATE
-// ============================================
+
 function updateUI() {
     const balEl = document.getElementById('balance');
     const wBalEl = document.getElementById('w-balance');
@@ -953,24 +778,21 @@ function updateUI() {
         if (silverExpiry && now < silverExpiry) {
             rankElement.innerHTML = "🏆 Silver";
             rankElement.style.color = "#c0c0c0"; 
+            rankElement.style.textShadow = "0 0 8px rgba(192, 192, 192, 0.6)";
         } else {
             rankElement.innerHTML = "🏆 Bronze";
             rankElement.style.color = "var(--gold)"; 
+            rankElement.style.textShadow = "none";
         }
     }
 }
 
-// ============================================
-// CHECK BUTTON STATUSES
-// ============================================
+
 function checkDailyStatus() {
     const now = Date.now();
     if (now - lastClaim < 24 * 60 * 60 * 1000) {
         const btn = document.getElementById('dailyBtn');
         if(btn) { btn.innerText = "Claimed"; btn.disabled = true; }
-    } else {
-        const btn = document.getElementById('dailyBtn');
-        if(btn) { btn.innerText = "Claim"; btn.disabled = false; }
     }
 }
 
@@ -979,9 +801,6 @@ function checkEnergyStatus() {
     if (now - lastEnergyClaim < 24 * 60 * 60 * 1000) {
         const btn = document.getElementById('energyBtn');
         if(btn) { btn.innerText = "Claimed"; btn.disabled = true; }
-    } else {
-        const btn = document.getElementById('energyBtn');
-        if(btn) { btn.innerText = "Claim"; btn.disabled = false; }
     }
 }
 
@@ -996,56 +815,12 @@ function checkSilverStatus() {
     updateUI(); 
 }
 
-function checkAdButtonStatus() {
-    const now = Date.now();
-    const btn = document.getElementById('watchBtn');
-    if (now - lastAdClaimTime < (2 * 60 * 60 * 1000)) {
-        btn.disabled = true; btn.innerText = "Locked"; btn.style.opacity = "0.5";
-    } else {
-        btn.disabled = false; btn.innerText = "Claim"; btn.style.opacity = "1";
-    }
-}
-
-function checkTelegramQuestStatus() {
-    const now = Date.now();
-    const btn = document.getElementById('telegramQuestBtn');
-    lastTelegramQuestTime = localStorage.getItem('lastTelegramQuest_' + userId) || 0;
-    
-    if (now - lastTelegramQuestTime < QUEST_COOLDOWN) {
-        if (btn) { 
-            btn.disabled = true; 
-            btn.innerText = "Locked"; 
-            btn.style.opacity = "0.5";
-        }
-    } else {
-        if (btn) { 
-            btn.disabled = false; 
-            btn.innerText = "Start"; 
-            btn.style.opacity = "1";
-        }
-    }
-}
-
-// ============================================
-// POPUP FUNCTIONS
-// ============================================
 function closeSilverPopup() {
     const popup = document.getElementById("silverOverlay");
     if(popup) popup.style.display = "none";
 }
 
-function closeReward(){ document.getElementById("claimOverlay").style.display = "none"; }
-
-function closeEnergyPopup(){ document.getElementById("energyOverlay").style.display = "none"; }
-
-function closeInterstitialPopup() { 
-    document.getElementById('InterstitialOverlay').style.display = 'none'; 
-    loadData();
-}
-
-// ============================================
-// EXISTING QUESTS
-// ============================================
+// Quests Logic
 async function claimDaily() {
     const now = Date.now();
     if (now - lastClaim < 24 * 60 * 60 * 1000) return tg.showAlert("Wait for 24 hours!");
@@ -1058,6 +833,8 @@ async function claimDaily() {
         updateUI(); await saveData(); checkDailyStatus();
     }, 2000);
 }
+
+function closeReward(){ document.getElementById("claimOverlay").style.display = "none"; }
 
 async function claimEnergy() {
     const now = Date.now();
@@ -1072,6 +849,8 @@ async function claimEnergy() {
     }, 2000);
 }
 
+function closeEnergyPopup(){ document.getElementById("energyOverlay").style.display = "none"; }
+
 async function claimSilver() {
     if (balance < 1000) return tg.showAlert("Insufficient Balance!");
     const loader = document.getElementById("loadingOverlay3");
@@ -1084,11 +863,8 @@ async function claimSilver() {
     }, 2000); 
 }
 
-// ============================================
-// MONETAG INTEGRATION
-// ============================================
+// Monetag Logic
 let lastAdClaimTime = localStorage.getItem('lastAdClaim') || 0;
-
 function claimInterstitial() {
     const now = Date.now();
     const waitTime = 2 * 60 * 60 * 1000;
@@ -1111,129 +887,19 @@ function claimInterstitial() {
     });
 }
 
-// ============================================
-// TELEGRAM QUEST - 2 HOUR LOCK
-// ============================================
-function startTelegramQuest() {
-    const btn = document.getElementById('telegramQuestBtn');
-    if (btn.disabled) return;
-    
-    if (questInProgress) return;
-    questInProgress = true;
-    
-    document.getElementById('loadingOverlay4').style.display = 'flex';
-    
-    setTimeout(() => {
-        document.getElementById('loadingOverlay4').style.display = 'none';
-        
-        document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
-        document.querySelector('.navbar').style.display = 'none';
-        
-        document.getElementById('telegramQuestPage').style.display = 'flex';
-        
-        startTelegramQuestTimer();
-    }, 2500);
+function checkAdButtonStatus() {
+    const now = Date.now();
+    const btn = document.getElementById('watchBtn');
+    if (now - lastAdClaimTime < (2 * 60 * 60 * 1000)) {
+        btn.disabled = true; btn.innerText = "Locked"; btn.style.opacity = "0.5";
+    } else {
+        btn.disabled = false; btn.innerText = "Claim"; btn.style.opacity = "1";
+    }
 }
 
-function startTelegramQuestTimer() {
-    tgQuestSeconds = 30;
-    const timerEl = document.getElementById('tgTimer');
-    const progressBar = document.getElementById('tgProgressBar');
-    const goBtn = document.getElementById('tgGoBtn');
-    const claimBtn = document.getElementById('tgClaimBtn');
-    
-    goBtn.disabled = true;
-    progressBar.style.width = '0%';
-    
-    const promotionalLink = "https://t.me/tapfortunebot";
-    
-    claimBtn.onclick = () => {
-        if (tg) {
-            tg.openLink(promotionalLink);
-        } else {
-            window.open(promotionalLink, '_blank');
-        }
-    };
-    
-    if (tgQuestTimer) clearInterval(tgQuestTimer);
-    
-    tgQuestTimer = setInterval(() => {
-        tgQuestSeconds--;
-        
-        let progress = ((30 - tgQuestSeconds) / 30) * 100;
-        progressBar.style.width = progress + "%";
-        timerEl.innerText = `00:${tgQuestSeconds < 10 ? '0' + tgQuestSeconds : tgQuestSeconds}`;
-        
-        if (tgQuestSeconds <= 0) {
-            clearInterval(tgQuestTimer);
-            timerEl.innerText = "DONE!";
-            goBtn.disabled = false;
-            
-            if (tg) {
-                tg.HapticFeedback.notificationOccurred('success');
-            }
-        }
-    }, 1000);
-    
-    goBtn.onclick = async function() {
-        if (goBtn.disabled) return;
-        goBtn.disabled = true;
-        
-        document.getElementById('telegramQuestPage').style.display = 'none';
-        document.getElementById('loadingOverlay4').style.display = 'flex';
-        
-        try {
-            balance += tgQuestReward;
-            await saveData();
-            
-            const now = Date.now();
-            localStorage.setItem('lastTelegramQuest_' + userId, now.toString());
-            lastTelegramQuestTime = now;
-            
-            document.querySelectorAll('.page').forEach(p => p.style.display = '');
-            document.querySelector('.navbar').style.display = 'flex';
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.getElementById('tasks').classList.add('active');
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            document.querySelectorAll('.nav-item')[1].classList.add('active');
-            
-            document.getElementById('loadingOverlay4').style.display = 'none';
-            
-            document.getElementById('Interstitial-pop-amount').innerText = tgQuestReward.toString();
-            document.getElementById('InterstitialOverlay').style.display = 'flex';
-            
-            updateUI();
-            checkTelegramQuestStatus();
-            
-        } catch (error) {
-            console.error("Error:", error);
-            document.getElementById('loadingOverlay4').style.display = 'none';
-        }
-        
-        questInProgress = false;
-    };
-}
+function closeInterstitialPopup() { document.getElementById('InterstitialOverlay').style.display = 'none'; }
 
-function closeTelegramQuest() {
-    if (!questInProgress) return;
-    
-    if (tgQuestTimer) clearInterval(tgQuestTimer);
-    
-    document.getElementById('telegramQuestPage').style.display = 'none';
-    
-    document.querySelectorAll('.page').forEach(p => p.style.display = '');
-    document.querySelector('.navbar').style.display = 'flex';
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    document.getElementById('tasks').classList.add('active');
-    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-    document.querySelectorAll('.nav-item')[1].classList.add('active');
-    
-    questInProgress = false;
-}
-
-// ============================================
-// WITHDRAWAL FUNCTIONS - FIXED ENERGY RESET
-// ============================================
+// Withdrawal Logic (Confetti Fix Layer)
 async function withdraw() {
     let upi = document.getElementById('upiId').value;
     let btn = document.querySelector('.btn-action[onclick="withdraw()"]');
@@ -1253,24 +919,18 @@ async function withdraw() {
         if (!dbResponse.ok) throw new Error("Database error");
 
         let msg = `💰 *New Withdrawal*\n👤: ${userName}\n💵: ${amount.toFixed(2)}\n🏦: \`${upi}\``;
-        await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${ADMIN_ID}&text=${encodeURIComponent(msg)}&parse_mode=Markdown`);
+        const tgResponse = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${ADMIN_ID}&text=${encodeURIComponent(msg)}&parse_mode=Markdown`);
 
-        // FIX: Don't reset energy, only reset balance and pending
         balance = 0; 
         localStorage.setItem('pendingBalance', 0);
         localStorage.setItem('pendingEnergyLoss', 0);
-        localStorage.setItem('pendingTaps', 0);
-        tapCounter = 0;
-        
-        // Save current energy value
-        await saveData();
-        updateUI(); 
-        updateHistoryUI();
+        updateUI(); updateHistoryUI(); saveData();
 
         document.getElementById('popAmt').innerText = amount.toFixed(2);
         document.getElementById('overlay').style.display = "block"; 
         document.getElementById('successPopup').style.display = "flex"; 
 
+        // Confetti fixed for top layer (zIndex: 20000)
         confetti({
             particleCount: 150,
             spread: 70,
@@ -1278,15 +938,8 @@ async function withdraw() {
             colors: ['#f3ba2f', '#ffffff', '#22c55e'],
             zIndex: 20000
         });
-    } catch (e) { 
-        console.error("Withdrawal error:", e);
-        showAlert("Request fail!"); 
-    }
-    finally { 
-        btn.disabled = false; 
-        btn.style.opacity = "1"; 
-        btn.innerHTML = originalBtnText; 
-    }
+    } catch (e) { showAlert("Request fail!"); }
+    finally { btn.disabled = false; btn.style.opacity = "1"; btn.innerHTML = originalBtnText; }
 }
 
 async function updateHistoryUI() {
@@ -1309,9 +962,6 @@ async function updateHistoryUI() {
     } catch (e) { console.log(e); }
 }
 
-// ============================================
-// UTILITY FUNCTIONS
-// ============================================
 function showAlert(text) {
     setTimeout(() => {
         const existing = document.getElementById('brandedAlertWrapper');
@@ -1338,39 +988,33 @@ function nav(p, el) {
     document.getElementById(p).classList.add('active'); el.classList.add('active');
 }
 
-function closePopup() { 
-    document.getElementById('overlay').style.display = "none"; 
-    document.getElementById('successPopup').style.display = "none"; 
-}
+function closePopup() { document.getElementById('overlay').style.display = "none"; document.getElementById('successPopup').style.display = "none"; }
 
-// ============================================
-// INITIALIZATION
-// ============================================
-window.onload = function() {
-    loadData();
-    checkAdButtonStatus();
-    checkTelegramQuestStatus();
-    
-    setTimeout(() => { 
-        document.getElementById('bot-loader').style.display = 'none'; 
-    }, 2500);
-};
-
-// Auto-refresh button status every minute
-setInterval(() => {
-    checkTelegramQuestStatus();
-    checkAdButtonStatus();
-}, 60000);
+window.onload = loadData;
 
 setInterval(async () => {
     const now = Date.now();
     if (silverExpiry && now < silverExpiry) {
-        balance += (5 / 3600); 
-        if (energy < 1000) energy += 0.1; 
-        updateUI();
+        balance += (5 / 3600); if (energy < 1000) energy += 0.1; updateUI();
     }
-}, 1000);
+    if (Math.floor(now / 1000) % 10 === 0) {
+        try {
+            let res = await fetch(`${DB_BASE_URL}${userId}.json`);
+            let data = await res.json();
+            if (data) {
+                totalRefs = data.totalRefs || 0;
+                if (data.balance > balance) balance = data.balance;
+                updateUI();
+            }
+        } catch (e) {}
+    }
+}, 1000); 
 
+window.addEventListener('load', () => {
+    checkAdButtonStatus();
+    setTimeout(() => { document.getElementById('bot-loader').style.display = 'none'; }, 2500);
+});
+    
 </script>
 </body>
 </html>
