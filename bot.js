@@ -8,6 +8,45 @@ app.get('/', (req, res) => res.send('Bot is Live!'));
 app.get('/ping', (req, res) => {
   res.status(200).send('OK');
 });
+
+// ============================================
+// ADGEM POSTBACK HANDLER - ADD THIS
+// ============================================
+app.get('/adgem-postback', async (req, res) => {
+    try {
+        // AdGem se aane wale parameters
+        const { user_id, amount, transaction_id } = req.query;
+        
+        // Basic validation
+        if (!user_id || !amount) {
+            return res.status(400).send('Missing parameters');
+        }
+
+        console.log(`💰 AdGem Postback: User ${user_id} earned ${amount} coins`);
+
+        // Firebase mein user ka current balance fetch karo
+        const userRes = await axios.get(`${DB_BASE}/${user_id}.json`);
+        const userData = userRes.data || {};
+        const currentBalance = userData.balance || 0;
+        
+        // New balance calculate karo (amount ko integer mein convert)
+        const newBalance = currentBalance + parseInt(amount);
+        
+        // Firebase update karo
+        await axios.patch(`${DB_BASE}/${user_id}.json`, {
+            balance: newBalance
+        });
+
+        console.log(`✅ User ${user_id} balance updated: ${currentBalance} → ${newBalance}`);
+        
+        // AdGem ko OK response bhejo
+        res.status(200).send('OK');
+    } catch (error) {
+        console.error('❌ Postback Error:', error.message);
+        res.status(500).send('Server Error');
+    }
+});
+
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
 const bot = new Telegraf('8652596915:AAGgK4nWqRM-YB3864rCII_T0uHxQbz_RKU');
